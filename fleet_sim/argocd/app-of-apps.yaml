@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/sumicsamy/fleet-sim.git
+    repoURL: https://github.com/sumicsamy/fleet_sim.git
     targetRevision: main
     path: argocd
     directory:
@@ -20,9 +20,9 @@ spec:
       selfHeal: true
   # Child Applications (sites)
   sources:
-    - repoURL: https://github.com/sumicsamy/fleet-sim.git
+    - repoURL: https://github.com/sumicsamy/fleet_sim.git
       path: overlays/pilbara
       targetRevision: main
-    - repoURL: https://github.com/sumicsamy/fleet-sim.git
+    - repoURL: https://github.com/sumicsamy/fleet_sim.git
       path: overlays/tomprice
       targetRevision: main
