@@ -4,8 +4,6 @@ metadata:
   name: truck-sim-config
   namespace: site-pilbara
 data:
-  BROKER_HOST: "mosquitto.mqtt.svc.cluster.local"
-  BROKER_PORT: "1883"
   REGION: "pilbara"
   TRUCK_COUNT: "100"
   MESSAGE_HZ: "1.0"

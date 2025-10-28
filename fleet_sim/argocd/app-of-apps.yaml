@@ -6,9 +6,9 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/sumicsamy/fleet_sim.git
+    repoURL: https://github.com/sumicsamy/mqtt.git
     targetRevision: main
-    path: argocd
+    path: fleet_sim/argocd
     directory:
       recurse: true
   destination:
@@ -20,9 +20,9 @@ spec:
       selfHeal: true
   # Child Applications (sites)
   sources:
-    - repoURL: https://github.com/sumicsamy/fleet_sim.git
-      path: overlays/pilbara
+    - repoURL: https://github.com/sumicsamy/mqtt.git
+      path: fleet_sim/overlays/pilbara
       targetRevision: main
-    - repoURL: https://github.com/sumicsamy/fleet_sim.git
-      path: overlays/tomprice
+    - repoURL: https://github.com/sumicsamy/mqtt.git
+      path: fleet_sim/overlays/tomprice
       targetRevision: main

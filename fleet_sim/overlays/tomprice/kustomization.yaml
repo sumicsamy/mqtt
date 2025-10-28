@@ -1,4 +1,5 @@
 namespace: site-tomprice
 resources:
   - ../../base
+patchesStrategicMerge:
   - configmap-tomprice.yaml
