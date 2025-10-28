@@ -1,0 +1,4 @@
+namespace: site-pilbara
+resources:
+  - ../../base
+  - configmap-pilbara.yaml

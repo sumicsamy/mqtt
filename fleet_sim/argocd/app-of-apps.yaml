@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fleet-sim-apps
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/sumicsamy/fleet-sim.git
+    targetRevision: main
+    path: argocd
+    directory:
+      recurse: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: openshift-gitops
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+  # Child Applications (sites)
+  sources:
+    - repoURL: https://github.com/sumicsamy/fleet-sim.git
+      path: overlays/pilbara
+      targetRevision: main
+    - repoURL: https://github.com/sumicsamy/fleet-sim.git
+      path: overlays/tomprice
+      targetRevision: main

@@ -1,0 +1,4 @@
+namespace: site-tomprice
+resources:
+  - ../../base
+  - configmap-tomprice.yaml

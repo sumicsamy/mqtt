@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: truck-sim-config
+data:
+  BROKER_HOST: "mosquitto.mqtt.svc.cluster.local"
+  BROKER_PORT: "1883"
+  REGION: "default"
+  TRUCK_COUNT: "50"
+  MESSAGE_HZ: "1.0"

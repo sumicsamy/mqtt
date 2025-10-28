@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: truck-sim-{{SITE}}
+  namespace: openshift-gitops  # or argocd namespace
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/sumicsamy/fleet-sim.git
+    targetRevision: main
+    path: overlays/{{SITE}}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: site-{{SITE}}
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
