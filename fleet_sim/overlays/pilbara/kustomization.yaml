@@ -1,5 +1,9 @@
 namespace: site-pilbara
 resources:
   - ../../base
-patchesStrategicMerge:
-  - configmap-pilbara.yaml
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: truck-sim-config
+    path: configmap-pilbara.yaml

@@ -1,5 +1,9 @@
 namespace: site-tomprice
 resources:
   - ../../base
-patchesStrategicMerge:
-  - configmap-tomprice.yaml
+
+patches:
+  - target:
+      kind: ConfigMap
+      name: truck-sim-config
+    path: configmap-tomprice.yaml
