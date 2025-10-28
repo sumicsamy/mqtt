@@ -1,5 +1,6 @@
 namespace: site-tomprice
 resources:
+  - namespace.yaml
   - ../../base
 
 patches:

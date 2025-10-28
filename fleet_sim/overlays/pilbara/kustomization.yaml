@@ -1,6 +1,8 @@
 namespace: site-pilbara
 resources:
+  - namespace.yaml
   - ../../base
+
 
 patches:
   - target:

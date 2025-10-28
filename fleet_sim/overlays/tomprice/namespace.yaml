@@ -1,0 +1,6 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: site-tomprice
+  labels:
+    argocd.argoproj.io/managed-by: openshift-gitops

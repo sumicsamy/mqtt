@@ -18,6 +18,8 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
   # Child Applications (sites)
   sources:
     - repoURL: https://github.com/sumicsamy/mqtt.git
