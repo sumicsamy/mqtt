@@ -17,7 +17,7 @@ spec:
       serviceAccountName: truck-sim-sa
       containers:
       - name: truck-sim
-        image: quay.io/suchugh/fleet-sim:0.0.1
+        image: quay.io/suchugh/fleet-sim:0.0.2
         imagePullPolicy: Always
         envFrom:
         - configMapRef:
