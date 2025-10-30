@@ -5,31 +5,6 @@ metadata:
   labels:
     argocd.argoproj.io/managed-by: openshift-gitops
 ---    
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: telegraf-config
-  namespace: fleet-metrics
-data:
-  telegraf.conf: |
-    [agent]
-      interval = "5s"
-      flush_interval = "5s"
-      hostname = "telegraf"
-
-    [[inputs.mqtt_consumer]]
-      servers = ["ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"]
-      topics  = ["mine/fleet/+/truck/+/telemetry"]
-      qos = 1
-      client_id = "telegraf-mqtt"
-      insecure_skip_verify = true
-      data_format = "json"      # built-in JSON parser (no v2 mapping)
-
-    [[outputs.prometheus_client]]
-      listen = ":9273"
-      metric_version = 2
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:

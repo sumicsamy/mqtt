@@ -1,3 +1,12 @@
 resources:
   - deployment.yaml
   - servicemonitor.yaml
+
+
+
+configMapGenerator:
+  - name: telegraf-config
+    files:
+      - telegraf.conf
+generatorOptions:
+  disableNameSuffixHash: true      
