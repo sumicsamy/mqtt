@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fleet-telegraf
+  namespace: openshift-gitops    # or argocd namespace
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-org/fleet-telemetry.git
+    targetRevision: main
+    path: telegraf
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fleet-metrics
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,102 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: telegraf-config
+  namespace: fleet-metrics
+data:
+  telegraf.conf: |
+    [agent]
+      interval = "5s"
+      flush_interval = "5s"
+      hostname = "telegraf"
+
+    [[inputs.mqtt_consumer]]
+      servers = ["ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"]
+      topics  = ["mine/fleet/+/truck/+/telemetry"]
+      qos = 1
+      client_id = "telegraf-mqtt"
+      tls_skip_verify = true
+      data_format = "json_v2"
+
+      [[inputs.mqtt_consumer.json_v2.field]]
+        path = "spd"                type = "float"
+      [[inputs.mqtt_consumer.json_v2.field]]
+        path = "eng.rpm"            type = "int"
+      [[inputs.mqtt_consumer.json_v2.field]]
+        path = "eng.tmp"            type = "float"
+      [[inputs.mqtt_consumer.json_v2.field]]
+        path = "eng.fuel"           type = "float"
+      [[inputs.mqtt_consumer.json_v2.field]]
+        path = "load.pay_t"         type = "float"
+      [[inputs.mqtt_consumer.json_v2.field]]
+        path = "sys.cpu"            type = "int"
+      [[inputs.mqtt_consumer.json_v2.field]]
+        path = "sys.tmp"            type = "float"
+
+      [[inputs.mqtt_consumer.json_v2.tag]]
+        path = "truck"
+      [[inputs.mqtt_consumer.json_v2.tag]]
+        path = "region"
+
+      [[inputs.mqtt_consumer.json_v2.time_key]]
+        path = "ts"
+        format = "2006-01-02T15:04:05Z07:00"
+
+    [[outputs.prometheus_client]]
+      listen = ":9273"
+      metric_version = 2
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telegraf
+  namespace: fleet-metrics
+  labels:
+    app: telegraf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telegraf
+  template:
+    metadata:
+      labels:
+        app: telegraf
+    spec:
+      containers:
+      - name: telegraf
+        image: docker.io/library/telegraf:1.31
+        imagePullPolicy: IfNotPresent
+        ports:
+          - name: metrics
+            containerPort: 9273
+        volumeMounts:
+          - name: config
+            mountPath: /etc/telegraf/telegraf.conf
+            subPath: telegraf.conf
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+      volumes:
+        - name: config
+          configMap:
+            name: telegraf-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telegraf
+  namespace: fleet-metrics
+  labels:
+    app: telegraf
+spec:
+  selector:
+    app: telegraf
+  ports:
+    - name: metrics
+      port: 9273
+      targetPort: 9273
