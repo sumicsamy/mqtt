@@ -22,47 +22,8 @@ data:
       topics  = ["mine/fleet/+/truck/+/telemetry"]
       qos = 1
       client_id = "telegraf-mqtt"
-      tls_skip_verify = true
-      data_format = "json_v2"
-
-      [[inputs.mqtt_consumer.json_v2]]
-        [[inputs.mqtt_consumer.json_v2.field]]
-          path = "spd"
-          type = "float"
-
-        [[inputs.mqtt_consumer.json_v2.field]]
-          path = "eng.rpm"
-          type = "int"
-
-        [[inputs.mqtt_consumer.json_v2.field]]
-          path = "eng.tmp"
-          type = "float"
-
-        [[inputs.mqtt_consumer.json_v2.field]]
-          path = "eng.fuel"
-          type = "float"
-
-        [[inputs.mqtt_consumer.json_v2.field]]
-          path = "load.pay_t"
-          type = "float"
-
-        [[inputs.mqtt_consumer.json_v2.field]]
-          path = "sys.cpu"
-          type = "int"
-
-        [[inputs.mqtt_consumer.json_v2.field]]
-          path = "sys.tmp"
-          type = "float"
-
-        [[inputs.mqtt_consumer.json_v2.tag]]
-          path = "truck"
-
-        [[inputs.mqtt_consumer.json_v2.tag]]
-          path = "region"
-
-        [[inputs.mqtt_consumer.json_v2.time_key]]
-          path = "ts"
-          format = "2006-01-02T15:04:05Z07:00"
+      insecure_skip_verify = true
+      data_format = "json"      # built-in JSON parser (no v2 mapping)
 
     [[outputs.prometheus_client]]
       listen = ":9273"
