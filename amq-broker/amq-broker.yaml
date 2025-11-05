@@ -1,3 +1,12 @@
+---
+# amq-broker-operator/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mqtt-broker
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+---    
 apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
