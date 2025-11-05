@@ -1,0 +1,35 @@
+---
+# amq-broker-operator/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: amq-broker-operator
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+---
+# amq-broker-operator/operatorgroup.yaml
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: amq-broker-operatorgroup
+  namespace: amq-broker-operator
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  targetNamespaces:
+    - amq-broker-operator
+---
+# amq-broker-operator/subscription.yaml
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: amq-broker
+  namespace: amq-broker-operator
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  channel: 7.13.x
+  name: amq-broker-rhel8
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  installPlanApproval: Automatic

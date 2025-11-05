@@ -1,0 +1,4 @@
+resources:
+  - operator.yaml
+  - amq-broker.yaml
+  - service.yaml

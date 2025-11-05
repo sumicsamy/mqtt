@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: amq-broker-metrics
+  namespace: mqtt-broker
+  labels:
+    application: fleet-manager-broker
+    prometheus.io/scrape: 'true'
+spec:
+  selector:
+    ActiveMQArtemis: amq-broker
+  ports:
+    - name: metrics
+      port: 8161
+      targetPort: 8161
+      protocol: TCP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: amq-broker-monitor
+  namespace: mqtt-broker
+  labels:
+    release: prometheus  # match your Prometheus Operator release label
+spec:
+  selector:
+    matchLabels:
+      application: fleet-manager-broker
+  namespaceSelector:
+    matchNames:
+      - mqtt-broker
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 15s
+      scheme: http
