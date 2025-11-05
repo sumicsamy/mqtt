@@ -29,22 +29,4 @@ spec:
     journalType: nio
   console:
     expose: true
-  security:
-    authentication:
-      enabled: true
-      user: admin
-      password: admin
-      roles: admin
-    authorization:
-      - match: "mine.#"
-        permissions:
-          - operationType: createNonDurableQueue
-            roles: [ "admin", "anonymous" ]
-          - operationType: createAddress
-            roles: [ "admin", "anonymous" ]
-          - operationType: send
-            roles: [ "admin", "anonymous" ]
-          - operationType: consume
-            roles: [ "admin", "anonymous" ]
-          - operationType: browse
-            roles: [ "admin", "anonymous" ]
+  
