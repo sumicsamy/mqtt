@@ -28,8 +28,8 @@ metadata:
   annotations:
     argocd.argoproj.io/sync-wave: "1"
 spec:
-  channel: 7.12.x
-  name: amq-broker-rhel8
+  channel: 7.13.x
+  name: amq-broker-rhel9
   source: redhat-operators
   sourceNamespace: openshift-marketplace
   installPlanApproval: Automatic
