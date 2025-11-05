@@ -3,6 +3,9 @@ kind: ActiveMQArtemis
 metadata:
   name: fleet-manager-broker
   namespace: mqtt-broker
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   acceptors:
     - name: mqtts
