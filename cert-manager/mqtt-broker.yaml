@@ -1,0 +1,15 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: amq-broker-cert
+  namespace: mqtt-broker
+spec:
+  secretName: amq-broker-tls
+  duration: 2160h # 90 days
+  renewBefore: 360h # renew 15 days early
+  commonName: broker.mqtt.acme.internal
+  dnsNames:
+    - "*.mqtt-broker.svc.cluster.local"
+  issuerRef:
+    name: root-ca-issuer
+    kind: ClusterIssuer
