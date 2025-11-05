@@ -8,7 +8,6 @@ secretGenerator:
 - name: amq-broker-tls
   files:
     - broker.ks=ssl/broker.ks
-    - broker.ts=ssl/broker.ts
   literals:
     - KEYSTORE_PASSWORD=changeit
     - TRUSTSTORE_PASSWORD=changeit
