@@ -1,6 +1,35 @@
 apiVersion: v1
 kind: Service
 metadata:
+  name: mqtt-lb
+  namespace: fleet-manager-broker
+spec:
+  selector:
+    ActiveMQArtemis: fleet-manager-broker
+  ports:
+    - port: 8883
+      name: mqtt
+      targetPort: 8883
+  type: ClusterIP
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: mqtt-lb
+  namespace: fleet-manager-broker
+spec:
+  port:
+    targetPort: 8883
+  to:
+    kind: Service
+    name: mqtt-lb
+    weight: 100
+  tls:
+    termination: passthrough
+---
+apiVersion: v1
+kind: Service
+metadata:
   name: fleet-manager-broker-metrics
   namespace: mqtt-broker
   labels:
