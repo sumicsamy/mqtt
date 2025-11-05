@@ -6,9 +6,13 @@ resources:
 
 secretGenerator:
 - name: amq-broker-tls
+  namespace: mqtt-broker 
   files:
     - broker.ks=ssl/broker.ks
   literals:
     - KEYSTORE_PASSWORD=changeit
     - TRUSTSTORE_PASSWORD=changeit
   type: Opaque
+
+generatorOptions:
+  disableNameSuffixHash: true  
