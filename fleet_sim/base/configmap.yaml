@@ -7,4 +7,4 @@ data:
   BROKER_PORT: "8883"
   REGION: "default"
   TRUCK_COUNT: "50"
-  MESSAGE_HZ: "1.0"
+  MESSAGE_HZ: "50.0"
