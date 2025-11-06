@@ -6,4 +6,4 @@ metadata:
 data:
   REGION: "tomprice"
   TRUCK_COUNT: "110"
-  MESSAGE_HZ: "1.0"
+  MESSAGE_HZ: "100.0"
