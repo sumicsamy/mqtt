@@ -3,3 +3,4 @@ resources:
   - amq-broker.yaml
   - rolebinding.yaml
   - trust-manager.yaml
+  - ns.yaml

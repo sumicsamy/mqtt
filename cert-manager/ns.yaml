@@ -1,0 +1,10 @@
+---
+# amq-broker-operator/namespace.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mqtt-broker
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+  labels:
+    inject-fleet-ca: enabled

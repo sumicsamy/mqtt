@@ -1,13 +1,3 @@
----
-# amq-broker-operator/namespace.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: mqtt-broker
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
-  labels:
-    inject-fleet-ca: enabled
 ---    
 apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
@@ -23,18 +13,18 @@ spec:
       protocols: mqtt
       port: 8883
       sslEnabled: true
-      wantClientAuth: true
+      needClientAuth: true
       verifyHost: false
       sslSecret: amq-broker-tls
       trustSecret: fleet-root-trust
       suppressInternalManagementObjects: true
-      trustStoreType: PEMCA
+      trustStoreType: PEM
       enabledProtocols: TLSv1.2,TLSv1.3
       enabledCipherSuites: TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384
   brokerProperties:
     - "acceptorConfigurations.mqtts.params.sslAutoReload=true"
   deploymentPlan:
-    size: 3
+    size: 1
     persistenceEnabled: true
     clustered: false
     journalType: nio
