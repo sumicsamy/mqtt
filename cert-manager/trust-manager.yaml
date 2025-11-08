@@ -38,7 +38,7 @@ spec:
       matchLabels:
         inject-fleet-ca: enabled
     secret:
-      key: client-bundle-ca.crt
+      key: client-bundle-ca.pem
       metadata:
         annotations:
           argocd.argoproj.io/sync-wave: '1'
