@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: truck-sim-config
-  namespace: site-tomprice
-data:
-  REGION: "tomprice"
-  TRUCK_COUNT: "110"
-  MESSAGE_HZ: "100.0"

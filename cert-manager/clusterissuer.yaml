@@ -1,7 +1,30 @@
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: root-ca-issuer
+  name: root-selfsigned
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: fleet-root-ca
+  namespace: mqtt-broker
+spec:
+  isCA: true
+  commonName: fleet-root-ca
+  secretName: fleet-root-ca
+  duration: 87600h
+  issuerRef:
+    name: root-selfsigned
+    kind: ClusterIssuer
+---
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: fleet-issuer
+  namespace: mqtt-broker
 spec:
   ca:
-    secretName: root-ca
+    secretName: fleet-root-ca
+

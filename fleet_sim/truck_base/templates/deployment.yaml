@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: truck-{{ .Values.siteId }}-{{ .Values.truckId }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: truck-{{ .Values.siteId }}-{{ .Values.truckId }}
+  template:
+    metadata:
+      labels:
+        app: truck-{{ .Values.siteId }}-{{ .Values.truckId }}
+    spec:
+      containers:
+      - name: truck
+        image: quay.io/suchugh/fleet-sim:0.0.6
+        env:
+          - name: TRUCK_ID
+            value: "{{ .Values.truckId }}"
+          - name: SITE_ID
+            value: "{{ .Values.siteId }}"
+          - name: BROKER_HOST
+            value: "{{ .Values.brokerHost }}"
+          - name: BROKER_PORT
+            value: "{{ .Values.brokerPort }}"
+          - name: MESSAGE_HZ
+            value: "800.0" 
+        volumeMounts:
+          - name: certs
+            mountPath: /certs
+      volumes:
+        - name: certs
+          secret:
+            secretName: truck-{{ .Values.siteId }}-{{ .Values.truckId }}-tls

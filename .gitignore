@@ -205,3 +205,15 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
+###CUSTOM
+fleet_sim/argocd/app-of-apps.yaml
+fleet_sim/argocd/site-template.yaml
+fleet_sim/base
+fleet_sim/overlays
+cert-manager/root*
+pull_secret.json
+TrustPolicy.json
+amq-broker/ssl/
+producer

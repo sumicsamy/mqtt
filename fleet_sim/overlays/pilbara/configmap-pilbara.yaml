@@ -1,9 +1,0 @@
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: truck-sim-config
-  namespace: site-pilbara
-data:
-  REGION: "pilbara"
-  TRUCK_COUNT: "100"
-  MESSAGE_HZ: "50.0"
