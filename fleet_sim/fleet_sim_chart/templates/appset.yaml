@@ -19,7 +19,7 @@ spec:
     metadata:
       name: "{{`{{siteId}}`}}-truck-{{`{{truckId}}`}}"
     spec:
-      project: default
+      project: fleet-simulator
       source:
         repoURL: 'https://github.com/sumicsamy/mqtt.git'
         targetRevision: main
