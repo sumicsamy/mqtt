@@ -19,7 +19,7 @@ spec:
         env:
           - name: TRUCK_ID
             value: "{{ .Values.truckId }}"
-          - name: SITE_ID
+          - name: REGION
             value: "{{ .Values.siteId }}"
           - name: BROKER_HOST
             value: "{{ .Values.brokerHost }}"
