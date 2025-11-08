@@ -1,0 +1,4 @@
+apiVersion: v2
+name: fleet-simulator
+description: Helm chart to generate ArgoCD ApplicationSet for fleet truck simulators
+version: 0.1.0

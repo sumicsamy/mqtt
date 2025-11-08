@@ -1,0 +1,11 @@
+sites:
+  - id: pilbara
+    namespace: site-pilbara
+  - id: tomprice
+    namespace: site-tomprice
+
+
+
+brokerHost: fleet-manager-hdls.mqtt-broker.svc
+brokerPort: 8883
+repoURL: https://github.com/sumicsamy/mqtt.git

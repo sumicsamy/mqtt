@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: fleet-simulator
+  namespace: openshift-gitops
+spec:
+  generators:
+    - list:
+        elements:
+{{- range $site := .Values.sites }}
+{{- range $i, $_ := until 100 }}
+          - siteId: "{{ $site.id }}"
+            namespace: "{{ $site.namespace }}"
+            truckId: "{{ printf "%03d" $i }}"
+{{- end }}
+{{- end }}
+                                                     
+  template:
+    metadata:
+      name: "{{`{{siteId}}`}}-truck-{{`{{truckId}}`}}"
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/sumicsamy/mqtt.git'
+        targetRevision: main
+        path: fleet_sim/truck_base
+        helm:
+          values: |
+            siteId: "{{`{{siteId}}`}}"
+            truckId: "{{`{{truckId}}`}}"
+            namespace: "{{`{{namespace}}`}}"
+            brokerHost: "fleet-manager-hdls.mqtt-broker.svc"
+            brokerPort: 8883
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{`{{namespace}}`}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
