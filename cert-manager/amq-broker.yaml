@@ -7,9 +7,9 @@ spec:
   secretName: amq-broker-tls
   duration: 2160h # 90 days
   renewBefore: 360h # renew 15 days early
-  commonName: amq-broker-hdls.mqtt-broker.svc
+  commonName: fleet-manager-broker-hdls.mqtt-broker.svc
   dnsNames:
-    - "*.amq-broker.svc.cluster.local"
+    - "*.mqtt-broker.svc.cluster.local"
   issuerRef:
     name: fleet-issuer
     kind: ClusterIssuer

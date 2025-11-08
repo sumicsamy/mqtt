@@ -6,6 +6,8 @@ metadata:
   name: mqtt-broker
   annotations:
     argocd.argoproj.io/sync-wave: "0"
+  labels:
+    inject-fleet-ca: enabled
 ---    
 apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
@@ -21,8 +23,10 @@ spec:
       protocols: mqtt
       port: 8883
       sslEnabled: true
-      needClientAuth: true
+      wantClientAuth: true
+      verifyHost: false
       sslSecret: amq-broker-tls
+      trustSecret: fleet-root-trust
   deploymentPlan:
     size: 3
     persistenceEnabled: true

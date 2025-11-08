@@ -2,3 +2,4 @@ resources:
   - clusterissuer.yaml
   - amq-broker.yaml
   - rolebinding.yaml
+  - trust-manager.yaml

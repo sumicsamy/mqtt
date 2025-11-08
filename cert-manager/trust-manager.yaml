@@ -1,0 +1,50 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: trust-manager-secret-reader
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: trust-manager-secret-reader-binding
+subjects:
+  - kind: ServiceAccount
+    name: trust-manager
+    namespace: cert-manager
+roleRef:
+  kind: ClusterRole
+  name: trust-manager-secret-reader
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: trust.cert-manager.io/v1alpha1
+kind: Bundle
+metadata:
+  name: fleet-root-trust
+spec:
+  sources:
+    - useDefaultCAs: true
+    - secret:
+        key: ca.crt
+        name: fleet-root-ca
+  target:
+    additionalFormats:
+      jks:
+        key: client.ts
+        password: changeit
+      pkcs12:
+        key: client.p12
+        password: 'changeit'
+    namespaceSelector:
+      matchLabels:
+        inject-fleet-ca: enabled
+    secret:
+      key: root-certs.pem
+      metadata:
+        annotations:
+          argocd.argoproj.io/sync-wave: '1'
+        labels:
+          app.kubernetes.io/component: trust-bundle
