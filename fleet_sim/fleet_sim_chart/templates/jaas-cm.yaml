@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: amq-jaas-cert-login
+  namespace: {{ .Values.brokerNamespace }}
+data:
+  login.config: |
+    activemq {
+      org.apache.activemq.artemis.spi.core.security.jaas.TextFileCertificateLoginModule required
+      debug=false
+      org.apache.activemq.artemis.spi.core.security.jaas.TextFileCertificateLoginModule.verifyDN=true
+      org.apache.activemq.artemis.spi.core.security.jaas.TextFileCertificateLoginModule.usersFile="/home/jboss/amq-broker/etc/artemis-certs.properties"
+      org.apache.activemq.artemis.spi.core.security.jaas.TextFileCertificateLoginModule.rolesFile="/home/jboss/amq-broker/etc/artemis-roles.properties";
+    };
+
+  artemis-certs.properties: |
+    {{- range $site := .Values.sites }}
+    {{- range $i, $_ := until ($site.truckCount | int) }}
+    CN=truck-{{ $site.id }}-{{ printf "%03d" $i }}
+    {{- end }}
+    {{- end }}
+
+  artemis-roles.properties: |
+    {{- range $site := .Values.sites }}
+    {{- range $i, $_ := until ($site.truckCount | int) }}
+    truck-{{ $site.id }}-{{ printf "%03d" $i }}
+    {{- end }}
+    {{- end }}

@@ -8,7 +8,7 @@ spec:
     - list:
         elements:
 {{- range $site := .Values.sites }}
-{{- range $i, $_ := until 100 }}
+{{- range $i, $_ := until ($site.truckCount | int) }}
           - siteId: "{{ $site.id }}"
             namespace: "{{ $site.namespace }}"
             truckId: "{{ printf "%03d" $i }}"

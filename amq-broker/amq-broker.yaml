@@ -28,12 +28,16 @@ spec:
       sslSecret: amq-broker-tls
       trustSecret: fleet-root-trust
   brokerProperties:
-    - "acceptorConfigurations.myacceptor.params.sslAutoReload=true"    
+    - "acceptorConfigurations.mqtts.params.sslAutoReload=true"
   deploymentPlan:
     size: 3
     persistenceEnabled: true
     journalType: nio
     enableMetricsPlugin: true
+    extraMounts:
+      secrets:
+      - "amq-jaas-cert-login"
+      - "site-roles"
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
