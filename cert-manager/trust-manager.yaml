@@ -44,3 +44,29 @@ spec:
           argocd.argoproj.io/sync-wave: '1'
         labels:
           app.kubernetes.io/component: trust-bundle
+---
+---
+apiVersion: trust.cert-manager.io/v1alpha1
+kind: Bundle
+metadata:
+  name: fleet-trust-bundle
+spec:
+  sources:
+    - secret:
+        key: ca.crt
+        name: fleet-root-ca
+  target:
+    additionalFormats:
+      jks:
+        key: client.ts
+        password: 'changeit'
+    namespaceSelector:
+      matchLabels:
+        inject-fleet-ca: enabled
+    secret:
+      key: client-bundle-ca.pem
+      metadata:
+        annotations:
+          argocd.argoproj.io/sync-wave: '1'
+        labels:
+          app.kubernetes.io/component: trust-bundle          
