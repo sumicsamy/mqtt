@@ -8,5 +8,5 @@ spec:
   commonName: truck-{{ .Values.siteId }}-{{ .Values.truckId }}
   usages: ["client auth"]
   issuerRef:
-    name: "{{ .Values.namespace }}-issuer"
-    kind: Issuer
+    name: fleet-issuer
+    kind: ClusterIssuer
