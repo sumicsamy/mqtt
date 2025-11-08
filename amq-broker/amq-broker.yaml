@@ -27,11 +27,16 @@ spec:
       verifyHost: false
       sslSecret: amq-broker-tls
       trustSecret: fleet-root-trust
+      suppressInternalManagementObjects: true
+      trustStoreType: JKS
+      enabledProtocols: TLSv1.2,TLSv1.3
+      enabledCipherSuites: TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384
   brokerProperties:
     - "acceptorConfigurations.mqtts.params.sslAutoReload=true"
   deploymentPlan:
     size: 3
     persistenceEnabled: true
+    clustered: false
     journalType: nio
     enableMetricsPlugin: true
     extraMounts:
