@@ -1,0 +1,22 @@
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: "{{`{{namespace}}`}}-issuer"
+  namespace: "{{`{{namespace}}`}}"
+spec:
+  ca:
+    secretName: "{{`{{namespace}}`}}-root-ca"
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: "{{`{{namespace}}`}}-root-ca"
+  namespace: "{{`{{namespace}}`}}"
+spec:
+  commonName: "{{`{{namespace}}`}}-root-ca"
+  duration: 87600h
+  isCA: true
+  issuerRef:
+    kind: ClusterIssuer
+    name: root-selfsigned
+  secretName: "{{`{{namespace}}`}}-root-ca"
