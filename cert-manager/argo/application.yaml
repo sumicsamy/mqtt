@@ -37,7 +37,7 @@ spec:
               helmCert:
                 enabled: true
           trust:
-            namespace: mqtt-broker
+            namespace: cert-manager
         secretTargets:
           enabled: true
   destination:
