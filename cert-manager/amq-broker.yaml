@@ -12,5 +12,5 @@ spec:
     - "*.amq-broker.svc.cluster.local"
   issuerRef:
     name: fleet-issuer
-    kind: Issuer
+    kind: ClusterIssuer
 

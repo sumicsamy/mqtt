@@ -9,7 +9,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: fleet-root-ca
-  namespace: mqtt-broker
+  namespace: cert-manager
 spec:
   isCA: true
   commonName: fleet-root-ca
@@ -23,7 +23,6 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: fleet-issuer
-  namespace: mqtt-broker
 spec:
   ca:
     secretName: fleet-root-ca
