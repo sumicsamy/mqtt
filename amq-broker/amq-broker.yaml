@@ -11,7 +11,7 @@ apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: fleet-manager-broker
-  namespace: mqtt-broker
+  namespace: amq-broker
   annotations:
     argocd.argoproj.io/sync-wave: "3"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -21,7 +21,7 @@ spec:
       protocols: mqtt
       port: 8883
       sslEnabled: true
-      needClientAuth: false
+      needClientAuth: true
       sslSecret: amq-broker-tls
   deploymentPlan:
     size: 2
