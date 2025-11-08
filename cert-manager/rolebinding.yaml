@@ -1,0 +1,44 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argocd-certmanager-access
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+rules:
+  - apiGroups: ["cert-manager.io"]
+    resources:
+      - certificates
+      - issuers
+      - clusterissuers
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argocd-certmanager-access
+  namespace: mqtt-broker
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+subjects:
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops
+roleRef:
+  kind: ClusterRole
+  name: argocd-certmanager-access
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: argocd-certmanager-cluster-access
+  annotations:
+    argocd.argoproj.io/sync-wave: "-2"
+subjects:
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops
+roleRef:
+  kind: ClusterRole
+  name: argocd-certmanager-access
+  apiGroup: rbac.authorization.k8s.io
