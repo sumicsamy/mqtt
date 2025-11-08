@@ -11,7 +11,7 @@ apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: fleet-manager-broker
-  namespace: amq-broker
+  namespace: mqtt-broker
   annotations:
     argocd.argoproj.io/sync-wave: "3"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
@@ -24,9 +24,20 @@ spec:
       needClientAuth: true
       sslSecret: amq-broker-tls
   deploymentPlan:
-    size: 2
+    size: 3
     persistenceEnabled: true
     journalType: nio
+    enableMetricsPlugin: true
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: ActiveMQArtemis
+                  operator: In
+                  values:
+                    - fleet-manager-broker
+            topologyKey: kubernetes.io/hostname
   console:
     expose: true
   
