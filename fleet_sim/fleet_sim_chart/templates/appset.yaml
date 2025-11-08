@@ -29,8 +29,9 @@ spec:
             siteId: "{{`{{siteId}}`}}"
             truckId: "{{`{{truckId}}`}}"
             namespace: "{{`{{namespace}}`}}"
-            brokerHost: "fleet-manager-hdls.mqtt-broker.svc"
-            brokerPort: 8883
+            brokerHost: "{{ .Values.brokerHost }}"
+            brokerPort: {{ .Values.brokerPort }}
+            image: "{{ .Values.image }}"
       destination:
         server: https://kubernetes.default.svc
         namespace: "{{`{{namespace}}`}}"

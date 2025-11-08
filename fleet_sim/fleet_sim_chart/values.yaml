@@ -9,3 +9,4 @@ sites:
 brokerHost: fleet-manager-hdls.mqtt-broker.svc
 brokerPort: 8883
 repoURL: https://github.com/sumicsamy/mqtt.git
+image: quay.io/suchugh/fleet-sim:0.0.7
