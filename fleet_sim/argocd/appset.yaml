@@ -42,7 +42,7 @@ spec:
             siteId: "{{`{{siteId}}`}}"
             truckId: "{{`{{truckId}}`}}"
             namespace: "{{`{{namespace}}`}}"
-            brokerHost: "amq-broker-hdls.mqtt-broker.svc"
+            brokerHost: "fleet-manager-hdls.mqtt-broker.svc"
             brokerPort: 8883
       destination:
         server: https://kubernetes.default.svc
