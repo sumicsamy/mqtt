@@ -27,7 +27,7 @@ spec:
   source:
     repoURL: https://charts.jetstack.io
     chart: trust-manager
-    targetRevision: latest           # or a fixed version like "v0.10.0"
+    targetRevision: v0.20.2           # or a fixed version like "v0.10.0"
     helm:
       releaseName: trust-manager
       values: |

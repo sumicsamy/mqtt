@@ -27,6 +27,8 @@ spec:
       verifyHost: false
       sslSecret: amq-broker-tls
       trustSecret: fleet-root-trust
+  brokerProperties:
+    - "acceptorConfigurations.myacceptor.params.sslAutoReload=true"    
   deploymentPlan:
     size: 3
     persistenceEnabled: true
