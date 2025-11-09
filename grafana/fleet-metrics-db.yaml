@@ -1,0 +1,181 @@
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: truck-telemetry-overview
+  namespace: grafana   # same as your datasource namespace
+  labels:
+    app: grafana
+    dashboard: truck-telemetry
+spec:
+  # 👇 must match your Grafana instance labelSelector (use same as in datasource)
+  instanceSelector:
+    matchLabels:
+      dashboards: fleet-metrics
+  json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "links": [],
+      "panels": [
+        {
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "type": "stat",
+          "title": "Average Speed (km/h)",
+          "targets": [
+            {
+              "expr": "avg(mqtt_consumer_spd{truck=\"$truck\", region=\"$region\"})",
+              "legendFormat": "avg speed",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 }
+        },
+        {
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Truck Speed per Truck",
+          "targets": [
+            {
+              "expr": "avg by(truck) (mqtt_consumer_spd{truck=\"$truck\", region=\"$region\"})",
+              "legendFormat": "{{truck}}",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "h": 7, "w": 18, "x": 6, "y": 0 }
+        },
+        {
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Engine Temperature (°C)",
+          "targets": [
+            {
+              "expr": "mqtt_consumer_tmp{truck=\"$truck\", region=\"$region\"}",
+              "legendFormat": "{{truck}}",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "h": 7, "w": 12, "x": 0, "y": 7 }
+        },
+        {
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Engine RPM",
+          "targets": [
+            {
+              "expr": "mqtt_consumer_rpm{truck=\"$truck\", region=\"$region\"}",
+              "legendFormat": "{{truck}}",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "h": 7, "w": 12, "x": 12, "y": 7 }
+        },
+        {
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Fuel Level (L)",
+          "targets": [
+            {
+              "expr": "avg by(truck) (mqtt_consumer_fuel{region=\"$region\", truck=\"$truck\"})",
+              "legendFormat": "{{truck}}",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "h": 7, "w": 12, "x": 0, "y": 14 }
+        },
+        {
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Payload Weight (t)",
+          "targets": [
+            {
+              "expr": "avg by(truck) (mqtt_consumer_pay_t{region=\"$region\", truck=\"$truck\"})",
+              "legendFormat": "{{truck}}",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "h": 7, "w": 12, "x": 12, "y": 14 }
+        },
+        {
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "type": "gauge",
+          "title": "Average Truck CPU (%)",
+          "targets": [
+            { "expr": "avg(mqtt_consumer_cpu)", "legendFormat": "avg CPU", "refId": "A" }
+          ],
+          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 21 }
+        },
+        {
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "type": "gauge",
+          "title": "Average System Temp (°C)",
+          "targets": [
+            { "expr": "avg(mqtt_consumer_tmp)", "legendFormat": "avg sys temp", "refId": "A" }
+          ],
+          "gridPos": { "h": 5, "w": 6, "x": 6, "y": 21 }
+        },
+        {
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "type": "table",
+          "title": "Latest Truck Telemetry",
+          "targets": [
+            {
+              "expr": "last_over_time(mqtt_consumer_spd[30s])",
+              "legendFormat": "{{truck}} speed",
+              "refId": "A"
+            },
+            {
+              "expr": "last_over_time(mqtt_consumer_tmp[30s])",
+              "legendFormat": "{{truck}} temp",
+              "refId": "B"
+            },
+            {
+              "expr": "last_over_time(mqtt_consumer_fuel[30s])",
+              "legendFormat": "{{truck}} fuel",
+              "refId": "C"
+            }
+          ],
+          "gridPos": { "h": 7, "w": 12, "x": 12, "y": 21 }
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 41,
+      "templating": {
+        "list": [
+          {
+            "name": "region",
+            "type": "query",
+            "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+            "definition": "label_values(mqtt_consumer_spd,region)",
+            "query": { "query": "label_values(mqtt_consumer_spd,region)" },
+            "refresh": 2
+          },
+          {
+            "name": "truck",
+            "type": "query",
+            "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+            "definition": "label_values(mqtt_consumer_spd{region=\"$region\"},truck)",
+            "query": { "query": "label_values(mqtt_consumer_spd{region=\"$region\"},truck)" },
+            "refresh": 2
+          }
+        ]
+      },
+      "time": { "from": "now-5m", "to": "now" },
+      "timezone": "browser",
+      "title": "Truck Telemetry Overview",
+      "uid": "truck-telemetry",
+      "version": 1
+    }
