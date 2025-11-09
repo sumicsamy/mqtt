@@ -1,0 +1,45 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: emqx-operator
+  namespace: openshift-gitops   # or 'argocd' if that's your ArgoCD ns
+spec:
+  project: emqx
+  source:
+    repoURL: 'https://repos.emqx.io/charts'
+    chart: emqx-operator
+    targetRevision: latest      # or specify a version like '0.6.1'
+    helm:
+      releaseName: emqx-operator
+      values: |
+        # Add any Helm values overrides here
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: emqx-operator-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: emqx
+  namespace: openshift-gitops
+spec:
+  project: emqx
+  source:
+    repoURL: 'https://github.com/sumicsamy/mqtt.git'
+    targetRevision: main
+    path: emqx/
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: emqx
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true      
