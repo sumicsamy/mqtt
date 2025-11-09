@@ -32,7 +32,7 @@ spec:
       value: Australia/Melbourne
     - name: JDK_JAVA_OPTIONS
       value: -XshowSettings:system
-    - name: JAVA_ARGS_APPENDED
+    - name: JAVA_ARGS_APPEND
       value: -Dhawtio.realm=console  
   deploymentPlan:
     size: 1
