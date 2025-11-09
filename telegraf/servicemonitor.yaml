@@ -3,6 +3,8 @@ kind: ServiceMonitor
 metadata:
   name: telegraf-metrics
   namespace: fleet-metrics
+  labels:
+    release: prometheus-user-workload
 spec:
   selector:
     matchLabels:
