@@ -8,6 +8,7 @@ metadata:
     argocd.argoproj.io/sync-wave: "3"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
+  adminUser: admin
   acceptors:
     - name: mqtts
       protocols: mqtt
