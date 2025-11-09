@@ -24,6 +24,13 @@ spec:
       enabledCipherSuites: TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384
   brokerProperties:
     - "acceptorConfigurations.mqtts.params.sslAutoReload=true"
+  env:
+    - name: TZ
+      value: Australia/Melbourne
+    - name: JAVA_ARGS_APPEND
+      value: -Dhawtio.realm=console
+    - name: JDK_JAVA_OPTIONS
+      value: -XshowSettings:system  
   deploymentPlan:
     size: 1
     persistenceEnabled: true

@@ -1,17 +1,27 @@
 apiVersion: grafana.integreatly.org/v1beta1
-kind: GrafanaDataSource
+kind: GrafanaDatasource
 metadata:
-  name: prometheus-ds
+  name: prometheus-user-workload
   namespace: grafana
+  labels:
+    grafana_datasource: '1'
 spec:
-  name: prometheus.yaml
-  datasources:
-    - name: Prometheus
-      type: prometheus
-      access: proxy
-      url: https://prometheus-k8s.openshift-monitoring.svc:9091
-      isDefault: true
-      jsonData:
-        tlsSkipVerify: true
-        timeInterval: 5s
-  allowCrossNamespaceImport: true
+  allowCrossNamespaceImport: false
+  datasource:
+    access: proxy
+    editable: true
+    isDefault: true
+    jsonData:
+      httpHeaderName1: Authorization
+      tlsSkipVerify: true
+    secureJsonData:
+      httpHeaderValue1: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+    type: prometheus
+    url: 'https://thanos-querier.openshift-monitoring.svc:9091'
+  instanceSelector:
+    matchLabels:
+      dashboards: fleet-metrics
+  plugins:
+    - name: grafana-clock-panel
+      version: 1.3.0
+  resyncPeriod: 10m0s
