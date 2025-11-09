@@ -11,20 +11,6 @@ spec:
     targetRevision: 2.2.29      # or specify a version like '0.6.1'
     helm:
       releaseName: emqx-operator
-      values: |
-        emqx:
-          securityContext:
-            enabled: false
-          podSecurityContext:
-            enabled: false
-        coreTemplate:
-          spec:
-            securityContext: {}
-            podSecurityContext: {}
-        replicantTemplate:
-          spec:
-            securityContext: {}
-            podSecurityContext: {}
   destination:
     server: https://kubernetes.default.svc
     namespace: emqx-operator-system
