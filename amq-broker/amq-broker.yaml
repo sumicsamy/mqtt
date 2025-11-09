@@ -31,7 +31,7 @@ spec:
     - name: JAVA_ARGS_APPEND
       value: -Dhawtio.realm=console
     - name: JDK_JAVA_OPTIONS
-      value: -XshowSettings:system  
+      value: -XshowSettings:system
   deploymentPlan:
     size: 1
     persistenceEnabled: true
@@ -41,7 +41,6 @@ spec:
     extraMounts:
       secrets:
       - "amq-jaas-cert-login"
-      - "site-roles"
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
