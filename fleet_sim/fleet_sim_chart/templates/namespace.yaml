@@ -7,4 +7,5 @@ metadata:
     inject-fleet-ca: enabled
   annotations:
     argocd.argoproj.io/sync-wave: "-3"  
-{{ - end }}    
+---    
+{{- end }}
