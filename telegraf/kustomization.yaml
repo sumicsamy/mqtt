@@ -2,6 +2,7 @@ resources:
   - deployment.yaml
   - servicemonitor.yaml
   - cert.yaml
+  - uwm.yaml
 
 
 configMapGenerator:
