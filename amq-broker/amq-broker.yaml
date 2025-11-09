@@ -27,14 +27,6 @@ spec:
   brokerProperties:
     - "acceptorConfigurations.mqtts.params.sslAutoReload=true"
     - brokerPlugins.\"org.apache.activemq.artemis.core.server.plugin.impl.LoggingActiveMQServerPlugin.class\".init=LOG_CONNECTION_EVENTS=true,LOG_SESSION_EVENTS=true,LOG_CONSUMER_EVENTS=true
-    - securityRoles."mine.fleet.pilbara.truck.000.telemetry".truck-pilbara-000.send=true
-    - securityRoles."mine.fleet.pilbara.truck.000.telemetry".truck-pilbara-000.createAddress=true
-    - securityRoles."mine.fleet.tomprice.truck.000.telemetry".truck-tomprice-000.send=true
-    - securityRoles."mine.fleet.tomprice.truck.000.telemetry".truck-tomprice-000.createAddress=true
-    - securityRoles."mine.fleet.pilbara.truck.000.telemetry".fleet.send=true
-    - securityRoles."mine.fleet.pilbara.truck.000.telemetry".fleet.createAddress=true
-    - securityRoles."mine.fleet.tomprice.truck.000.telemetry".metrics.send=true
-    - securityRoles."mine.fleet.tomprice.truck.000.telemetry".metrics.createAddress=true
   env:
     - name: TZ
       value: Australia/Melbourne
@@ -50,8 +42,8 @@ spec:
     enableMetricsPlugin: true
     extraMounts:
       secrets:
-      - "custom-jaas-config"
-      - "mqtt-logging-config"
+      - "fleet-manager-broker-jaas-config"
+      - "site-roles-bp"
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
