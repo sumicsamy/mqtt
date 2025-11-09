@@ -2,5 +2,22 @@ apiVersion: apps.emqx.io/v2beta1
 kind: EMQX
 metadata:
    name: emqx
-Spec:
-   image: emqx:5.8.8
+spec:
+  image: emqx/emqx:5.8.8
+  replicas: 1
+  coreTemplate:
+    spec:
+      containers:
+        - name: emqx
+          image: emqx/emqx:5.8.8
+      securityContext:
+        runAsUser: null
+        fsGroup: null    
+  replicantTemplate:
+    spec:
+      containers:
+        - name: emqx
+          image: emqx/emqx:5.8.8
+      securityContext:
+        runAsUser: null
+        fsGroup: null        
