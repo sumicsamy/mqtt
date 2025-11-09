@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://repos.emqx.io/charts'
     chart: emqx-operator
-    targetRevision: latest      # or specify a version like '0.6.1'
+    targetRevision: 2.2.29      # or specify a version like '0.6.1'
     helm:
       releaseName: emqx-operator
       values: |
