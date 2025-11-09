@@ -9,6 +9,7 @@ metadata:
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   adminUser: admin
+  adminPassword: admin
   acceptors:
     - name: mqtts
       protocols: mqtt
