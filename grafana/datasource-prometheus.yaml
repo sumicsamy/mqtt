@@ -1,0 +1,17 @@
+apiVersion: integreatly.org/v1alpha1
+kind: GrafanaDataSource
+metadata:
+  name: prometheus-ds
+  namespace: grafana
+spec:
+  name: prometheus.yaml
+  datasources:
+    - name: Prometheus
+      type: prometheus
+      access: proxy
+      url: https://prometheus-k8s.openshift-monitoring.svc:9091
+      isDefault: true
+      jsonData:
+        tlsSkipVerify: true
+        timeInterval: 5s
+  allowCrossNamespaceImport: true

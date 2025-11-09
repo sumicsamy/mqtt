@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana
+  namespace: openshift-gitops
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/sumicsamy/mqtt.git'
+    targetRevision: main
+    path: grafana
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: grafana
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true  
