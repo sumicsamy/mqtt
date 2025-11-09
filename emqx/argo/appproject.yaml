@@ -7,6 +7,7 @@ spec:
   description: Project to install emqx broker
   sourceRepos:
     - 'https://github.com/sumicsamy/mqtt.git'
+    - 'https://repos.emqx.io/charts' 
   destinations:
     - namespace: '*'
       server: 'https://kubernetes.default.svc'
