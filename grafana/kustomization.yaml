@@ -2,3 +2,4 @@ resources:
   - subscription.yaml
   - grafana.yaml
   - datasource-prometheus.yaml
+  - rbac.yaml
