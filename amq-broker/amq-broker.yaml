@@ -51,7 +51,7 @@ spec:
     extraMounts:
       secrets:
       - "custom-jaas-config"
-      - "logging-config"
+      - "mqtt-logging-config"
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
