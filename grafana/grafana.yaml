@@ -1,10 +1,10 @@
 apiVersion: grafana.integreatly.org/v1beta1
 kind: Grafana
 metadata:
-  name: fleet-monitoring
   labels:
     dashboards: fleet-metrics
-    folders: fleet- metrics
+    folders: fleet-metrics
+  name: fleet-monitoring
   namespace: grafana
 spec:
   config:
@@ -12,8 +12,8 @@ spec:
       disable_login_form: 'false'
       disable_signout_menu: 'false'
     log:
-      mode: console
       level: info
+      mode: console
     security:
       admin_password: start
       admin_user: root
@@ -22,6 +22,6 @@ spec:
       tls:
         termination: edge
       to:
+        kind: Service
         name: fleet-monitoring-service
         weight: 100
-        kind: Service
