@@ -40,6 +40,8 @@ spec:
     clustered: true
     journalType: nio
     enableMetricsPlugin: true
+    storage:
+      size: 10Gi
     extraMounts:
       secrets:
       - "fleet-manager-broker-jaas-config"
