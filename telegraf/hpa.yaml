@@ -10,6 +10,19 @@ spec:
     name: telegraf
   minReplicas: 3
   maxReplicas: 10
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 120          # wait 2 min before new scale-up decision
+      policies:
+        - type: Percent
+          value: 100                           # at most double pods per scale-up
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300          # wait 5 min before scaling down
+      policies:
+        - type: Percent
+          value: 50                            # reduce by at most 50 % at a time
+          periodSeconds: 60
   metrics:
     - type: Resource
       resource:
