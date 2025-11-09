@@ -1,0 +1,10 @@
+{{- range $site := .Values.sites }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ $site.namespace }}
+  labels:
+    inject-fleet-ca: enabled
+  annotations:
+    argocd.argoproj.io/sync-wave: "-3"  
+{{ - end }}    
