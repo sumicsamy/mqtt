@@ -32,6 +32,8 @@ spec:
       value: -Dhawtio.realm=console
     - name: JDK_JAVA_OPTIONS
       value: -XshowSettings:system
+    - name: ARTEMIS_JAAS_CONFIG
+      value: /amq/extra/secrets/amq-jaas-cert-login/login.config    
   deploymentPlan:
     size: 1
     persistenceEnabled: true
