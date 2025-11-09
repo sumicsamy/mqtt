@@ -12,16 +12,19 @@ spec:
     helm:
       releaseName: emqx-operator
       values: |
+        emqx:
+          securityContext:
+            enabled: false
+          podSecurityContext:
+            enabled: false
         coreTemplate:
           spec:
-            securityContext:
-              runAsUser: null
-              fsGroup: null
+            securityContext: {}
+            podSecurityContext: {}
         replicantTemplate:
           spec:
-            securityContext:
-              runAsUser: null
-              fsGroup: null
+            securityContext: {}
+            podSecurityContext: {}
   destination:
     server: https://kubernetes.default.svc
     namespace: emqx-operator-system

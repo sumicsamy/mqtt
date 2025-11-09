@@ -3,21 +3,55 @@ kind: EMQX
 metadata:
    name: emqx
 spec:
-  image: emqx/emqx:5.8.8
-  replicas: 1
+  clusterDomain: cluster.local
+  config:
+    mode: Merge
   coreTemplate:
+    metadata: {}
     spec:
-      containers:
-        - name: emqx
-          image: emqx/emqx:5.8.8
-      securityContext:
-        runAsUser: null
-        fsGroup: null    
+      livenessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /status
+          port: dashboard
+        initialDelaySeconds: 60
+        periodSeconds: 30
+      readinessProbe:
+        failureThreshold: 12
+        httpGet:
+          path: /status
+          port: dashboard
+        initialDelaySeconds: 10
+        periodSeconds: 5
+      replicas: 2
+      resources: {}
+      volumeClaimTemplates:
+        resources: {}
+  image: 'emqx/emqx:5.8.8'
   replicantTemplate:
+    metadata: {}
     spec:
-      containers:
-        - name: emqx
-          image: emqx/emqx:5.8.8
-      securityContext:
-        runAsUser: null
-        fsGroup: null        
+      livenessProbe:
+        failureThreshold: 3
+        httpGet:
+          path: /status
+          port: dashboard
+        initialDelaySeconds: 60
+        periodSeconds: 30
+      readinessProbe:
+        failureThreshold: 12
+        httpGet:
+          path: /status
+          port: dashboard
+        initialDelaySeconds: 10
+        periodSeconds: 5
+      replicas: 2
+      resources: {}
+  revisionHistoryLimit: 3
+  updateStrategy:
+    evacuationStrategy:
+      connEvictRate: 1000
+      sessEvictRate: 1000
+      waitTakeover: 10
+    initialDelaySeconds: 10
+    type: Recreate
