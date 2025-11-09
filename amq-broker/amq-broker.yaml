@@ -42,7 +42,7 @@ spec:
     enableMetricsPlugin: true
     extraMounts:
       secrets:
-      - "amq-jaas-cert-login"
+      - "custom-jaas-config"
     affinity:
       podAntiAffinity:
         requiredDuringSchedulingIgnoredDuringExecution:
