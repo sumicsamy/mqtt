@@ -4,7 +4,7 @@ metadata:
   name: telegraf-metrics
   namespace: fleet-metrics
   labels:
-    release: prometheus-user-workload
+    release: prometheus
 spec:
   selector:
     matchLabels:
@@ -12,3 +12,6 @@ spec:
   endpoints:
     - port: metrics
       interval: 15s
+  namespaceSelector:
+    matchNames:
+      - fleet-metrics
