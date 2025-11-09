@@ -179,3 +179,257 @@ spec:
       "uid": "truck-telemetry",
       "version": 1
     }
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: amq-broker-mqtt-fleet-overview
+  namespace: grafana   # ⬅️ change if your Grafana instance is in another namespace
+  labels:
+    app: grafana
+    dashboard: amq-broker-fleet
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: fleet-metrics   # ⬅️ must match your Grafana instance & datasource CR
+  json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "links": [],
+      "panels": [
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "stat",
+          "title": "Active Connections",
+          "targets": [ { "expr": "sum(artemis_connection_count)", "refId": "A" } ],
+          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "stat",
+          "title": "Active Sessions",
+          "targets": [ { "expr": "sum(artemis_session_count)", "refId": "A" } ],
+          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "stat",
+          "title": "Total Producers / Consumers",
+          "targets": [
+            { "expr": "sum(artemis_producer_count)", "legendFormat": "Producers", "refId": "A" },
+            { "expr": "sum(artemis_consumer_count)", "legendFormat": "Consumers", "refId": "B" }
+          ],
+          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "stat",
+          "title": "Messages Currently Stored",
+          "targets": [ { "expr": "sum(artemis_message_count)", "refId": "A" } ],
+          "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Message Throughput (Enqueue / Dequeue)",
+          "targets": [
+            { "expr": "rate(artemis_enqueue_total[1m])", "legendFormat": "Enqueue/s", "refId": "A" },
+            { "expr": "rate(artemis_dequeue_total[1m])", "legendFormat": "Dequeue/s", "refId": "B" }
+          ],
+          "gridPos": { "h": 7, "w": 12, "x": 0, "y": 4 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Message Count Trend (Backlog Growth)",
+          "targets": [
+            { "expr": "artemis_message_count", "legendFormat": "{{broker}}", "refId": "A" }
+          ],
+          "gridPos": { "h": 7, "w": 12, "x": 12, "y": 4 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Durable Message Count (Persistent Backlog)",
+          "targets": [
+            { "expr": "artemis_durable_message_count", "legendFormat": "{{broker}}", "refId": "A" }
+          ],
+          "gridPos": { "h": 7, "w": 12, "x": 0, "y": 11 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Broker Resource Usage",
+          "targets": [
+            {
+              "expr": "avg(rate(container_cpu_usage_seconds_total{pod=~\"amq-broker.*\"}[1m])) * 100",
+              "legendFormat": "CPU (%)",
+              "refId": "A"
+            },
+            {
+              "expr": "avg(container_memory_usage_bytes{pod=~\"amq-broker.*\"}) / (1024^2)",
+              "legendFormat": "Memory (MB)",
+              "refId": "B"
+            }
+          ],
+          "gridPos": { "h": 7, "w": 12, "x": 12, "y": 11 }
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 41,
+      "tags": [ "amq", "artemis", "mqtt", "pilbara" ],
+      "templating": {
+        "list": [
+          {
+            "name": "site",
+            "type": "query",
+            "label": "Site",
+            "includeAll": true,
+            "multi": true,
+            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+            "definition": "label_values(artemis_address_size,broker)",
+            "query": { "query": "label_values(artemis_address_size,broker)" },
+            "refresh": 2,
+            "current": {
+              "text": [ "amq-broker" ],
+              "value": [ "amq-broker" ]
+            }
+          }
+        ]
+      },
+      "time": { "from": "now-1m", "to": "now" },
+      "timezone": "browser",
+      "title": "AMQ Broker MQTT Fleet Overview (Validated Metrics)",
+      "uid": "amq-mqtt-fleet-realmetrics",
+      "version": 5
+    }
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: amq-broker-mqtt-address-level
+  namespace: grafana        # ← change if your Grafana instance lives elsewhere
+  labels:
+    app: grafana
+    dashboard: amq-broker-address
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: fleet-metrics
+  json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 8,
+      "links": [],
+      "panels": [
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "stat",
+          "title": "Total Active MQTT Addresses",
+          "targets": [
+            { "expr": "artemis_routed_message_count{address=~\"$address\"}", "refId": "A" }
+          ],
+          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "stat",
+          "title": "Total Messages (All MQTT Topics)",
+          "targets": [
+            { "expr": "sum(artemis_message_count{address=~\"$address\"})", "refId": "A" }
+          ],
+          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "stat",
+          "title": "Durable Messages (Persistent MQTT)",
+          "targets": [
+            { "expr": "sum(artemis_durable_message_count{address=~\"$address\"})", "refId": "A" }
+          ],
+          "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Message Count per MQTT Address",
+          "targets": [
+            { "expr": "artemis_message_count{address=~\"$address\"}", "legendFormat": "{{address}}", "refId": "A" }
+          ],
+          "gridPos": { "h": 7, "w": 12, "x": 0, "y": 4 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Durable Message Count per MQTT Address",
+          "targets": [
+            { "expr": "artemis_durable_message_count{address=~\"$address\"}", "legendFormat": "{{address}}", "refId": "A" }
+          ],
+          "gridPos": { "h": 7, "w": 12, "x": 12, "y": 4 }
+        },
+        {
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "type": "timeseries",
+          "title": "Published vs Delivered (Per Address)",
+          "targets": [
+            { "expr": "rate(artemis_routed_message_count{address=~\"$address\"}[1m])", "legendFormat": "{{address}} Published/s", "refId": "A" },
+            { "expr": "rate(artemis_address_delivered_message_count_total{address=~\"$address\"}[1m])", "legendFormat": "{{address}} Delivered/s", "refId": "B" }
+          ],
+          "gridPos": { "h": 7, "w": 24, "x": 0, "y": 11 }
+        }
+      ],
+      "refresh": "10s",
+      "schemaVersion": 41,
+      "tags": [ "amq", "artemis", "mqtt", "address" ],
+      "templating": {
+        "list": [
+          {
+            "name": "address",
+            "label": "MQTT Address",
+            "type": "query",
+            "includeAll": true,
+            "multi": true,
+            "regex": "/mine.*/",
+            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+            "definition": "label_values(artemis_address_size,address)",
+            "query": { "query": "label_values(artemis_address_size,address)" },
+            "refresh": 2
+          }
+        ]
+      },
+      "time": { "from": "now-15m", "to": "now" },
+      "timezone": "browser",
+      "title": "AMQ Broker MQTT Address-Level Health",
+      "uid": "amq-mqtt-address-level",
+      "version": 15
+    }
