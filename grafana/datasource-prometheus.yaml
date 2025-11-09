@@ -17,7 +17,7 @@ spec:
     secureJsonData:
       httpHeaderValue1: Bearer $(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
     type: prometheus
-    url: 'https://thanos-querier.openshift-monitoring.svc:9091'
+    url: 'https://prometheus-user-workload.openshift-user-workload-monitoring.svc.cluster.local:9091'
   instanceSelector:
     matchLabels:
       dashboards: fleet-metrics
