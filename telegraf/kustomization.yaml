@@ -3,6 +3,7 @@ resources:
   - servicemonitor.yaml
   - cert.yaml
   - uwm.yaml
+  - hpa.yaml
 
 
 configMapGenerator:
