@@ -26,7 +26,7 @@ spec:
       enabledCipherSuites: TLS_AES_128_GCM_SHA256,TLS_AES_256_GCM_SHA384
   brokerProperties:
     - "acceptorConfigurations.mqtts.params.sslAutoReload=true"
-    - brokerPlugins.\"org.apache.activemq.artemis.core.server.plugin.impl.LoggingActiveMQServerPlugin.class\".init=LOG_CONNECTION_EVENTS=true,LOG_SESSION_EVENTS=true,LOG_CONSUMER_EVENTS=true
+    - brokerPlugins.\"org.apache.activemq.artemis.core.server.plugin.impl.LoggingActiveMQServerPlugin.class\".init=LOG_CONNECTION_EVENTS=false,LOG_SESSION_EVENTS=false,LOG_CONSUMER_EVENTS=true
   env:
     - name: TZ
       value: Australia/Melbourne

@@ -4,23 +4,24 @@ metadata:
   name: fleet-metrics
   labels:
     argocd.argoproj.io/managed-by: openshift-gitops
----    
+--- 
+{{- range $i, $v := until (.Values.size | int) }}  
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: telegraf
+  name: telegraf-{{ $i }}
   namespace: fleet-metrics
   labels:
-    app: telegraf
+    app: telegraf-{{ $i }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: telegraf
+      app: telegraf-{{ $i }}
   template:
     metadata:
       labels:
-        app: telegraf
+        app: telegraf-{{ $i }}
     spec:
       containers:
       - name: telegraf
@@ -46,7 +47,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: telegraf-config
+            name: telegraf-config-{{ $i }}
         - name: certs
           secret:
             secretName: telegraf-tls       
@@ -54,14 +55,33 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: telegraf
+  name: telegraf-{{ $i }}
   namespace: fleet-metrics
   labels:
-    app: telegraf
+    app: telegraf-{{ $i }}
 spec:
   selector:
-    app: telegraf
+    app: telegraf-{{ $i }}
   ports:
     - name: metrics
       port: 9273
       targetPort: 9273
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: telegraf-{{ $i }}
+  namespace: fleet-metrics
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: telegraf-{{ $i }}
+  endpoints:
+    - port: metrics
+      interval: 15s
+  namespaceSelector:
+    matchNames:
+      - fleet-metrics
+{{- end  }}      

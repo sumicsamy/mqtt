@@ -1,0 +1,60 @@
+{{- range $i, $v := until (.Values.size | int) }}  
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: telegraf-config-{{ $i }}
+  namespace: fleet-metrics
+data:
+  telegraf.conf: |
+    [agent]
+      interval = "1s"
+      flush_interval = "1s"
+      metric_buffer_limit = 80000
+      round_interval = false
+
+    [[inputs.mqtt_consumer]]
+      tls_ca = "/certs/ca.crt"
+      tls_cert = "/certs/tls.crt"
+      tls_key = "/certs/tls.key"
+      servers = ["ssl://fleet-manager-broker-mqtts-{{ $i }}-svc.mqtt-broker.svc.cluster.local:8883"]
+      qos = 1
+      max_undelivered_messages = 80000
+      persistent_session = false
+      insecure_skip_verify = true
+      client_id = "telegraf-mqtt"
+      topics = ["mine/fleet/+/truck/+/telemetry"]
+      data_format = "json_v2"
+
+
+      [[inputs.mqtt_consumer.json_v2]]
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "spd"        type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "eng.rpm"    type = "int"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "eng.tmp"    type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "eng.fuel"   type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "load.pay_t" type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "sys.cpu"    type = "int"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "sys.tmp"    type = "float"
+
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path = "truck"
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path = "region"
+
+    [[outputs.prometheus_client]]
+      listen = ":9273"
+      metric_version = 2
+      path = "/metrics"
+      expiration_interval = "10s"
+
+    [[outputs.file]]
+      files = ["stdout"]
+      data_format = "json"
+--- 
+{{- end }}

@@ -8,7 +8,10 @@ spec:
   source:
     repoURL: https://github.com/sumicsamy/mqtt.git
     targetRevision: main
-    path: telegraf
+    path: telegraf/telegraf
+    helm:
+      valueFiles:
+        - values.yaml 
   destination:
     server: https://kubernetes.default.svc
     namespace: fleet-metrics
