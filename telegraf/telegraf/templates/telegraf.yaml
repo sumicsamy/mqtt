@@ -11,6 +11,8 @@ data:
       flush_interval = "1s"
       metric_buffer_limit = 80000
       round_interval = false
+      debug = false              # disables verbose per-message logs
+      quiet = true               # suppresses routine INFO spam
 
     [[inputs.mqtt_consumer]]
       tls_ca = "/certs/ca.crt"
@@ -18,8 +20,8 @@ data:
       tls_key = "/certs/tls.key"
       servers = ["ssl://fleet-manager-broker-mqtts-{{ $i }}-svc.mqtt-broker.svc.cluster.local:8883"]
       qos = 1
-      max_undelivered_messages = 80000
-      persistent_session = false
+      max_undelivered_messages = 30000
+      persistent_session = true
       insecure_skip_verify = true
       client_id = "telegraf-mqtt"
       topics = ["mine/fleet/+/truck/+/telemetry"]
