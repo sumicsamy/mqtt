@@ -43,6 +43,10 @@ data:
           path = "sys.cpu"    type = "int"
         [[inputs.mqtt_consumer.json_v2.field]]
           path = "sys.tmp"    type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "lat"    type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "lon"    type = "float"  
 
         [[inputs.mqtt_consumer.json_v2.tag]]
           path = "truck"
