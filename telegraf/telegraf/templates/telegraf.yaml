@@ -44,11 +44,19 @@ data:
         [[inputs.mqtt_consumer.json_v2.field]]
           path = "sys.tmp"    type = "float"
         [[inputs.mqtt_consumer.json_v2.field]]
-          path = "loc[0]"    type = "float"
+          path = "loc[0]"
+          type = "float"
+          rename = "lat"
+
         [[inputs.mqtt_consumer.json_v2.field]]
-          path = "loc[1]"    type = "float"
+          path = "loc[1]"
+          type = "float"
+          rename = "lon"
+
         [[inputs.mqtt_consumer.json_v2.field]]
-          path = "loc[2]"    type = "float"   
+          path = "loc[2]"
+          type = "float"
+          rename = "alt"
 
         [[inputs.mqtt_consumer.json_v2.tag]]
           path = "truck"
