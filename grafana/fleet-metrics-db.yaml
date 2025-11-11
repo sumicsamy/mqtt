@@ -433,3 +433,228 @@ spec:
       "uid": "amq-mqtt-address-level",
       "version": 15
     }
+---
+apiVersion: grafana.integreatly.org/v1beta1
+kind: GrafanaDashboard
+metadata:
+  name: amq-broker-overview
+  namespace: grafana            # change if your Grafana instance uses a different ns
+  labels:
+    app: amq-broker
+spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: fleet-metrics   # must match your Grafana instance & datasource
+  json: |
+    {
+      "uid": "amq-broker-overview",
+      "title": "AMQ Broker 7.13 Cluster Overview",
+      "tags": ["amq","artemis","mqtt","openshift"],
+      "timezone": "browser",
+      "schemaVersion": 38,
+      "refresh": "30s",
+      "time": { "from": "now-1h", "to": "now" },
+      "templating": {
+        "list": [
+          {
+            "name": "broker",
+            "type": "query",
+            "label": "Broker Pod",
+            "datasource": "Prometheus",
+            "query": "label_values(artemis_connection_count, pod)",
+            "refresh": 2
+          }
+        ]
+      },
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Messages In (msg/s)",
+          "targets": [
+            {
+              "expr": "sum(rate(artemis_messages_added[1m]))",
+              "legendFormat": "Messages In",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
+        },
+        {
+          "type": "stat",
+          "title": "Messages Out (msg/s)",
+          "targets": [
+            {
+              "expr": "sum(rate(artemis_messages_acknowledged[1m]))",
+              "legendFormat": "Messages Out",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 }
+        },
+        {
+          "type": "stat",
+          "title": "Connections",
+          "targets": [
+            { "expr": "sum(artemis_connection_count)", "legendFormat": "Connections", "refId": "A" }
+          ],
+          "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 }
+        },
+        {
+          "type": "stat",
+          "title": "Sessions",
+          "targets": [
+            { "expr": "sum(artemis_session_count)", "legendFormat": "Sessions", "refId": "A" }
+          ],
+          "gridPos": { "x": 16, "y": 0, "w": 4, "h": 4 }
+        },
+        {
+          "type": "stat",
+          "title": "Consumers",
+          "targets": [
+            { "expr": "sum(artemis_consumer_count)", "legendFormat": "Consumers", "refId": "A" }
+          ],
+          "gridPos": { "x": 0, "y": 4, "w": 4, "h": 4 }
+        },
+        {
+          "type": "stat",
+          "title": "Estimated Producers (Sessions - Consumers)",
+          "targets": [
+            {
+              "expr": "max(sum(artemis_session_count) - sum(artemis_consumer_count), 0)",
+              "legendFormat": "Producer Sessions",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "x": 4, "y": 4, "w": 4, "h": 4 }
+        },
+        {
+          "type": "stat",
+          "title": "Topics (Addresses, Multicast)",
+          "targets": [
+            {
+              "expr": "count(artemis_address_size{routing_type=\"MULTICAST\"})",
+              "legendFormat": "Topics",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "x": 8, "y": 4, "w": 4, "h": 4 }
+        },
+        {
+          "type": "stat",
+          "title": "Queues",
+          "targets": [
+            {
+              "expr": "count(artemis_queue_message_count)",
+              "legendFormat": "Queues",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "x": 12, "y": 4, "w": 4, "h": 4 }
+        },
+        {
+          "type": "timeseries",
+          "title": "Messages In / Out (per second)",
+          "targets": [
+            {
+              "expr": "sum(rate(artemis_messages_added[1m]))",
+              "legendFormat": "In",
+              "refId": "A"
+            },
+            {
+              "expr": "sum(rate(artemis_messages_acknowledged[1m]))",
+              "legendFormat": "Out",
+              "refId": "B"
+            }
+          ],
+          "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
+        },
+        {
+          "type": "timeseries",
+          "title": "Connections & Sessions",
+          "targets": [
+            { "expr": "sum(artemis_connection_count)", "legendFormat": "Connections", "refId": "A" },
+            { "expr": "sum(artemis_session_count)", "legendFormat": "Sessions", "refId": "B" }
+          ],
+          "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
+        },
+        {
+          "type": "timeseries",
+          "title": "Queue Depth (Messages per Queue)",
+          "targets": [
+            {
+              "expr": "avg(artemis_queue_message_count)",
+              "legendFormat": "Avg Msgs / Queue",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 }
+        },
+        {
+          "type": "timeseries",
+          "title": "Broker Pod CPU Usage (cores)",
+          "targets": [
+            {
+              "expr": "sum by (pod)(rate(container_cpu_usage_seconds_total{namespace=\"mqtt-broker\",container!=\"POD\",image!=\"\"}[1m]))",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 }
+        },
+        {
+          "type": "timeseries",
+          "title": "Broker Pod Memory Usage (MB)",
+          "targets": [
+            {
+              "expr": "sum by (pod)(container_memory_usage_bytes{namespace=\"mqtt-broker\",container!=\"POD\",image!=\"\"}) / 1024 / 1024",
+              "legendFormat": "{{pod}}",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 }
+        },
+        {
+          "type": "timeseries",
+          "title": "Dropped / Undelivered Messages (msg/s)",
+          "targets": [
+            {
+              "expr": "rate(artemis_unrouted_message_count[1m]) + rate(artemis_expired_message_count[1m])",
+              "legendFormat": "Dropped + Unrouted",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "x": 0, "y": 32, "w": 12, "h": 8 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "msgs/s",
+              "color": { "mode": "continuous-BlYlRd" }
+            }
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Delivery Success %",
+          "targets": [
+            {
+              "expr": "100 * rate(artemis_messages_acknowledged[1m]) / rate(artemis_messages_added[1m])",
+              "legendFormat": "Success %",
+              "refId": "A"
+            }
+          ],
+          "gridPos": { "x": 12, "y": 32, "w": 6, "h": 4 },
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "red", "value": null },
+                  { "color": "orange", "value": 80 },
+                  { "color": "green", "value": 95 }
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
