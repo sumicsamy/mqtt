@@ -10,5 +10,5 @@ sites:
 brokerHost: mqtt-lb.mqtt-broker.svc.cluster.local
 brokerPort: 8883
 repoURL: https://github.com/sumicsamy/mqtt.git
-image: quay.io/suchugh/fleet-sim:0.0.16
+image: quay.io/suchugh/fleet-sim:0.0.17
 brokerNamespace: mqtt-broker
