@@ -7,6 +7,7 @@ spec:
   description: Project to manage all fleet truck simulator Applications
   sourceRepos:
     - 'https://github.com/sumicsamy/mqtt.git'
+    - 'https://charts.jetstack.io'
   destinations:
     - namespace: '*'
       server: 'https://kubernetes.default.svc'
@@ -29,10 +30,10 @@ spec:
         revision: main
         directories:
           - path: "*/argo"
-          - path: "*/*/argo"     # discovers all folders that contain /argo
+          - path: "*/*/argo"     
   template:
     metadata:
-      name: '{{index path.segments 0}}'   # use the folder name as application name
+      name: '{{path[0]}}'
     spec:
       project: mqtt
       source:

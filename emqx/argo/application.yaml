@@ -4,7 +4,7 @@ metadata:
   name: emqx-operator
   namespace: openshift-gitops   # or 'argocd' if that's your ArgoCD ns
 spec:
-  project: emqx
+  project: mqtt
   source:
     repoURL: 'https://repos.emqx.io/charts'
     chart: emqx-operator
@@ -27,7 +27,7 @@ metadata:
   name: emqx
   namespace: openshift-gitops
 spec:
-  project: emqx
+  project: mqtt
   source:
     repoURL: 'https://github.com/sumicsamy/mqtt.git'
     targetRevision: main
