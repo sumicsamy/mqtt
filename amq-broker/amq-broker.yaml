@@ -35,7 +35,7 @@ spec:
     - name: JAVA_ARGS_APPEND
       value: -Dhawtio.realm=console  
   deploymentPlan:
-    size: 3
+    size: 1
     persistenceEnabled: true
     clustered: true
     journalType: nio
@@ -44,8 +44,8 @@ spec:
       size: 10Gi
     resources:
       requests:
-        memory: "2Gi"
-        cpu: "500m"
+        memory: "20Gi"
+        cpu: "2000m"
       limits:
         memory: "20Gi"
         cpu: "5000m"
