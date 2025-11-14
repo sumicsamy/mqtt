@@ -23,7 +23,7 @@ spec:
       source:
         repoURL: 'https://github.com/sumicsamy/mqtt.git'
         targetRevision: main
-        path: fleet_sim/truck_base
+        path: fleet-sim/truck_base
         helm:
           values: |
             siteId: "{{`{{siteId}}`}}"

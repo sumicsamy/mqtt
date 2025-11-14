@@ -4,7 +4,7 @@ metadata:
   name: cert-manager-mqtt
   namespace: openshift-gitops
 spec:
-  project: default
+  project: mqtt
   source:
     repoURL: 'https://github.com/sumicsamy/mqtt.git'
     targetRevision: main
@@ -23,7 +23,7 @@ metadata:
   name: trust-manager
   namespace: openshift-gitops       # Argo CD control namespace
 spec:
-  project: default
+  project: mqtt
   source:
     repoURL: https://charts.jetstack.io
     chart: trust-manager
