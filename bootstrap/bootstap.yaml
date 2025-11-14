@@ -30,7 +30,7 @@ spec:
         repoURL: https://github.com/sumicsamy/mqtt.git
         revision: main
         directories:
-          - path: "*/argo/application.yaml"
+          - path: "*/argo"
   template:
     metadata:
       name: '{{path[0]}}'
