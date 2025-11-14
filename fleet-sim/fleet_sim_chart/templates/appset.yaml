@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: mqtt
+  name: fleet-simulator
   namespace: openshift-gitops
 spec:
   generators:
@@ -19,7 +19,7 @@ spec:
     metadata:
       name: "{{`{{siteId}}`}}-truck-{{`{{truckId}}`}}"
     spec:
-      project: mqtt
+      project: fleet-simulator
       source:
         repoURL: 'https://github.com/sumicsamy/mqtt.git'
         targetRevision: main
