@@ -437,7 +437,7 @@ spec:
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
-  name: amq-broker-overview
+  name: amq-broker-overview-1
   namespace: grafana            # change if your Grafana instance uses a different ns
   labels:
     app: amq-broker
@@ -662,7 +662,7 @@ spec:
 apiVersion: grafana.integreatly.org/v1beta1
 kind: GrafanaDashboard
 metadata:
-  name: amq-broker-overview
+  name: amq-broker-overview-2
   namespace: grafana            # change if your Grafana instance uses a different ns
   labels:
     app: amq-broker
