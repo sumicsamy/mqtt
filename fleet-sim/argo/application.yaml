@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/sumicsamy/mqtt.git'       # your repo
     targetRevision: main                                   # branch
-    path: fleet_sim/fleet_sim_chart                        # path to the Helm chart
+    path: fleet-sim/fleet_sim_chart                        # path to the Helm chart
     helm:
       valueFiles:
         - values.yaml                                      # optional override
