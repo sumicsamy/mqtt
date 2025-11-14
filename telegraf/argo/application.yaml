@@ -4,7 +4,7 @@ metadata:
   name: fleet-telegraf
   namespace: openshift-gitops    # or argocd namespace
 spec:
-  project: default
+  project: mqtt
   source:
     repoURL: https://github.com/sumicsamy/mqtt.git
     targetRevision: main
