@@ -8,6 +8,7 @@ spec:
   sourceRepos:
     - 'https://github.com/sumicsamy/mqtt.git'
     - 'https://charts.jetstack.io'
+    - 'https://repos.emqx.io/charts'
   destinations:
     - namespace: '*'
       server: 'https://kubernetes.default.svc'
@@ -29,8 +30,7 @@ spec:
         repoURL: https://github.com/sumicsamy/mqtt.git
         revision: main
         directories:
-          - path: "*/argo"
-          - path: "*/*/argo"     
+          - path: "*/argo/application.yaml"
   template:
     metadata:
       name: '{{path[0]}}'
