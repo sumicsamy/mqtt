@@ -17,7 +17,7 @@ spec:
         "list": [
           {
             "builtIn": 1,
-            "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+            "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
             "enable": true,
             "hide": true,
             "iconColor": "rgba(0, 211, 255, 1)",
@@ -32,7 +32,7 @@ spec:
       "links": [],
       "panels": [
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "stat",
           "title": "Average Speed (km/h)",
           "targets": [
@@ -45,7 +45,7 @@ spec:
           "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 }
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Truck Speed per Truck",
           "targets": [
@@ -58,7 +58,7 @@ spec:
           "gridPos": { "h": 7, "w": 18, "x": 6, "y": 0 }
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Engine Temperature (°C)",
           "targets": [
@@ -71,7 +71,7 @@ spec:
           "gridPos": { "h": 7, "w": 12, "x": 0, "y": 7 }
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Engine RPM",
           "targets": [
@@ -84,7 +84,7 @@ spec:
           "gridPos": { "h": 7, "w": 12, "x": 12, "y": 7 }
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Fuel Level (L)",
           "targets": [
@@ -97,7 +97,7 @@ spec:
           "gridPos": { "h": 7, "w": 12, "x": 0, "y": 14 }
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Payload Weight (t)",
           "targets": [
@@ -110,7 +110,7 @@ spec:
           "gridPos": { "h": 7, "w": 12, "x": 12, "y": 14 }
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "gauge",
           "title": "Average Truck CPU (%)",
           "targets": [
@@ -119,7 +119,7 @@ spec:
           "gridPos": { "h": 5, "w": 6, "x": 0, "y": 21 }
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "gauge",
           "title": "Average System Temp (°C)",
           "targets": [
@@ -128,7 +128,7 @@ spec:
           "gridPos": { "h": 5, "w": 6, "x": 6, "y": 21 }
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "table",
           "title": "Latest Truck Telemetry",
           "targets": [
@@ -158,7 +158,7 @@ spec:
           {
             "name": "region",
             "type": "query",
-            "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+            "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
             "definition": "label_values(mqtt_consumer_spd,region)",
             "query": { "query": "label_values(mqtt_consumer_spd,region)" },
             "refresh": 2
@@ -166,7 +166,7 @@ spec:
           {
             "name": "truck",
             "type": "query",
-            "datasource": { "type": "prometheus", "name": "prometheus-user-workload" },
+            "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
             "definition": "label_values(mqtt_consumer_spd{region=\"$region\"},truck)",
             "query": { "query": "label_values(mqtt_consumer_spd{region=\"$region\"},truck)" },
             "refresh": 2
@@ -198,7 +198,7 @@ spec:
         "list": [
           {
             "builtIn": 1,
-            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
             "enable": true,
             "hide": true,
             "iconColor": "rgba(0, 211, 255, 1)",
@@ -213,21 +213,21 @@ spec:
       "links": [],
       "panels": [
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "stat",
           "title": "Active Connections",
           "targets": [ { "expr": "sum(artemis_connection_count)", "refId": "A" } ],
           "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "stat",
           "title": "Active Sessions",
           "targets": [ { "expr": "sum(artemis_session_count)", "refId": "A" } ],
           "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "stat",
           "title": "Total Producers / Consumers",
           "targets": [
@@ -237,14 +237,14 @@ spec:
           "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "stat",
           "title": "Messages Currently Stored",
           "targets": [ { "expr": "sum(artemis_message_count)", "refId": "A" } ],
           "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Message Throughput (Enqueue / Dequeue)",
           "targets": [
@@ -254,7 +254,7 @@ spec:
           "gridPos": { "h": 7, "w": 12, "x": 0, "y": 4 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Message Count Trend (Backlog Growth)",
           "targets": [
@@ -263,7 +263,7 @@ spec:
           "gridPos": { "h": 7, "w": 12, "x": 12, "y": 4 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Durable Message Count (Persistent Backlog)",
           "targets": [
@@ -272,7 +272,7 @@ spec:
           "gridPos": { "h": 7, "w": 12, "x": 0, "y": 11 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Broker Resource Usage",
           "targets": [
@@ -301,7 +301,7 @@ spec:
             "label": "Site",
             "includeAll": true,
             "multi": true,
-            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
             "definition": "label_values(artemis_address_size,broker)",
             "query": { "query": "label_values(artemis_address_size,broker)" },
             "refresh": 2,
@@ -337,7 +337,7 @@ spec:
         "list": [
           {
             "builtIn": 1,
-            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
             "enable": true,
             "hide": true,
             "iconColor": "rgba(0, 211, 255, 1)",
@@ -353,7 +353,7 @@ spec:
       "links": [],
       "panels": [
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "stat",
           "title": "Total Active MQTT Addresses",
           "targets": [
@@ -362,7 +362,7 @@ spec:
           "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "stat",
           "title": "Total Messages (All MQTT Topics)",
           "targets": [
@@ -371,7 +371,7 @@ spec:
           "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "stat",
           "title": "Durable Messages (Persistent MQTT)",
           "targets": [
@@ -380,7 +380,7 @@ spec:
           "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Message Count per MQTT Address",
           "targets": [
@@ -389,7 +389,7 @@ spec:
           "gridPos": { "h": 7, "w": 12, "x": 0, "y": 4 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Durable Message Count per MQTT Address",
           "targets": [
@@ -398,7 +398,7 @@ spec:
           "gridPos": { "h": 7, "w": 12, "x": 12, "y": 4 }
         },
         {
-          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+          "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
           "type": "timeseries",
           "title": "Published vs Delivered (Per Address)",
           "targets": [
@@ -420,7 +420,7 @@ spec:
             "includeAll": true,
             "multi": true,
             "regex": "/mine.*/",
-            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload" },
+            "datasource": { "type": "Prometheus", "name": "prometheus-user-workload-fleet-metrics" },
             "definition": "label_values(artemis_address_size,address)",
             "query": { "query": "label_values(artemis_address_size,address)" },
             "refresh": 2
@@ -733,7 +733,7 @@ spec:
             "builtIn": 1,
             "datasource": {
               "type": "prometheus",
-              "name": "prometheus-user-workload"
+              "name": "prometheus-user-workload-fleet-metrics"
             },
             "enable": true,
             "hide": true,
@@ -752,7 +752,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -878,7 +878,7 @@ spec:
             {
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               },
               "editorMode": "code",
               "expr": "mqtt_consumer_lon{truck=\"$truck\", region=\"$region\"} ",
@@ -891,7 +891,7 @@ spec:
             {
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               },
               "editorMode": "code",
               "expr": "mqtt_consumer_lat{truck=\"$truck\", region=\"$region\"}",
@@ -939,7 +939,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -993,7 +993,7 @@ spec:
               "adhocFilters": [],
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               },
               "disableTextWrap": false,
               "editorMode": "builder",
@@ -1017,7 +1017,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -1072,7 +1072,7 @@ spec:
               "adhocFilters": [],
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               },
               "disableTextWrap": false,
               "editorMode": "builder",
@@ -1096,7 +1096,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -1150,7 +1150,7 @@ spec:
               "adhocFilters": [],
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               },
               "disableTextWrap": false,
               "editorMode": "builder",
@@ -1174,7 +1174,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -1227,7 +1227,7 @@ spec:
               "refId": "A",
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               }
             }
           ],
@@ -1237,7 +1237,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -1322,7 +1322,7 @@ spec:
               "refId": "A",
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               }
             }
           ],
@@ -1332,7 +1332,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -1417,7 +1417,7 @@ spec:
               "refId": "A",
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               }
             }
           ],
@@ -1427,7 +1427,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -1512,7 +1512,7 @@ spec:
               "refId": "A",
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               }
             }
           ],
@@ -1522,7 +1522,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -1607,7 +1607,7 @@ spec:
               "refId": "A",
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               }
             }
           ],
@@ -1617,7 +1617,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -1702,7 +1702,7 @@ spec:
               "refId": "A",
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               }
             }
           ],
@@ -1712,7 +1712,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -1765,7 +1765,7 @@ spec:
               "refId": "A",
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               }
             }
           ],
@@ -1775,7 +1775,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -1832,7 +1832,7 @@ spec:
               "useBackend": false,
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               }
             }
           ],
@@ -1842,7 +1842,7 @@ spec:
         {
           "datasource": {
             "type": "prometheus",
-            "name": "prometheus-user-workload"
+            "name": "prometheus-user-workload-fleet-metrics"
           },
           "fieldConfig": {
             "defaults": {
@@ -1900,7 +1900,7 @@ spec:
               "refId": "A",
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               }
             },
             {
@@ -1911,7 +1911,7 @@ spec:
               "refId": "B",
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               }
             },
             {
@@ -1922,7 +1922,7 @@ spec:
               "refId": "C",
               "datasource": {
                 "type": "prometheus",
-                "name": "prometheus-user-workload"
+                "name": "prometheus-user-workload-fleet-metrics"
               }
             }
           ],
@@ -1939,7 +1939,7 @@ spec:
             "current": {},
             "datasource": {
               "type": "prometheus",
-              "name": "prometheus-user-workload"
+              "name": "prometheus-user-workload-fleet-metrics"
             },
             "definition": "label_values(mqtt_consumer_spd,region)",
             "name": "region",
@@ -1954,7 +1954,7 @@ spec:
             "current": {},
             "datasource": {
               "type": "prometheus",
-              "name": "prometheus-user-workload"
+              "name": "prometheus-user-workload-fleet-metrics"
             },
             "definition": "label_values(mqtt_consumer_spd{region=\"$region\"},truck)",
             "name": "truck",
