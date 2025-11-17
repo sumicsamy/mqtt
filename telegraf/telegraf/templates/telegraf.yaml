@@ -1,8 +1,9 @@
-{{- range $i, $v := until (.Values.size | int) }}  
+{{- range $i, $_ := until (.Values.size | int) }} 
+{{- range $j, $_ := until (.Values.replicaCount | int) }}  
 kind: ConfigMap
 apiVersion: v1
 metadata:
-  name: telegraf-config-{{ $i }}
+  name: telegraf-config-{{ $i }}-r-{{ $j }}
   namespace: fleet-metrics
 data:
   telegraf.conf: |
@@ -23,7 +24,7 @@ data:
       max_undelivered_messages = 200000
       persistent_session = true
       insecure_skip_verify = true
-      client_id = "${agent.hostname}"
+      client_id = "telegraf-{{ $i }}-r-{{ $j }}"
       topics = ["$share/mine/fleet/+/truck/+/telemetry"]
 
       data_format = "json_v2"
