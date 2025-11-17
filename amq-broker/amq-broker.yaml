@@ -52,7 +52,7 @@ spec:
     journalType: aio
     enableMetricsPlugin: true
     storage:
-      size: 10Gi
+      size: 150Gi
     resources:
       requests:
         memory: 32Gi
