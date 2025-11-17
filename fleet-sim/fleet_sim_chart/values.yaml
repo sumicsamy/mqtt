@@ -1,7 +1,7 @@
 sites:
   - id: pilbara
     namespace: site-pilbara
-    truckCount: 10
+    truckCount: 100
   - id: tomprice
     namespace: site-tomprice
     truckCount: 10
