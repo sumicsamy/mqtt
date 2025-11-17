@@ -18,13 +18,14 @@ data:
       tls_ca = "/certs/ca.crt"
       tls_cert = "/certs/tls.crt"
       tls_key = "/certs/tls.key"
-      servers = ["ssl://fleet-manager-broker-mqtts-{{ $i }}-svc.mqtt-broker.svc.cluster.local:8883"]
+      servers = ["ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"]
       qos = 1
       max_undelivered_messages = 200000
       persistent_session = true
       insecure_skip_verify = true
-      client_id = "telegraf-mqtt-{{ $i }}"
+      client_id = "${agent.hostname}"
       topics = ["$share/mine/fleet/+/truck/+/telemetry"]
+
       data_format = "json_v2"
 
 
