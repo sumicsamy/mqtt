@@ -1,5 +1,5 @@
 {{- range $i, $_ := until (.Values.size | int) }} 
-{{- range $j, $_ := until (.Values.replicaCount | int) }}  
+{{- range $j, $_ := until ($.Values.replicaCount | int) }}  
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -72,4 +72,5 @@ data:
     #   files = ["stdout"]
     #   data_format = "json"
 --- 
+{{- end }}
 {{- end }}
