@@ -24,7 +24,7 @@ data:
       persistent_session = true
       insecure_skip_verify = true
       client_id = "telegraf-mqtt-{{ $i }}"
-      topics = ["mine/fleet/+/truck/+/telemetry"]
+      topics = ["$share/mine/fleet/+/truck/+/telemetry"]
       data_format = "json_v2"
 
 
