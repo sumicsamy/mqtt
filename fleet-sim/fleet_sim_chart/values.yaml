@@ -4,7 +4,10 @@ sites:
     truckCount: 100
   - id: tomprice
     namespace: site-tomprice
-    truckCount: 10
+    truckCount: 100
+  - id: perth
+    namespace: site-perth
+    truckCount: 100
 
 
 brokerHost: mqtt-lb.mqtt-broker.svc.cluster.local
