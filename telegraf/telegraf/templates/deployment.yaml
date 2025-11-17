@@ -14,7 +14,7 @@ metadata:
   labels:
     app: telegraf-{{ $i }}
 spec:
-  replicas: {{ $.Values.replicaCount | int }}
+  replicas: 1
   selector:
     matchLabels:
       app: telegraf-{{ $i }}
