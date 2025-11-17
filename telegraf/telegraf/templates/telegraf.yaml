@@ -68,7 +68,7 @@ data:
       expiration_interval = "0s"
 
     [[outputs.file]]
-      files = ["stderr"]
+      files = ["stdout"]
       data_format = "json"
 --- 
 {{- end }}
