@@ -24,7 +24,7 @@ data:
       persistent_session = true
       insecure_skip_verify = true
       client_id = "telegraf-{{ $i }}"
-      topics = ["$share/telegraf/mine/fleet/+/truck/+/telemetry"]
+      topics = ["mine/fleet/+/truck/+/telemetry"]
 
       data_format = "json_v2"
 
@@ -67,8 +67,8 @@ data:
       path = "/metrics"
       expiration_interval = "0s"
 
-    # [[outputs.file]]
-    #   files = ["stdout"]
-    #   data_format = "json"
+    [[outputs.file]]
+      files = ["stderr"]
+      data_format = "json"
 --- 
 {{- end }}
