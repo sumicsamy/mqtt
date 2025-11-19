@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"strconv"
@@ -17,7 +16,8 @@ import (
 	"time"
 
 	"github.com/IBM/sarama"
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/eclipse/paho.golang/autopaho"
+	"github.com/eclipse/paho.golang/paho"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -64,10 +64,6 @@ type Config struct {
 	MqttPassword    string
 	MqttSharedGroup string // $share/<group>/...
 
-	MqttTLSCA   string
-	MqttTLSCert string
-	MqttTLSKey  string
-
 	KafkaBrokers  []string
 	KafkaTopic    string
 	KafkaClientID string
@@ -95,16 +91,12 @@ func mustInt(key, def string) int {
 
 func loadConfig() *Config {
 	cfg := &Config{
-		MqttBrokers:     strings.Split(getenv("MQTT_BROKERS", "ssl://mqtt:8883"), ","),
+		MqttBrokers:     strings.Split(getenv("MQTT_BROKERS", "mqtt://mqtt:1883"), ","),
 		MqttTopicFilter: getenv("MQTT_TOPIC", "mine/fleet/+/truck/+/telemetry"),
 		MqttClientID:    getenv("MQTT_CLIENT_ID", "mqtt-kafka-bridge"),
 		MqttUsername:    getenv("MQTT_USERNAME", ""),
 		MqttPassword:    getenv("MQTT_PASSWORD", ""),
 		MqttSharedGroup: getenv("MQTT_SHARED_GROUP", "bridge"),
-
-		MqttTLSCA:   getenv("MQTT_TLS_CA", "/certs/ca.crt"),
-		MqttTLSCert: getenv("MQTT_TLS_CERT", "/certs/tls.crt"),
-		MqttTLSKey:  getenv("MQTT_TLS_KEY", "/certs/tls.key"),
 
 		KafkaBrokers:  strings.Split(getenv("KAFKA_BROKERS", "fleet-kafka-kafka-bootstrap:9092"), ","),
 		KafkaTopic:    getenv("KAFKA_TOPIC", "truck-telemetry"),
@@ -166,121 +158,23 @@ func deriveKey(jsonPayload []byte) string {
 	return t.Region + ":" + t.Truck
 }
 
-/************** TLS Helper **************/
-
-func loadTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error) {
-	certpool := x509.NewCertPool()
-
-	caCert, err := os.ReadFile(caPath)
-	if err != nil {
-		return nil, fmt.Errorf("read CA file: %w", err)
-	}
-	if ok := certpool.AppendCertsFromPEM(caCert); !ok {
-		return nil, fmt.Errorf("append CA cert failed")
-	}
-
-	clientCert, err := tls.LoadX509KeyPair(certPath, keyPath)
-	if err != nil {
-		return nil, fmt.Errorf("load client cert/key: %w", err)
-	}
-
-	return &tls.Config{
-		RootCAs:      certpool,
-		Certificates: []tls.Certificate{clientCert},
-		MinVersion:   tls.VersionTLS12,
-	}, nil
-}
-
-/************** Main **************/
-
-func main() {
-	cfg := loadConfig()
-
-	if len(cfg.KafkaBrokers) == 0 || cfg.KafkaBrokers[0] == "" {
-		log.Fatalf("[KAFKA] KAFKA_BROKERS is empty or invalid")
-	}
-
-	log.Printf("[KAFKA] Brokers: %v", cfg.KafkaBrokers)
-	log.Printf("[MQTT] Brokers: %v", cfg.MqttBrokers)
-	log.Printf("[MQTT] Topic filter: %s", cfg.MqttTopicFilter)
-	log.Printf("[MQTT] Shared group: %s", cfg.MqttSharedGroup)
-
-	msgCh := make(chan *BridgeMessage, cfg.MessageBuffer)
-
-	// Kafka producer
-	producer := newKafkaProducer(cfg)
-	defer producer.Close()
-
-	go func() {
-		for err := range producer.Errors() {
-			kafkaErr.Inc()
-			log.Printf("[KAFKA] Error: %v", err)
-		}
-	}()
-
-	// Worker pool
-	ctx, cancel := context.WithCancel(context.Background())
-	var wg sync.WaitGroup
-	for i := 0; i < cfg.WorkerCount; i++ {
-		wg.Add(1)
-		go worker(ctx, &wg, producer, cfg.KafkaTopic, msgCh)
-	}
-
-	// MQTT v5 client (scalable: unique client-id + shared subscription)
-	mqttClient := newMqttClientV5(cfg, msgCh)
-
-	for {
-		log.Printf("[MQTT] [v5] Attempting connection to brokers: %v ...", cfg.MqttBrokers)
-		token := mqttClient.Connect()
-
-		if !token.WaitTimeout(10 * time.Second) {
-			log.Printf("[MQTT] [v5] ERROR: Connect() timed out")
-			time.Sleep(5 * time.Second)
-			continue
-		}
-		if err := token.Error(); err != nil {
-			log.Printf("[MQTT] [v5] ERROR: Connect() failed → %v", err)
-			time.Sleep(5 * time.Second)
-			continue
-		}
-		break
-	}
-
-	// Shared subscription: $share/<group>/topic/filter
-	sharedTopic := fmt.Sprintf("$share/%s/%s", cfg.MqttSharedGroup, cfg.MqttTopicFilter)
-	log.Printf("[MQTT] [v5] Using shared subscription topic: %s", sharedTopic)
-
-	subTok := mqttClient.Subscribe(sharedTopic, cfg.MqttQos, nil)
-	if !subTok.WaitTimeout(10 * time.Second) {
-		log.Printf("[MQTT] [v5] ERROR: Subscribe() timeout")
-	} else if err := subTok.Error(); err != nil {
-		log.Printf("[MQTT] [v5] ERROR: Subscribe() failed → %v", err)
-	} else {
-		log.Printf("[MQTT] [v5] Subscribed (shared) to %s", sharedTopic)
-	}
-
-	// Prometheus endpoint
-	go func() {
-		http.Handle("/metrics", promhttp.Handler())
-		log.Printf("[HTTP] Serving metrics on :%s/metrics", cfg.PromPort)
-		if err := http.ListenAndServe(":"+cfg.PromPort, nil); err != nil {
-			log.Fatalf("[HTTP] ListenAndServe error: %v", err)
-		}
-	}()
-
-	// Graceful shutdown
-	sig := make(chan os.Signal, 1)
-	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
-	<-sig
-
-	log.Printf("[MAIN] Shutting down...")
-	cancel()
-	mqttClient.Disconnect(250)
-	close(msgCh)
-	wg.Wait()
-}
-
 /************** Kafka **************/
+
+func newKafkaProducer(cfg *Config) sarama.AsyncProducer {
+	c := sarama.NewConfig()
+	c.Version = sarama.V3_3_0_0
+	c.Producer.Return.Errors = true
+	c.Producer.RequiredAcks = sarama.WaitForLocal
+	c.Producer.Compression = sarama.CompressionSnappy
+	c.Producer.Flush.Frequency = 20 * time.Millisecond
+	c.ClientID = cfg.KafkaClientID
+
+	p, err := sarama.NewAsyncProducer(cfg.KafkaBrokers, c)
+	if err != nil {
+		log.Fatalf("[KAFKA] Producer init error: %v", err)
+	}
+	return p
+}
 
 func worker(ctx context.Context, wg *sync.WaitGroup, producer sarama.AsyncProducer, topic string, ch <-chan *BridgeMessage) {
 	defer wg.Done()
@@ -302,67 +196,25 @@ func worker(ctx context.Context, wg *sync.WaitGroup, producer sarama.AsyncProduc
 	}
 }
 
-func newKafkaProducer(cfg *Config) sarama.AsyncProducer {
-	c := sarama.NewConfig()
-	c.Version = sarama.V3_3_0_0
-	c.Producer.Return.Errors = true
-	c.Producer.RequiredAcks = sarama.WaitForLocal
-	c.Producer.Compression = sarama.CompressionSnappy
-	c.Producer.Flush.Frequency = 20 * time.Millisecond
-	c.ClientID = cfg.KafkaClientID
+/************** MQTT v5 with autopaho **************/
 
-	p, err := sarama.NewAsyncProducer(cfg.KafkaBrokers, c)
-	if err != nil {
-		log.Fatalf("[KAFKA] Producer init error: %v", err)
-	}
-	return p
-}
-
-/************** MQTT v5 (scalable) **************/
-
-func newMqttClientV5(cfg *Config, msgCh chan<- *BridgeMessage) mqtt.Client {
-	opts := mqtt.NewClientOptions()
-
-	// MQTT 5.0
-	opts.ProtocolVersion = 5
-	opts.SetProtocolVersion(5)
-
-	for _, b := range cfg.MqttBrokers {
-		opts.AddBroker(b)
+func newMQTTConnection(ctx context.Context, cfg *Config, msgCh chan<- *BridgeMessage) *autopaho.ConnectionManager {
+	if len(cfg.MqttBrokers) == 0 || cfg.MqttBrokers[0] == "" {
+		log.Fatalf("[MQTT] MQTT_BROKERS is empty or invalid")
 	}
 
-	// Unique client ID per pod
-	host, _ := os.Hostname()
-	baseID := cfg.MqttClientID
-	if baseID == "" {
-		baseID = "mqtt-kafka-bridge"
-	}
-	clientID := fmt.Sprintf("%s-%s", baseID, host)
-	opts.SetClientID(clientID)
-
-	opts.SetUsername(cfg.MqttUsername)
-	opts.SetPassword(cfg.MqttPassword)
-
-	// For MQTT 5, CleanStart semantics are used but Paho keeps SetCleanSession for compatibility
-	opts.SetCleanSession(true)
-
-	// TLS
-	tlsCfg, err := loadTLSConfig(cfg.MqttTLSCA, cfg.MqttTLSCert, cfg.MqttTLSKey)
-	if err != nil {
-		log.Fatalf("[MQTT] [v5] TLS config error: %v", err)
-	}
-	opts.SetTLSConfig(tlsCfg)
-
-	opts.OnConnect = func(c mqtt.Client) {
-		log.Printf("[MQTT] [v5] Connected successfully as clientID=%s", clientID)
+	var urls []*url.URL
+	for _, raw := range cfg.MqttBrokers {
+		u, err := url.Parse(strings.TrimSpace(raw))
+		if err != nil {
+			log.Fatalf("[MQTT] invalid broker URL %q: %v", raw, err)
+		}
+		urls = append(urls, u)
 	}
 
-	opts.OnConnectionLost = func(c mqtt.Client, err error) {
-		log.Printf("[MQTT] [v5] Connection lost: %v", err)
-	}
-
-	opts.SetDefaultPublishHandler(func(c mqtt.Client, m mqtt.Message) {
-		payload := append([]byte(nil), m.Payload()...)
+	// Router: handles all incoming publishes
+	router := paho.NewStandardRouterWithDefault(func(p *paho.Publish) {
+		payload := append([]byte(nil), p.Payload...)
 		key := deriveKey(payload)
 
 		mqttIn.Inc()
@@ -371,9 +223,138 @@ func newMqttClientV5(cfg *Config, msgCh chan<- *BridgeMessage) mqtt.Client {
 		select {
 		case msgCh <- &BridgeMessage{Key: key, Payload: payload}:
 		default:
-			log.Printf("[MQTT] [v5] Buffer full → dropping message")
+			log.Printf("[MQTT] Buffer full → dropping message (topic=%s)", p.Topic)
 		}
 	})
 
-	return mqtt.NewClient(opts)
+	sharedTopic := fmt.Sprintf("$share/%s/%s", cfg.MqttSharedGroup, cfg.MqttTopicFilter)
+
+	cliCfg := autopaho.ClientConfig{
+		ServerUrls:                    urls,
+		KeepAlive:                     20,
+		CleanStartOnInitialConnection: false,
+		// Keep session alive for a while to survive short outages
+		SessionExpiryInterval: 600,
+		OnConnectionUp: func(cm *autopaho.ConnectionManager, connAck *paho.Connack) {
+			log.Printf("[MQTT] connection up, subscribing to %s (QoS=%d)", sharedTopic, cfg.MqttQos)
+
+			_, err := cm.Subscribe(context.Background(), &paho.Subscribe{
+				Subscriptions: []paho.SubscribeOptions{
+					{
+						Topic: sharedTopic,
+						QoS:   cfg.MqttQos,
+					},
+				},
+			})
+			if err != nil {
+				log.Printf("[MQTT] subscribe failed: %v (no messages will be received until this succeeds)", err)
+				return
+			}
+			log.Printf("[MQTT] subscription to %s established", sharedTopic)
+		},
+		OnConnectError: func(err error) {
+			log.Printf("[MQTT] error whilst attempting connection: %v", err)
+		},
+		// Username / password (MQTT 5 CONNECT properties)
+		ConnectUsername: cfg.MqttUsername,
+		ConnectPassword: []byte(cfg.MqttPassword),
+
+		// Base MQTT v5 client config
+		ClientConfig: paho.ClientConfig{
+			ClientID: cfg.MqttClientID,
+			Router:   router,
+			OnClientError: func(err error) {
+				log.Printf("[MQTT] client error: %v", err)
+			},
+			OnServerDisconnect: func(d *paho.Disconnect) {
+				if d.Properties != nil {
+					log.Printf("[MQTT] server requested disconnect: %s", d.Properties.ReasonString)
+				} else {
+					log.Printf("[MQTT] server requested disconnect; reason code: %d", d.ReasonCode)
+				}
+			},
+		},
+	}
+
+	log.Printf("[MQTT] brokers: %v", cfg.MqttBrokers)
+	log.Printf("[MQTT] topic filter: %s", cfg.MqttTopicFilter)
+	log.Printf("[MQTT] shared subscription: %s", sharedTopic)
+	log.Printf("[MQTT] clientID: %s", cfg.MqttClientID)
+
+	cm, err := autopaho.NewConnection(ctx, cliCfg)
+	if err != nil {
+		log.Fatalf("[MQTT] failed to create connection manager: %v", err)
+	}
+
+	// Wait for first successful connection
+	if err := cm.AwaitConnection(ctx); err != nil {
+		log.Fatalf("[MQTT] initial connection failed: %v", err)
+	}
+
+	return cm
+}
+
+/************** Main **************/
+
+func main() {
+	cfg := loadConfig()
+
+	if len(cfg.KafkaBrokers) == 0 || cfg.KafkaBrokers[0] == "" {
+		log.Fatalf("[KAFKA] KAFKA_BROKERS is empty or invalid")
+	}
+
+	log.Printf("[KAFKA] Brokers: %v", cfg.KafkaBrokers)
+
+	msgCh := make(chan *BridgeMessage, cfg.MessageBuffer)
+
+	// Kafka producer + error logger
+	producer := newKafkaProducer(cfg)
+	defer producer.Close()
+
+	go func() {
+		for err := range producer.Errors() {
+			kafkaErr.Inc()
+			log.Printf("[KAFKA] Error: %v", err)
+		}
+	}()
+
+	// Context + signal handling
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	// Worker pool
+	var wg sync.WaitGroup
+	for i := 0; i < cfg.WorkerCount; i++ {
+		wg.Add(1)
+		go worker(ctx, &wg, producer, cfg.KafkaTopic, msgCh)
+	}
+
+	// MQTT v5 connection (AutoPaho handles reconnects)
+	cm := newMQTTConnection(ctx, cfg, msgCh)
+
+	// Prometheus endpoint
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		log.Printf("[HTTP] Serving metrics on :%s/metrics", cfg.PromPort)
+		if err := http.ListenAndServe(":"+cfg.PromPort, nil); err != nil {
+			log.Fatalf("[HTTP] ListenAndServe error: %v", err)
+		}
+	}()
+
+	// Wait for termination signal
+	<-ctx.Done()
+	log.Printf("[MAIN] signal received → shutting down")
+
+	// Ask MQTT manager to disconnect cleanly
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := cm.Disconnect(shutdownCtx); err != nil {
+		log.Printf("[MQTT] disconnect error: %v", err)
+	}
+	<-cm.Done() // wait for MQTT to finish
+
+	close(msgCh)
+	wg.Wait()
+
+	log.Printf("[MAIN] shutdown complete")
 }
