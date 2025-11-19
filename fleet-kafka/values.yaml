@@ -76,7 +76,7 @@ bridge:
 aggregator:
   enabled: true
 
-  image: "quay.io/your-org/fleet-aggregator:latest"
+  image: "quay.io/suchugh/fleet-aggregator:1.0.0"
   replicas: 3
   port: 8080
   prometheusPath: "/metrics"

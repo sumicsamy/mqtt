@@ -221,3 +221,4 @@ producer
 */go.sum
 */bin
 */bin/*
+.DS_Store
