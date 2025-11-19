@@ -1,13 +1,13 @@
 sites:
   - id: pilbara
     namespace: site-pilbara
-    truckCount: 1
+    truckCount: 10
   - id: tomprice
     namespace: site-tomprice
-    truckCount: 1
+    truckCount: 10
   - id: perth
     namespace: site-perth
-    truckCount: 1
+    truckCount: 10
 
 
 brokerHost: mqtt-lb.mqtt-broker.svc.cluster.local
