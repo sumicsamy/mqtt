@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: mqtt-lb
-  namespace: mqtt-broker
+  namespace: {{ .Values.brokerNamespace }}
 spec:
   selector:
     ActiveMQArtemis: fleet-manager-broker
@@ -16,7 +16,7 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: mqtt-lb
-  namespace: mqtt-broker
+  namespace: {{ .Values.brokerNamespace }}
 spec:
   port:
     targetPort: 8883
@@ -31,7 +31,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: fleet-manager-broker-metrics
-  namespace: mqtt-broker
+  namespace: {{ .Values.brokerNamespace }}
   labels:
     application: fleet-manager-broker
     prometheus.io/scrape: 'true'
@@ -48,7 +48,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: fleet-manager-broker-monitor
-  namespace: mqtt-broker
+  namespace: {{ .Values.brokerNamespace }}
   labels:
     release: prometheus  # match your Prometheus Operator release label
 spec:

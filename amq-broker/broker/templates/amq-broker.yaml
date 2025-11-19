@@ -3,7 +3,7 @@ apiVersion: broker.amq.io/v1beta1
 kind: ActiveMQArtemis
 metadata:
   name: fleet-manager-broker
-  namespace: mqtt-broker
+  namespace: {{ .Values.brokerNamespace }}
   annotations:
     argocd.argoproj.io/sync-wave: "3"
     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true

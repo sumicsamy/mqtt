@@ -8,3 +8,4 @@ sites:
   - id: perth
     namespace: site-perth
     truckCount: 100
+brokerNamespace: mqtt-broker    
