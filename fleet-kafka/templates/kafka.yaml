@@ -7,55 +7,46 @@ metadata:
     strimzi.io/kraft: enabled
     strimzi.io/node-pools: enabled
 spec:
-  entityOperator:
-    topicOperator: {}
-    userOperator: {}
   kafka:
-    config:
-      default.replication.factor: 3
-      min.insync.replicas: 2
-      offsets.topic.replication.factor: 3
-      transaction.state.log.min.isr: 2
-      transaction.state.log.replication.factor: 3
+    version: 4.0.0
+    metadataVersion: 4.0-IV3
     listeners:
       - name: plain
         port: 9092
-        tls: false
         type: internal
+        tls: false
       - name: tls
         port: 9093
-        tls: true
         type: internal
-    metadataVersion: 4.0-IV3
-    version: 4.0.0
+        tls: true
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      default.replication.factor: 3
+      min.insync.replicas: 2
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
 
 ---    
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaNodePool
 metadata:
-  name: broker
+  name: dual-role
   namespace: {{ .Values.namespace }}
   labels:
     strimzi.io/cluster: {{ .Values.kafka.clusterName }}
 spec:
   replicas: 3
   roles:
+    - controller
     - broker
   storage:
-    type: persistent-claim
-    size: 200Gi
----
-apiVersion: kafka.strimzi.io/v1beta2
-kind: KafkaNodePool
-metadata:
-  name: controllers
-  namespace: {{ .Values.namespace }}
-  labels:
-    strimzi.io/cluster: {{ .Values.kafka.clusterName }}
-spec:
-  replicas: 1
-  roles:
-    - controller
-  storage:
-    type: persistent-claim
-    size: 50Gi
+    type: jbod
+    volumes:
+      - id: 0
+        type: persistent-claim
+        size: 100Gi
+        deleteClaim: false
+        kraftMetadata: shared
