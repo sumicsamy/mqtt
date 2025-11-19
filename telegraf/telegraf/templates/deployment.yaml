@@ -13,6 +13,8 @@ metadata:
   namespace: fleet-metrics
   labels:
     app: telegraf-{{ $i }}
+  annotations:
+    checksum/configmap: {{ include (print $.Template.BasePath "/telegraf.yaml") $ | sha256sum }}  
 spec:
   replicas: 1
   selector:
