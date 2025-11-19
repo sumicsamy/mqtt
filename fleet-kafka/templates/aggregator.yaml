@@ -19,7 +19,7 @@ spec:
           ports:
             - containerPort: {{ .Values.aggregator.port }}
           env:
-            - name: KAFKA_BOOTSTRAP
+            - name: KAFKA_BOOTSTRAP_SERVERS
               value: "{{ .Values.kafka.clusterName }}-kafka-bootstrap:9092"
             - name: KAFKA_TOPIC
               value: "{{ .Values.telemetryTopic.name }}"
