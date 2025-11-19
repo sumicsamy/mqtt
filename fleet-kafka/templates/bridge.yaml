@@ -39,7 +39,7 @@ spec:
             - name: MQTT_QOS
               value: "{{ $.Values.bridge.mqtt.qos }}"
             - name: MQTT_CLIENT_ID
-              value: "{{ $.Values.bridge.mqtt.clientId }}"
+              value: "{{ $.Values.bridge.mqtt.clientId }}-{{ $i }}"
             - name: KAFKA_BROKERS
               value: "{{ $.Values.bridge.kafka.brokers }}"
             - name: KAFKA_TOPIC
@@ -63,6 +63,7 @@ spec:
               containerPort: 8080
           resources:
 {{- toYaml $.Values.bridge.resources | nindent 12 }}
+---
 {{- end }}
 {{- end }}
 ---
@@ -78,11 +79,12 @@ metadata:
 spec:
   type: ClusterIP
   selector:
-    app: {{ $.Values.bridge.mqtt.clientId }}-{{ $i }}
+    clientid: {{ $.Values.bridge.mqtt.clientId }}-{{ $i }}
   ports:
     - name: http
       port: 8080
       targetPort: http
+---
 {{- end }}
 {{- end }}
 ---
