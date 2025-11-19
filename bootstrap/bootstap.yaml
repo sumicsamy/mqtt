@@ -18,6 +18,12 @@ spec:
   namespaceResourceWhitelist:
     - group: '*'
       kind: '*'
+  ignoreDifferences:
+  - group: ""
+    kind: Secret
+    jsonPointers:
+    - /metadata/annotations/kubectl.kubernetes.io~1last-applied-configuration
+    - /metadata/annotations    
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -50,3 +56,4 @@ spec:
         syncOptions:
           - CreateNamespace=false
           - PruneLast=true
+          - ApplyOutOfSyncOnly=true
