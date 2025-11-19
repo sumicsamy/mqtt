@@ -5,8 +5,32 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   kafka:
-    version: 3.7.0
+
+    # REQUIRED for KRaft in 0.46.x
     metadataMode: unified
+
+    # Your listeners as needed
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: tls
+        port: 9093
+        type: internal
+        tls: true
+
+    # KRaft-specific config
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+
+  # Optional but usually handy
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}
+
 ---    
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaNodePool
