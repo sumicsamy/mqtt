@@ -2,11 +2,9 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"encoding/json"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"os/signal"
 	"strconv"
@@ -183,13 +181,16 @@ func main() {
 	mqttClient := newMqttClient(cfg, msgCh)
 
 	for {
+		log.Printf("[MQTT] Attempting connection to brokers: %v ...", cfg.MqttBrokers)
+
 		token := mqttClient.Connect()
-		ok := token.WaitTimeout(10 * time.Second)
-		if !ok {
-			log.Printf("[MQTT] ERROR: Connect() timed out after 10s")
+
+		if !token.WaitTimeout(10 * time.Second) {
+			log.Printf("[MQTT] ERROR: Connect() timed out after 10 seconds")
 			time.Sleep(5 * time.Second)
 			continue
 		}
+
 		if err := token.Error(); err != nil {
 			log.Printf("[MQTT] ERROR: Failed to connect → %v", err)
 			time.Sleep(5 * time.Second)
@@ -197,17 +198,17 @@ func main() {
 		}
 
 		// SUCCESS
-		log.Printf("[MQTT] CONNECT successful")
 		break
 	}
 
-	sub := mqttClient.Subscribe(cfg.MqttTopicFilter, cfg.MqttQos, nil)
-	if !sub.WaitTimeout(10 * time.Second) {
-		log.Printf("[MQTT] ERROR: Subscribe() timed out")
-	} else if err := sub.Error(); err != nil {
-		log.Printf("[MQTT] ERROR: Subscribe failed → %v", err)
+	subTok := mqttClient.Subscribe(cfg.MqttTopicFilter, cfg.MqttQos, nil)
+
+	if !subTok.WaitTimeout(10 * time.Second) {
+		log.Printf("[MQTT] ERROR: Subscribe timeout")
+	} else if subTok.Error() != nil {
+		log.Printf("[MQTT] ERROR: Subscribe failed → %v", subTok.Error())
 	} else {
-		log.Printf("[MQTT] Subscribed to topic pattern: %s", cfg.MqttTopicFilter)
+		log.Printf("[MQTT] Subscribed to MQTT pattern: %s", cfg.MqttTopicFilter)
 	}
 
 	// Prom metrics
@@ -266,10 +267,9 @@ func newKafkaProducer(cfg *Config) sarama.AsyncProducer {
 
 func newMqttClient(cfg *Config, msgCh chan<- *BridgeMessage) mqtt.Client {
 	opts := mqtt.NewClientOptions()
-	opts.SetCleanSession(true)
 
-	// Artemis **requires MQTT 3.1.1**, so force protocol level 4
-	opts.SetProtocolVersion(4) // MQTT v3.1.1
+	// Artemis supports only MQTT 3.1.1 → Force protocol level 4
+	opts.SetProtocolVersion(4)
 
 	// Add brokers
 	for _, b := range cfg.MqttBrokers {
@@ -279,22 +279,19 @@ func newMqttClient(cfg *Config, msgCh chan<- *BridgeMessage) mqtt.Client {
 	opts.SetClientID(cfg.MqttClientID)
 	opts.SetUsername(cfg.MqttUsername)
 	opts.SetPassword(cfg.MqttPassword)
+	opts.SetCleanSession(true)
 
-	// --- LOG CONNECTION ATTEMPTS ---
-	opts.SetConnectionAttemptHandler(func(broker *url.URL, tlsCfg *tls.Config) {
-		log.Printf("[MQTT] Attempting connection to %s ...", broker.String())
-	})
-
-	// --- LOG CONNECT SUCCESS OR FAILURE ---
-	opts.SetOnConnectHandler(func(c mqtt.Client) {
+	// Log successful connections
+	opts.OnConnect = func(c mqtt.Client) {
 		log.Printf("[MQTT] Connected successfully to broker(s): %v", cfg.MqttBrokers)
-	})
+	}
 
-	opts.SetConnectionLostHandler(func(c mqtt.Client, err error) {
+	// Log disconnects
+	opts.OnConnectionLost = func(c mqtt.Client, err error) {
 		log.Printf("[MQTT] Connection lost: %v", err)
-	})
+	}
 
-	// --- LOG SUBSCRIPTION ERRORS ---
+	// Log incoming publishes
 	opts.SetDefaultPublishHandler(func(c mqtt.Client, m mqtt.Message) {
 		payload := append([]byte(nil), m.Payload()...)
 		key := deriveKey(payload)
