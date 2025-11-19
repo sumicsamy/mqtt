@@ -1,0 +1,94 @@
+{{- if .Values.bridge.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-kafka-bridge
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: mqtt-kafka-bridge
+spec:
+  replicas: {{ .Values.bridge.replicas }}
+  selector:
+    matchLabels:
+      app: mqtt-kafka-bridge
+  template:
+    metadata:
+      labels:
+        app: mqtt-kafka-bridge
+    spec:
+      containers:
+        - name: bridge
+          image: {{ .Values.bridge.image }}
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MQTT_BROKERS
+              value: "{{ .Values.bridge.mqtt.brokers }}"
+            - name: MQTT_TOPIC
+              value: "{{ .Values.bridge.mqtt.topic }}"
+            - name: MQTT_QOS
+              value: "{{ .Values.bridge.mqtt.qos }}"
+            - name: MQTT_CLIENT_ID
+              value: "{{ .Values.bridge.mqtt.clientId }}"
+            - name: MQTT_USERNAME
+              value: "{{ .Values.bridge.mqtt.username }}"
+            - name: MQTT_PASSWORD
+              value: "{{ .Values.bridge.mqtt.password }}"
+            - name: KAFKA_BROKERS
+              value: "{{ .Values.bridge.kafka.brokers }}"
+            - name: KAFKA_TOPIC
+              value: "{{ .Values.bridge.kafka.topic }}"
+            - name: KAFKA_CLIENT_ID
+              value: "{{ .Values.bridge.kafka.clientId }}"
+            - name: WORKER_COUNT
+              value: "{{ .Values.bridge.workerCount }}"
+            - name: MESSAGE_BUFFER
+              value: "{{ .Values.bridge.messageBuffer }}"
+            - name: PROM_PORT
+              value: "{{ .Values.bridge.prometheusPort }}"
+          ports:
+            - name: http
+              containerPort: 8080
+          resources:
+{{- toYaml .Values.bridge.resources | nindent 12 }}
+{{- end }}
+---
+{{- if .Values.bridge.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: mqtt-kafka-bridge
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: mqtt-kafka-bridge
+spec:
+  type: ClusterIP
+  selector:
+    app: mqtt-kafka-bridge
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+{{- end }}
+---
+{{- if and .Values.bridge.enabled .Values.serviceMonitor.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: mqtt-kafka-bridge
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- range $k, $v := .Values.serviceMonitor.labelSelector }}
+    {{ $k }}: {{ $v | quote }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app: mqtt-kafka-bridge
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.namespace }}
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 10s
+{{- end }}

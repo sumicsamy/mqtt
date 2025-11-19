@@ -217,3 +217,7 @@ pull_secret.json
 TrustPolicy.json
 amq-broker/ssl/
 producer
+
+*/go.sum
+*/bin
+*/bin/*

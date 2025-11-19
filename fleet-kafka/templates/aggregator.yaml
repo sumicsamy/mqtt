@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fleet-aggregator
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.aggregator.replicas }}
+  selector:
+    matchLabels:
+      app: fleet-aggregator
+  template:
+    metadata:
+      labels:
+        app: fleet-aggregator
+    spec:
+      containers:
+        - name: aggregator
+          image: {{ .Values.aggregator.image }}
+          ports:
+            - containerPort: {{ .Values.aggregator.port }}
+          env:
+            - name: KAFKA_BOOTSTRAP
+              value: "{{ .Values.kafka.clusterName }}-kafka-bootstrap:9092"
+            - name: KAFKA_TOPIC
+              value: "{{ .Values.telemetryTopic.name }}"
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: fleet-aggregator
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: fleet-aggregator
+  endpoints:
+    - port: http
+      interval: 5s
+      path: /metrics
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleet-aggregator
+  namespace: {{ .Values.namespace }}
+  labels:
+    app: fleet-aggregator
+spec:
+  type: ClusterIP
+  selector:
+    app: fleet-aggregator
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080

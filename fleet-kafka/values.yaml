@@ -1,0 +1,102 @@
+# ============================================================
+# Global Namespace
+# ============================================================
+namespace: fleet-kafka
+
+
+# ============================================================
+# Kafka Cluster (AMQ Streams)
+# ============================================================
+kafka:
+  clusterName: fleet-kafka
+  replicas: 3
+
+  # Kafka version MUST match AMQ Streams operator support matrix
+  kafkaVersion: 3.7.0
+
+  # PVC size for each broker
+  storageSize: 500Gi
+
+
+
+# ============================================================
+# Telemetry Topic (Incoming raw telemetry from 1700 trucks)
+# ============================================================
+telemetryTopic:
+  name: truck-telemetry
+  partitions: 48              # good for ~1M msg/sec
+  replicationFactor: 3
+  retentionMs: 86400000       # 1 day retention
+
+
+
+
+# ============================================================
+# MQTT→Kafka High-Performance Bridge (Go code)
+# ============================================================
+bridge:
+  enabled: true
+
+  image: "quay.io/suchugh/mqtt-kafka-bridge:1.0.0"
+  replicas: 6          # scale horizontally for 1M/s
+
+  resources:
+    requests:
+      cpu: "2"
+      memory: "4Gi"
+    limits:
+      cpu: "4"
+      memory: "8Gi"
+
+  # MQTT broker (Artemis)
+  mqtt:
+    brokers: "ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"
+    topic: "mine/fleet/+/truck/+/telemetry"
+    qos: 0                    # recommended for 1M/s
+    clientId: "mqtt-kafka-bridge"
+    username: "admin"              # optional
+    password: "admin"              # optional; move to Secret later
+
+  # Kafka side
+  kafka:
+    brokers: "fleet-kafka-kafka-bootstrap:9092"
+    topic: "truck-telemetry"
+    clientId: "mqtt-kafka-bridge"
+
+  # Internal parameters
+  prometheusPort: "8080"
+  workerCount: 8
+  messageBuffer: 100000
+
+
+
+# ============================================================
+# Aggregator (Kafka → Prometheus metrics)
+# ============================================================
+aggregator:
+  enabled: true
+
+  image: "quay.io/your-org/fleet-aggregator:latest"
+  replicas: 3
+  port: 8080
+  prometheusPath: "/metrics"
+
+  resources:
+    requests:
+      cpu: "1"
+      memory: "2Gi"
+    limits:
+      cpu: "2"
+      memory: "4Gi"
+
+
+
+# ============================================================
+# ServiceMonitor (Prometheus Operator / OpenShift UWM)
+# ============================================================
+serviceMonitor:
+  enabled: true
+
+  # Adjust this label to match your Prometheus installation
+  labelSelector:
+    release: "prometheus"
