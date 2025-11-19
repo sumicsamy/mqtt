@@ -23,7 +23,7 @@ data:
       tls_cert = "/certs/tls.crt"
       tls_key = "/certs/tls.key"
       servers = ["ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"]
-      qos = 1
+      qos = 0
       max_undelivered_messages = 8000000
       persistent_session = true
       insecure_skip_verify = true
