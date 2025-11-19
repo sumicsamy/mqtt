@@ -60,6 +60,13 @@ type Config struct {
 	MqttTopicFilter string
 	MqttQos         byte
 	MqttClientID    string
+	MqttUsername    string
+	MqttPassword    string
+	MqttSharedGroup string // $share/<group>/...
+
+	MqttTLSCA   string
+	MqttTLSCert string
+	MqttTLSKey  string
 
 	KafkaBrokers  []string
 	KafkaTopic    string
@@ -91,6 +98,13 @@ func loadConfig() *Config {
 		MqttBrokers:     strings.Split(getenv("MQTT_BROKERS", "ssl://mqtt:8883"), ","),
 		MqttTopicFilter: getenv("MQTT_TOPIC", "mine/fleet/+/truck/+/telemetry"),
 		MqttClientID:    getenv("MQTT_CLIENT_ID", "mqtt-kafka-bridge"),
+		MqttUsername:    getenv("MQTT_USERNAME", ""),
+		MqttPassword:    getenv("MQTT_PASSWORD", ""),
+		MqttSharedGroup: getenv("MQTT_SHARED_GROUP", "bridge"),
+
+		MqttTLSCA:   getenv("MQTT_TLS_CA", "/certs/ca.crt"),
+		MqttTLSCert: getenv("MQTT_TLS_CERT", "/certs/tls.crt"),
+		MqttTLSKey:  getenv("MQTT_TLS_KEY", "/certs/tls.key"),
 
 		KafkaBrokers:  strings.Split(getenv("KAFKA_BROKERS", "fleet-kafka-kafka-bootstrap:9092"), ","),
 		KafkaTopic:    getenv("KAFKA_TOPIC", "truck-telemetry"),
@@ -152,8 +166,44 @@ func deriveKey(jsonPayload []byte) string {
 	return t.Region + ":" + t.Truck
 }
 
+/************** TLS Helper **************/
+
+func loadTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error) {
+	certpool := x509.NewCertPool()
+
+	caCert, err := os.ReadFile(caPath)
+	if err != nil {
+		return nil, fmt.Errorf("read CA file: %w", err)
+	}
+	if ok := certpool.AppendCertsFromPEM(caCert); !ok {
+		return nil, fmt.Errorf("append CA cert failed")
+	}
+
+	clientCert, err := tls.LoadX509KeyPair(certPath, keyPath)
+	if err != nil {
+		return nil, fmt.Errorf("load client cert/key: %w", err)
+	}
+
+	return &tls.Config{
+		RootCAs:      certpool,
+		Certificates: []tls.Certificate{clientCert},
+		MinVersion:   tls.VersionTLS12,
+	}, nil
+}
+
+/************** Main **************/
+
 func main() {
 	cfg := loadConfig()
+
+	if len(cfg.KafkaBrokers) == 0 || cfg.KafkaBrokers[0] == "" {
+		log.Fatalf("[KAFKA] KAFKA_BROKERS is empty or invalid")
+	}
+
+	log.Printf("[KAFKA] Brokers: %v", cfg.KafkaBrokers)
+	log.Printf("[MQTT] Brokers: %v", cfg.MqttBrokers)
+	log.Printf("[MQTT] Topic filter: %s", cfg.MqttTopicFilter)
+	log.Printf("[MQTT] Shared group: %s", cfg.MqttSharedGroup)
 
 	msgCh := make(chan *BridgeMessage, cfg.MessageBuffer)
 
@@ -164,7 +214,7 @@ func main() {
 	go func() {
 		for err := range producer.Errors() {
 			kafkaErr.Inc()
-			log.Printf("Kafka error: %v", err)
+			log.Printf("[KAFKA] Error: %v", err)
 		}
 	}()
 
@@ -176,57 +226,61 @@ func main() {
 		go worker(ctx, &wg, producer, cfg.KafkaTopic, msgCh)
 	}
 
-	// MQTT client
-	mqttClient := newMqttClient(cfg, msgCh)
+	// MQTT v5 client (scalable: unique client-id + shared subscription)
+	mqttClient := newMqttClientV5(cfg, msgCh)
 
 	for {
-		log.Printf("[MQTT] Attempting connection to brokers: %v ...", cfg.MqttBrokers)
-
+		log.Printf("[MQTT] [v5] Attempting connection to brokers: %v ...", cfg.MqttBrokers)
 		token := mqttClient.Connect()
 
 		if !token.WaitTimeout(10 * time.Second) {
-			log.Printf("[MQTT] ERROR: Connect() timed out after 10 seconds")
+			log.Printf("[MQTT] [v5] ERROR: Connect() timed out")
 			time.Sleep(5 * time.Second)
 			continue
 		}
-
 		if err := token.Error(); err != nil {
-			log.Printf("[MQTT] ERROR: Failed to connect → %v", err)
+			log.Printf("[MQTT] [v5] ERROR: Connect() failed → %v", err)
 			time.Sleep(5 * time.Second)
 			continue
 		}
-
-		// SUCCESS
 		break
 	}
 
-	subTok := mqttClient.Subscribe(cfg.MqttTopicFilter, cfg.MqttQos, nil)
+	// Shared subscription: $share/<group>/topic/filter
+	sharedTopic := fmt.Sprintf("$share/%s/%s", cfg.MqttSharedGroup, cfg.MqttTopicFilter)
+	log.Printf("[MQTT] [v5] Using shared subscription topic: %s", sharedTopic)
 
+	subTok := mqttClient.Subscribe(sharedTopic, cfg.MqttQos, nil)
 	if !subTok.WaitTimeout(10 * time.Second) {
-		log.Printf("[MQTT] ERROR: Subscribe timeout")
-	} else if subTok.Error() != nil {
-		log.Printf("[MQTT] ERROR: Subscribe failed → %v", subTok.Error())
+		log.Printf("[MQTT] [v5] ERROR: Subscribe() timeout")
+	} else if err := subTok.Error(); err != nil {
+		log.Printf("[MQTT] [v5] ERROR: Subscribe() failed → %v", err)
 	} else {
-		log.Printf("[MQTT] Subscribed to MQTT pattern: %s", cfg.MqttTopicFilter)
+		log.Printf("[MQTT] [v5] Subscribed (shared) to %s", sharedTopic)
 	}
 
-	// Prom metrics
+	// Prometheus endpoint
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())
-		http.ListenAndServe(":"+cfg.PromPort, nil)
+		log.Printf("[HTTP] Serving metrics on :%s/metrics", cfg.PromPort)
+		if err := http.ListenAndServe(":"+cfg.PromPort, nil); err != nil {
+			log.Fatalf("[HTTP] ListenAndServe error: %v", err)
+		}
 	}()
 
-	// Shutdown
+	// Graceful shutdown
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	<-sig
 
-	log.Printf("Shutting down...")
+	log.Printf("[MAIN] Shutting down...")
 	cancel()
-	mqttClient.Disconnect(200)
+	mqttClient.Disconnect(250)
 	close(msgCh)
 	wg.Wait()
 }
+
+/************** Kafka **************/
 
 func worker(ctx context.Context, wg *sync.WaitGroup, producer sarama.AsyncProducer, topic string, ch <-chan *BridgeMessage) {
 	defer wg.Done()
@@ -259,44 +313,54 @@ func newKafkaProducer(cfg *Config) sarama.AsyncProducer {
 
 	p, err := sarama.NewAsyncProducer(cfg.KafkaBrokers, c)
 	if err != nil {
-		log.Fatalf("Kafka producer error: %v", err)
+		log.Fatalf("[KAFKA] Producer init error: %v", err)
 	}
 	return p
 }
 
-func newMqttClient(cfg *Config, msgCh chan<- *BridgeMessage) mqtt.Client {
+/************** MQTT v5 (scalable) **************/
+
+func newMqttClientV5(cfg *Config, msgCh chan<- *BridgeMessage) mqtt.Client {
 	opts := mqtt.NewClientOptions()
-	opts.SetProtocolVersion(4)
+
+	// MQTT 5.0
+	opts.ProtocolVersion = 5
+	opts.SetProtocolVersion(5)
 
 	for _, b := range cfg.MqttBrokers {
 		opts.AddBroker(b)
 	}
 
-	opts.SetClientID(cfg.MqttClientID)
+	// Unique client ID per pod
+	host, _ := os.Hostname()
+	baseID := cfg.MqttClientID
+	if baseID == "" {
+		baseID = "mqtt-kafka-bridge"
+	}
+	clientID := fmt.Sprintf("%s-%s", baseID, host)
+	opts.SetClientID(clientID)
+
+	opts.SetUsername(cfg.MqttUsername)
+	opts.SetPassword(cfg.MqttPassword)
+
+	// For MQTT 5, CleanStart semantics are used but Paho keeps SetCleanSession for compatibility
 	opts.SetCleanSession(true)
 
-	// ---- LOAD TLS CERTS ----
-	tlsConfig, err := loadTLSConfig(
-		getenv("MQTT_TLS_CA", "/certs/ca.crt"),
-		getenv("MQTT_TLS_CERT", "/certs/tls.crt"),
-		getenv("MQTT_TLS_KEY", "/certs/tls.key"),
-	)
+	// TLS
+	tlsCfg, err := loadTLSConfig(cfg.MqttTLSCA, cfg.MqttTLSCert, cfg.MqttTLSKey)
 	if err != nil {
-		log.Fatalf("[MQTT] TLS config error: %v", err)
+		log.Fatalf("[MQTT] [v5] TLS config error: %v", err)
 	}
-	opts.SetTLSConfig(tlsConfig)
+	opts.SetTLSConfig(tlsCfg)
 
-	// Connection success
 	opts.OnConnect = func(c mqtt.Client) {
-		log.Printf("[MQTT] Connected successfully to %v", cfg.MqttBrokers)
+		log.Printf("[MQTT] [v5] Connected successfully as clientID=%s", clientID)
 	}
 
-	// Disconnect events
 	opts.OnConnectionLost = func(c mqtt.Client, err error) {
-		log.Printf("[MQTT] Connection lost: %v", err)
+		log.Printf("[MQTT] [v5] Connection lost: %v", err)
 	}
 
-	// Incoming MQTT messages
 	opts.SetDefaultPublishHandler(func(c mqtt.Client, m mqtt.Message) {
 		payload := append([]byte(nil), m.Payload()...)
 		key := deriveKey(payload)
@@ -307,35 +371,9 @@ func newMqttClient(cfg *Config, msgCh chan<- *BridgeMessage) mqtt.Client {
 		select {
 		case msgCh <- &BridgeMessage{Key: key, Payload: payload}:
 		default:
-			log.Printf("[MQTT] Buffer full → drop message")
+			log.Printf("[MQTT] [v5] Buffer full → dropping message")
 		}
 	})
 
 	return mqtt.NewClient(opts)
-}
-
-func loadTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error) {
-	certpool := x509.NewCertPool()
-
-	// CA
-	caCert, err := os.ReadFile(caPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read CA file: %w", err)
-	}
-	if ok := certpool.AppendCertsFromPEM(caCert); !ok {
-		return nil, fmt.Errorf("failed to append CA certificate")
-	}
-
-	// Client certificate
-	clientCert, err := tls.LoadX509KeyPair(certPath, keyPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load client cert/key: %w", err)
-	}
-
-	return &tls.Config{
-		RootCAs:            certpool,
-		Certificates:       []tls.Certificate{clientCert},
-		InsecureSkipVerify: false,
-		MinVersion:         tls.VersionTLS12,
-	}, nil
 }
