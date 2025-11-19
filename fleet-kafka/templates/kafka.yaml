@@ -3,9 +3,9 @@ kind: Kafka
 metadata:
   name: {{ .Values.kafka.clusterName }}
   namespace: {{ .Values.namespace }}
-  labels:
-    strimzi.io/kraft: enabled
+  annotations:
     strimzi.io/node-pools: enabled
+    strimzi.io/kraft: enabled
 spec:
   kafka:
     version: 4.0.0
