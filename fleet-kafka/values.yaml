@@ -15,7 +15,7 @@ kafka:
   kafkaVersion: 3.7.0
 
   # PVC size for each broker
-  storageSize: 500Gi
+  storageSize: 100Gi
 
 
 
