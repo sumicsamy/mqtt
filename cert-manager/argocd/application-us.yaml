@@ -1,0 +1,49 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cert-manager-custom
+  namespace: openshift-gitops        # Argo CD namespace
+spec:
+  project: mqtt
+
+  destination:
+    namespace: cert-manager-custom
+    server: https://kubernetes.default.svc
+
+  source:
+    repoURL: https://charts.jetstack.io
+    chart: cert-manager
+    targetRevision: v1.15.0          # or any supported version you want
+    helm:
+      values: |
+        # CRDs should already exist from the OpenShift cert-manager operator
+        installCRDs: false
+
+        # 🔒 Limit this cert-manager instance to ONLY these namespaces
+        extraArgs:
+          - --namespace=mqtt-broker
+          - --namespace=fleet-metrics
+          - --namespace=site-pilbara
+          - --namespace=site-tomprice
+          - --namespace=site-perth
+
+        # Use a dedicated namespace for leader election so it doesn't
+        # clash with the OpenShift-managed cert-manager
+        global:
+          leaderElection:
+            namespace: cert-manager-custom
+
+        # You probably don't need Prometheus from this instance
+        prometheus:
+          enabled: false
+
+        # Nice to have: garbage collection of Secrets when Certificates are deleted
+        enableCertificateOwnerRef: true
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
