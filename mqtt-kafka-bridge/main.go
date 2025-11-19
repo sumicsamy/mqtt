@@ -60,8 +60,6 @@ type Config struct {
 	MqttTopicFilter string
 	MqttQos         byte
 	MqttClientID    string
-	MqttUsername    string
-	MqttPassword    string
 
 	KafkaBrokers  []string
 	KafkaTopic    string
@@ -93,8 +91,6 @@ func loadConfig() *Config {
 		MqttBrokers:     strings.Split(getenv("MQTT_BROKERS", "ssl://mqtt:8883"), ","),
 		MqttTopicFilter: getenv("MQTT_TOPIC", "mine/fleet/+/truck/+/telemetry"),
 		MqttClientID:    getenv("MQTT_CLIENT_ID", "mqtt-kafka-bridge"),
-		MqttUsername:    getenv("MQTT_USERNAME", ""),
-		MqttPassword:    getenv("MQTT_PASSWORD", ""),
 
 		KafkaBrokers:  strings.Split(getenv("KAFKA_BROKERS", "fleet-kafka-kafka-bootstrap:9092"), ","),
 		KafkaTopic:    getenv("KAFKA_TOPIC", "truck-telemetry"),
@@ -277,8 +273,6 @@ func newMqttClient(cfg *Config, msgCh chan<- *BridgeMessage) mqtt.Client {
 	}
 
 	opts.SetClientID(cfg.MqttClientID)
-	opts.SetUsername(cfg.MqttUsername)
-	opts.SetPassword(cfg.MqttPassword)
 	opts.SetCleanSession(true)
 
 	// ---- LOAD TLS CERTS ----

@@ -36,10 +36,6 @@ spec:
               value: "{{ .Values.bridge.mqtt.qos }}"
             - name: MQTT_CLIENT_ID
               value: "{{ .Values.bridge.mqtt.clientId }}"
-            - name: MQTT_USERNAME
-              value: "{{ .Values.bridge.mqtt.username }}"
-            - name: MQTT_PASSWORD
-              value: "{{ .Values.bridge.mqtt.password }}"
             - name: KAFKA_BROKERS
               value: "{{ .Values.bridge.kafka.brokers }}"
             - name: KAFKA_TOPIC
