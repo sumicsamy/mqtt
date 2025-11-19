@@ -5,33 +5,33 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   kafka:
-    version: 3.7.0                 # match AMQ Streams supported version
-    replicas: {{ .Values.kafka.replicas }}
-    listeners:
-      - name: plain
-        port: 9092
-        type: internal
-        tls: false
-      - name: tls
-        port: 9093
-        type: internal
-        tls: true
-    config:
-      num.partitions: 48
-      default.replication.factor: 3
-      offsets.topic.replication.factor: 3
-      transaction.state.log.replication.factor: 3
-      log.retention.ms: {{ .Values.telemetryTopic.retentionMs }}
-    storage:
-      type: persistent-claim
-      size: {{ .Values.kafka.storageSize }}
-      deleteClaim: false
-  zookeeper:
-    replicas: 3
-    storage:
-      type: persistent-claim
-      size: 100Gi
-      deleteClaim: false
-  entityOperator:
-    topicOperator: {}
-    userOperator: {}
+    version: 3.7.0
+    metadataMode: unified
+---    
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: broker
+  namespace: {{ .Values.namespace }}
+spec:
+  cluster: {{ .Values.kafka.clusterName }}
+  replicas: 3
+  roles:
+    - broker
+  storage:
+    type: persistent-claim
+    size: 200Gi
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: controllers
+  namespace: {{ .Values.namespace }}
+spec:
+  cluster: {{ .Values.kafka.clusterName }}
+  replicas: 3
+  roles:
+    - controller
+  storage:
+    type: persistent-claim
+    size: 50Gi
