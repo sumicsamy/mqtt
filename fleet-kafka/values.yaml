@@ -51,7 +51,7 @@ bridge:
   # MQTT broker (Artemis)
   mqtt:
     brokers: "ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"
-    topic: "$share/bridge/mine/fleet/+/truck/+/telemetry"
+    topic: "mine/fleet/+/truck/+/telemetry"
     qos: 0                    # recommended for 1M/s
     clientId: "mqtt-kafka-bridge"
 
