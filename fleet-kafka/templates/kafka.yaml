@@ -37,8 +37,9 @@ kind: KafkaNodePool
 metadata:
   name: broker
   namespace: {{ .Values.namespace }}
+  labels:
+    strimzi.io/kafka-cluster: {{ .Values.kafka.clusterName }}
 spec:
-  cluster: {{ .Values.kafka.clusterName }}
   replicas: 3
   roles:
     - broker
@@ -51,8 +52,9 @@ kind: KafkaNodePool
 metadata:
   name: controllers
   namespace: {{ .Values.namespace }}
+  labels:
+    strimzi.io/kafka-cluster: {{ .Values.kafka.clusterName }}
 spec:
-  cluster: {{ .Values.kafka.clusterName }}
   replicas: 3
   roles:
     - controller
