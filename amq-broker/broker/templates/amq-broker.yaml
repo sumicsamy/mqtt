@@ -27,14 +27,14 @@ spec:
   addressSettings:
     addressSetting:
     - match: "mine.fleet.#"
-      maxSizeBytes: -1
-      pageSizeBytes: 104857600
+      maxSizeBytes: -"1"
+      pageSizeBytes: "104857600"
       addressFullPolicy: PAGE
       maxDeliveryAttempts: 1
       redeliveryDelay: 0
       defaultConsumerWindowSize: 10485760
     - match: "$.artemis.internal.#"
-      maxSizeBytes: 10485760
+      maxSizeBytes: "10485760"
       addressFullPolicy: PAGE    
   brokerProperties:
     - "acceptorConfigurations.mqtts.params.sslAutoReload=true"
