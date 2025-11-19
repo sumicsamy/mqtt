@@ -7,3 +7,11 @@ sharedGroups:
   - telegraf-g1
   - telegraf-g2
   - telegraf-g3
+  - telegraf-g4
+  - telegraf-g5
+  - telegraf-g6
+  - telegraf-g7
+  - telegraf-g8
+  - telegraf-g9
+  - telegraf-g10
+  - telegraf-g11

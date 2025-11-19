@@ -27,11 +27,13 @@ spec:
   brokerProperties:
     - "acceptorConfigurations.mqtts.params.sslAutoReload=true"
     - brokerPlugins.\"org.apache.activemq.artemis.core.server.plugin.impl.LoggingActiveMQServerPlugin.class\".init=LOG_CONNECTION_EVENTS=false,LOG_SESSION_EVENTS=false,LOG_CONSUMER_EVENTS=true
-    - addressSettings.#.maxSizeBytes=0
-    - addressSettings.#.pageSizeBytes=10485760
-    - addressSettings.#.addressFullMessagePolicy=PAGE
-    - addressSettings.#.maxDeliveryAttempts=1
-    - addressSettings.#.redeliveryDelay=0
+    - addressSettings.'mine.fleet.#'.maxSizeBytes=-1
+    - addressSettings.'mine.fleet.#'.pageSizeBytes=10485760
+    - addressSettings.'mine.fleet.#'.addressFullMessagePolicy=PAGE
+    - addressSettings.'mine.fleet.#'.maxDeliveryAttempts=1
+    - addressSettings.'mine.fleet.#'.redeliveryDelay=0
+    - "acceptorConfigurations.mqtts.params.directDeliver=false"
+    - "acceptorConfigurations.mqtts.params.batchDelay=5"
     - addressSettings.#.defaultConsumerWindowSize=10485760
     - globalMaxSize=-1
     - journalSyncNonTransactional=false
@@ -39,6 +41,7 @@ spec:
     - journalBufferSize_AIO=20971520
     - journalMinFiles=10
     - journalPoolFiles=50
+
   env:
     - name: TZ
       value: Australia/Melbourne
