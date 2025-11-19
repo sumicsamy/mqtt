@@ -17,7 +17,10 @@ spec:
         "list": [
           {
             "builtIn": 1,
-            "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
+            "datasource": {
+              "name": "prometheus-user-workload-fleet-metrics",
+              "type": "prometheus"
+            },
             "enable": true,
             "hide": true,
             "iconColor": "rgba(0, 211, 255, 1)",
@@ -29,155 +32,1245 @@ spec:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
+      "id": 5,
       "links": [],
       "panels": [
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
-          "type": "stat",
-          "title": "Average Speed (km/h)",
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "fixed"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              },
+              "displayName": "Truck Path",
+              "fieldMinMax": false,
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "none"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 10,
+            "w": 24,
+            "x": 0,
+            "y": 0
+          },
+          "id": 13,
+          "options": {
+            "basemap": {
+              "config": {},
+              "layer-tooltip": true,
+              "name": "Layer 0",
+              "opacity": 1,
+              "type": "osm-standard"
+            },
+            "controls": {
+              "mouseWheelZoom": true,
+              "showAttribution": true,
+              "showDebug": false,
+              "showMeasure": true,
+              "showScale": true,
+              "showZoom": true
+            },
+            "layers": [
+              {
+                "config": {
+                  "showLegend": true,
+                  "style": {
+                    "color": {
+                      "fixed": "dark-green"
+                    },
+                    "opacity": 0.5,
+                    "rotation": {
+                      "field": "latitude",
+                      "fixed": 0,
+                      "max": 360,
+                      "min": -360,
+                      "mode": "mod"
+                    },
+                    "size": {
+                      "field": "truck",
+                      "fixed": 5,
+                      "max": 15,
+                      "min": 8
+                    },
+                    "symbol": {
+                      "fixed": "img/icons/unicons/truck.svg",
+                      "mode": "fixed"
+                    },
+                    "symbolAlign": {
+                      "horizontal": "center",
+                      "vertical": "center"
+                    },
+                    "text": {
+                      "field": "truck",
+                      "fixed": "",
+                      "mode": "fixed"
+                    },
+                    "textConfig": {
+                      "fontSize": 12,
+                      "offsetX": 0,
+                      "offsetY": 0,
+                      "textAlign": "center",
+                      "textBaseline": "middle"
+                    }
+                  }
+                },
+                "layer-tooltip": true,
+                "location": {
+                  "latitude": "latitude",
+                  "longitude": "longitude",
+                  "mode": "coords"
+                },
+                "name": "Route",
+                "opacity": 1,
+                "tooltip": true,
+                "type": "markers"
+              }
+            ],
+            "tooltip": {
+              "mode": "details"
+            },
+            "view": {
+              "allLayers": false,
+              "id": "coords",
+              "lastOnly": false,
+              "lat": -22.291335,
+              "layer": "Layer 1",
+              "lon": 117.762447,
+              "shared": false,
+              "zoom": 13
+            }
+          },
+          "pluginVersion": "12.1.0",
           "targets": [
             {
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "mqtt_consumer_lon{truck=\"$truck\", region=\"$region\"} ",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "",
+              "range": true,
+              "refId": "A"
+            },
+            {
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "mqtt_consumer_lat{truck=\"$truck\", region=\"$region\"}",
+              "hide": false,
+              "instant": false,
+              "legendFormat": "",
+              "range": true,
+              "refId": "B"
+            }
+          ],
+          "title": "Location tracking",
+          "transformations": [
+            {
+              "id": "concatenate",
+              "options": {
+                "frameNameLabel": "frame",
+                "frameNameMode": "drop"
+              }
+            },
+            {
+              "id": "labelsToFields",
+              "options": {
+                "keepLabels": [
+                  "region",
+                  "truck"
+                ]
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {},
+                "includeByName": {},
+                "indexByName": {},
+                "renameByName": {
+                  "mqtt_consumer_lat": "latitude",
+                  "mqtt_consumer_lon": "longitude"
+                }
+              }
+            }
+          ],
+          "transparent": true,
+          "type": "geomap"
+        },
+        {
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 0,
+            "y": 10
+          },
+          "id": 12,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true
+          },
+          "pluginVersion": "12.1.0",
+          "targets": [
+            {
+              "adhocFilters": [],
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "exemplar": false,
+              "expr": "sum by(pod) (rate(artemis_delivering_message_count[1m]))",
+              "format": "table",
+              "fromExploreMetrics": true,
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "artemis_delivering_message_count-avg",
+              "useBackend": false
+            }
+          ],
+          "title": "MPS Delivered",
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 8,
+            "y": 10
+          },
+          "id": 10,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "frameIndex": 1,
+            "showHeader": true
+          },
+          "pluginVersion": "12.1.0",
+          "targets": [
+            {
+              "adhocFilters": [],
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "exemplar": false,
+              "expr": "sum by(pod) (rate(artemis_messages_acknowledged[1m]))",
+              "format": "table",
+              "fromExploreMetrics": true,
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "artemis_messages_acknowledged-by-broker",
+              "useBackend": false
+            }
+          ],
+          "title": "MPS acked",
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "left",
+                "cellOptions": {
+                  "type": "auto",
+                  "wrapText": true
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 8,
+            "w": 8,
+            "x": 16,
+            "y": 10
+          },
+          "id": 11,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "showHeader": true
+          },
+          "pluginVersion": "12.1.0",
+          "targets": [
+            {
+              "adhocFilters": [],
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
+              "disableTextWrap": false,
+              "editorMode": "builder",
+              "exemplar": false,
+              "expr": "sum by(pod) (rate(artemis_messages_added[1m]))",
+              "format": "table",
+              "fromExploreMetrics": true,
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "instant": true,
+              "interval": "",
+              "legendFormat": "__auto",
+              "range": false,
+              "refId": "artemis_messages_added-avg",
+              "useBackend": false
+            }
+          ],
+          "title": "MPS added",
+          "type": "table"
+        },
+        {
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 6,
+            "x": 0,
+            "y": 18
+          },
+          "id": 1,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "area",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.1.0",
+          "targets": [
+            {
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
               "expr": "avg(mqtt_consumer_spd{truck=\"$truck\", region=\"$region\"})",
               "legendFormat": "avg speed",
               "refId": "A"
             }
           ],
-          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 }
+          "title": "Average Speed (km/h)",
+          "type": "stat"
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
-          "type": "timeseries",
-          "title": "Truck Speed per Truck",
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 4,
+            "x": 6,
+            "y": 18
+          },
+          "id": 8,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.1.0",
           "targets": [
             {
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
+              "disableTextWrap": false,
+              "editorMode": "code",
+              "expr": "avg(mqtt_consumer_tmp{truck=\"$truck\", region=\"$region\"})",
+              "fullMetaSearch": false,
+              "includeNullMetadata": true,
+              "legendFormat": "avg sys temp",
+              "range": true,
+              "refId": "A",
+              "useBackend": false
+            }
+          ],
+          "title": "Average System Temp (°C)",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 4,
+            "x": 10,
+            "y": 18
+          },
+          "id": 7,
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "pluginVersion": "12.1.0",
+          "targets": [
+            {
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "avg(mqtt_consumer_cpu{truck=\"$truck\", region=\"$region\"})",
+              "legendFormat": "avg CPU",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "Average Truck CPU (%)",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 10,
+            "x": 14,
+            "y": 18
+          },
+          "id": 2,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.0",
+          "targets": [
+            {
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
               "expr": "avg by(truck) (mqtt_consumer_spd{truck=\"$truck\", region=\"$region\"})",
               "legendFormat": "{{truck}}",
               "refId": "A"
             }
           ],
-          "gridPos": { "h": 7, "w": 18, "x": 6, "y": 0 }
+          "title": "Truck Speed per Truck",
+          "type": "timeseries"
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
-          "type": "timeseries",
-          "title": "Engine Temperature (°C)",
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 25
+          },
+          "id": 3,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.0",
           "targets": [
             {
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
               "expr": "mqtt_consumer_tmp{truck=\"$truck\", region=\"$region\"}",
               "legendFormat": "{{truck}}",
               "refId": "A"
             }
           ],
-          "gridPos": { "h": 7, "w": 12, "x": 0, "y": 7 }
+          "title": "Engine Temperature (°C)",
+          "type": "timeseries"
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
-          "type": "timeseries",
-          "title": "Engine RPM",
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 25
+          },
+          "id": 4,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.0",
           "targets": [
             {
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
               "expr": "mqtt_consumer_rpm{truck=\"$truck\", region=\"$region\"}",
               "legendFormat": "{{truck}}",
               "refId": "A"
             }
           ],
-          "gridPos": { "h": 7, "w": 12, "x": 12, "y": 7 }
+          "title": "Engine RPM",
+          "type": "timeseries"
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
-          "type": "timeseries",
-          "title": "Fuel Level (L)",
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 0,
+            "y": 32
+          },
+          "id": 5,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.0",
           "targets": [
             {
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
               "expr": "avg by(truck) (mqtt_consumer_fuel{region=\"$region\", truck=\"$truck\"})",
               "legendFormat": "{{truck}}",
               "refId": "A"
             }
           ],
-          "gridPos": { "h": 7, "w": 12, "x": 0, "y": 14 }
+          "title": "Fuel Level (L)",
+          "type": "timeseries"
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
-          "type": "timeseries",
-          "title": "Payload Weight (t)",
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 0,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 32
+          },
+          "id": 6,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.1.0",
           "targets": [
             {
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
               "expr": "avg by(truck) (mqtt_consumer_pay_t{region=\"$region\", truck=\"$truck\"})",
               "legendFormat": "{{truck}}",
               "refId": "A"
             }
           ],
-          "gridPos": { "h": 7, "w": 12, "x": 12, "y": 14 }
+          "title": "Payload Weight (t)",
+          "type": "timeseries"
         },
         {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
-          "type": "gauge",
-          "title": "Average Truck CPU (%)",
-          "targets": [
-            { "expr": "avg(mqtt_consumer_cpu)", "legendFormat": "avg CPU", "refId": "A" }
-          ],
-          "gridPos": { "h": 5, "w": 6, "x": 0, "y": 21 }
-        },
-        {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
-          "type": "gauge",
-          "title": "Average System Temp (°C)",
-          "targets": [
-            { "expr": "avg(mqtt_consumer_tmp)", "legendFormat": "avg sys temp", "refId": "A" }
-          ],
-          "gridPos": { "h": 5, "w": 6, "x": 6, "y": 21 }
-        },
-        {
-          "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
-          "type": "table",
-          "title": "Latest Truck Telemetry",
+          "datasource": {
+            "name": "prometheus-user-workload-fleet-metrics",
+            "type": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": false
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 12,
+            "x": 12,
+            "y": 39
+          },
+          "id": 9,
+          "options": {
+            "cellHeight": "sm",
+            "footer": {
+              "countRows": false,
+              "fields": "",
+              "reducer": [
+                "sum"
+              ],
+              "show": false
+            },
+            "frameIndex": 2,
+            "showHeader": true
+          },
+          "pluginVersion": "12.1.0",
           "targets": [
             {
-              "expr": "last_over_time(mqtt_consumer_spd[30s])",
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "last_over_time(mqtt_consumer_spd{truck=\"$truck\", region=\"$region\"}[30s])",
               "legendFormat": "{{truck}} speed",
+              "range": true,
               "refId": "A"
             },
             {
-              "expr": "last_over_time(mqtt_consumer_tmp[30s])",
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "last_over_time(mqtt_consumer_tmp{truck=\"$truck\", region=\"$region\"}[30s])",
               "legendFormat": "{{truck}} temp",
+              "range": true,
               "refId": "B"
             },
             {
-              "expr": "last_over_time(mqtt_consumer_fuel[30s])",
+              "datasource": {
+                "name": "prometheus-user-workload-fleet-metrics",
+                "type": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "last_over_time(mqtt_consumer_fuel{truck=\"$truck\", region=\"$region\"}[30s])",
               "legendFormat": "{{truck}} fuel",
+              "range": true,
               "refId": "C"
             }
           ],
-          "gridPos": { "h": 7, "w": 12, "x": 12, "y": 21 }
+          "title": "Latest Truck Telemetry",
+          "type": "table"
         }
       ],
+      "preload": false,
       "refresh": "5s",
       "schemaVersion": 41,
+      "tags": [],
       "templating": {
         "list": [
           {
-            "name": "region",
-            "type": "query",
-            "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
+            "current": {
+              "text": "pilbara",
+              "value": "pilbara"
+            },
+            "datasource": {
+              "name": "prometheus-user-workload-fleet-metrics",
+              "type": "prometheus"
+            },
             "definition": "label_values(mqtt_consumer_spd,region)",
-            "query": { "query": "label_values(mqtt_consumer_spd,region)" },
-            "refresh": 2
+            "name": "region",
+            "options": [],
+            "query": {
+              "query": "label_values(mqtt_consumer_spd,region)"
+            },
+            "refresh": 2,
+            "type": "query"
           },
           {
-            "name": "truck",
-            "type": "query",
-            "datasource": { "type": "prometheus", "name": "prometheus-user-workload-fleet-metrics" },
+            "current": {
+              "text": "008",
+              "value": "008"
+            },
+            "datasource": {
+              "name": "prometheus-user-workload-fleet-metrics",
+              "type": "prometheus"
+            },
             "definition": "label_values(mqtt_consumer_spd{region=\"$region\"},truck)",
-            "query": { "query": "label_values(mqtt_consumer_spd{region=\"$region\"},truck)" },
-            "refresh": 2
+            "name": "truck",
+            "options": [],
+            "query": {
+              "query": "label_values(mqtt_consumer_spd{region=\"$region\"},truck)"
+            },
+            "refresh": 2,
+            "type": "query"
           }
         ]
       },
-      "time": { "from": "now-5m", "to": "now" },
+      "time": {
+        "from": "now-5m",
+        "to": "now"
+      },
+      "timepicker": {},
       "timezone": "browser",
       "title": "Truck Telemetry Overview",
       "uid": "truck-telemetry",
-      "version": 1
+      "version": 5
     }
 ---
 apiVersion: grafana.integreatly.org/v1beta1

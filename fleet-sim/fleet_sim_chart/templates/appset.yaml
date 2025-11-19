@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: fleet-simulator
+  name: fleet-simulator-appset
   namespace: openshift-gitops
 spec:
   generators:
@@ -39,3 +39,6 @@ spec:
         automated:
           prune: true
           selfHeal: true
+        syncOptions:
+          - CreateNamespace=false
+          - PruneLast=true

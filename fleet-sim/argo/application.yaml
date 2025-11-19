@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: fleet-simulator-appset
+  name: fleet-simulator
   namespace: openshift-gitops
 spec:
   project: fleet-simulator  
@@ -20,7 +20,8 @@ spec:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
+      - CreateNamespace=false
+      - PruneLast=true
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
@@ -42,3 +43,17 @@ spec:
   namespaceResourceWhitelist:
     - group: '*'
       kind: '*'
+   # 🔥 Prevent stuck deletions:
+  ignoreDifferences:
+  - group: ""
+    kind: Secret
+    jsonPointers:
+    - /data
+  - group: admissionregistration.k8s.io
+    kind: ValidatingWebhookConfiguration
+  - group: admissionregistration.k8s.io
+    kind: MutatingWebhookConfiguration
+  - group: "rbac.authorization.k8s.io"
+    kind: RoleBinding
+  - group: "rbac.authorization.k8s.io"
+    kind: ClusterRoleBinding    

@@ -1,18 +1,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: amq-broker-operator
+  name: amq-broker
   namespace: openshift-gitops
 spec:
   project: mqtt
   source:
-    repoURL: 'https://github.com/sumicsamy/mqtt.git'
-    targetRevision: main
-    path: amq-broker/
+    repoURL: 'https://github.com/sumicsamy/mqtt.git'       # your repo
+    targetRevision: main                                   # branch
+    path: amq-broker/broker                        # path to the Helm chart
+    helm:
+      valueFiles:
+        - values.yaml                                      # optional override
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: amq-broker-operator
+    namespace: openshift-gitops
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      - CreateNamespace=false

@@ -1,1 +1,9 @@
-size: 20
+# How many Telegraf instances you want
+size: 20   # e.g., 30 pods, adjust based on testing
+
+# Shared subscription groups (3 queues)
+sharedGroups:
+  - telegraf-g0
+  - telegraf-g1
+  - telegraf-g2
+  - telegraf-g3

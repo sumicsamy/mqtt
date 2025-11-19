@@ -1,4 +1,8 @@
-{{- range $i, $_ := until (.Values.size | int) }} 
+{{- $groups := .Values.sharedGroups | default (list "telegraf-g1" "telegraf-g2" "telegraf-g3") -}}
+{{- $gCount := len $groups -}}
+
+{{- range $i, $_ := until (.Values.size | int) }}
+{{- $group := index $groups (mod $i $gCount) }}
 kind: ConfigMap
 apiVersion: v1
 metadata:
@@ -9,10 +13,10 @@ data:
     [agent]
       interval = "100ms"
       flush_interval = "100ms"
-      metric_buffer_limit = 80000
+      metric_buffer_limit = 800000        # bump for high throughput
       round_interval = false
-      debug = false              # disables verbose per-message logs
-      quiet = true               # suppresses routine INFO spam
+      debug = false
+      quiet = true
 
     [[inputs.mqtt_consumer]]
       tls_ca = "/certs/ca.crt"
@@ -20,14 +24,15 @@ data:
       tls_key = "/certs/tls.key"
       servers = ["ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"]
       qos = 1
-      max_undelivered_messages = 200000
+      max_undelivered_messages = 300000
       persistent_session = true
       insecure_skip_verify = true
-      client_id = "telegraf-{{ $i }}"
-      topics = ["$share/telegraf/mine/fleet/+/truck/+/telemetry"]
+
+      # each Telegraf instance gets a unique client_id and one shared group
+      client_id = "telegraf-{{ $group }}-{{ $i }}"
+      topics = ["$share/{{ $group }}/mine/fleet/+/truck/+/telemetry"]
 
       data_format = "json_v2"
-
 
       [[inputs.mqtt_consumer.json_v2]]
         [[inputs.mqtt_consumer.json_v2.field]]
@@ -45,16 +50,11 @@ data:
         [[inputs.mqtt_consumer.json_v2.field]]
           path = "sys.tmp"    type = "float"
         [[inputs.mqtt_consumer.json_v2.field]]
-          path = "loc.lat"
-          type = "float"
-
+          path = "loc.lat"    type = "float"
         [[inputs.mqtt_consumer.json_v2.field]]
-          path = "loc.lon"
-          type = "float"
-
+          path = "loc.lon"    type = "float"
         [[inputs.mqtt_consumer.json_v2.field]]
-          path = "loc.alt"
-          type = "float"
+          path = "loc.alt"    type = "float"
 
         [[inputs.mqtt_consumer.json_v2.tag]]
           path = "truck"
@@ -70,5 +70,5 @@ data:
     [[outputs.file]]
       files = ["stdout"]
       data_format = "json"
---- 
+---
 {{- end }}
