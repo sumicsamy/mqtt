@@ -13,7 +13,7 @@ data:
     [agent]
       interval = "100ms"
       flush_interval = "100ms"
-      metric_buffer_limit = 80000000       # bump for high throughput
+      metric_buffer_limit = 8000000     # bump for high throughput
       round_interval = false
       debug = false
       quiet = true
