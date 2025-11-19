@@ -11,7 +11,7 @@ spec:
     path: grafana
   destination:
     server: 'https://kubernetes.default.svc'
-    namespace: fleet-metrics
+    namespace: grafana
   syncPolicy:
     automated:
       selfHeal: true
