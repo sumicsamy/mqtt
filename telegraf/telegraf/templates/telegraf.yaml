@@ -13,7 +13,7 @@ data:
     [agent]
       interval = "100ms"
       flush_interval = "100ms"
-      metric_buffer_limit = 800000        # bump for high throughput
+      metric_buffer_limit = 80000000       # bump for high throughput
       round_interval = false
       debug = false
       quiet = true
@@ -24,7 +24,7 @@ data:
       tls_key = "/certs/tls.key"
       servers = ["ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"]
       qos = 1
-      max_undelivered_messages = 300000
+      max_undelivered_messages = 8000000
       persistent_session = true
       insecure_skip_verify = true
 
