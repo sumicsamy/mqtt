@@ -4,3 +4,4 @@ resources:
   - rolebinding.yaml
   - trust-manager.yaml
   - ns.yaml
+  - sub.yaml
