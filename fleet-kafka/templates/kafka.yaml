@@ -45,4 +45,6 @@ spec:
   storage:
     type: persistent-claim
     size: {{ .Values.kafka.storageSize }}
+    deleteClaim: true
+    kraftMetadata: shared
 
