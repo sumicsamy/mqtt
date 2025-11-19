@@ -1,0 +1,5 @@
+apiVersion: v2
+name: fleet-kafka-stack
+description: Helm chart to generate amq streams resources
+version: 0.0.1
+type: application

@@ -4,7 +4,7 @@ metadata:
   name: fleet-kafka-stack
   namespace: openshift-gitops
 spec:
-  project: default
+  project: mqtt
   source:
     repoURL: https://github.com/sumicsamy/mqtt.git
     path: fleet-kafka
