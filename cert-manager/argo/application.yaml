@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: 'https://github.com/sumicsamy/mqtt.git'
     targetRevision: main
-    path: cert-manager/
+    path: cert-manager/mgr/
   destination:
     server: 'https://kubernetes.default.svc'
     namespace: cert-manager
