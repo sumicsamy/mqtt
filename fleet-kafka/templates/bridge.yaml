@@ -16,8 +16,15 @@ spec:
       labels:
         app: mqtt-kafka-bridge
     spec:
+      volumes:
+        - name: broker-certs
+          secret:
+            secretName: {{ .Values.bridge.mqtt.clientId }}-tls
       containers:
         - name: bridge
+          volumeMounts:
+            - name: broker-certs
+              mountPath: /certs
           image: {{ .Values.bridge.image }}
           imagePullPolicy: IfNotPresent
           env:
@@ -45,6 +52,12 @@ spec:
               value: "{{ .Values.bridge.messageBuffer }}"
             - name: PROM_PORT
               value: "{{ .Values.bridge.prometheusPort }}"
+            - name: MQTT_TLS_CA
+              value: "/certs/ca.crt"
+            - name: MQTT_TLS_CERT
+              value: "/certs/tls.crt"
+            - name: MQTT_TLS_KEY
+              value: "/certs/tls.key"   
           ports:
             - name: http
               containerPort: 8080

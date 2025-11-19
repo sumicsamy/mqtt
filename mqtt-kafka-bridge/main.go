@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -267,11 +270,8 @@ func newKafkaProducer(cfg *Config) sarama.AsyncProducer {
 
 func newMqttClient(cfg *Config, msgCh chan<- *BridgeMessage) mqtt.Client {
 	opts := mqtt.NewClientOptions()
-
-	// Artemis supports only MQTT 3.1.1 → Force protocol level 4
 	opts.SetProtocolVersion(4)
 
-	// Add brokers
 	for _, b := range cfg.MqttBrokers {
 		opts.AddBroker(b)
 	}
@@ -281,29 +281,67 @@ func newMqttClient(cfg *Config, msgCh chan<- *BridgeMessage) mqtt.Client {
 	opts.SetPassword(cfg.MqttPassword)
 	opts.SetCleanSession(true)
 
-	// Log successful connections
+	// ---- LOAD TLS CERTS ----
+	tlsConfig, err := loadTLSConfig(
+		getenv("MQTT_TLS_CA", "/certs/ca.crt"),
+		getenv("MQTT_TLS_CERT", "/certs/tls.crt"),
+		getenv("MQTT_TLS_KEY", "/certs/tls.key"),
+	)
+	if err != nil {
+		log.Fatalf("[MQTT] TLS config error: %v", err)
+	}
+	opts.SetTLSConfig(tlsConfig)
+
+	// Connection success
 	opts.OnConnect = func(c mqtt.Client) {
-		log.Printf("[MQTT] Connected successfully to broker(s): %v", cfg.MqttBrokers)
+		log.Printf("[MQTT] Connected successfully to %v", cfg.MqttBrokers)
 	}
 
-	// Log disconnects
+	// Disconnect events
 	opts.OnConnectionLost = func(c mqtt.Client, err error) {
 		log.Printf("[MQTT] Connection lost: %v", err)
 	}
 
-	// Log incoming publishes
+	// Incoming MQTT messages
 	opts.SetDefaultPublishHandler(func(c mqtt.Client, m mqtt.Message) {
 		payload := append([]byte(nil), m.Payload()...)
 		key := deriveKey(payload)
+
 		mqttIn.Inc()
 		bufGauge.Set(float64(len(msgCh)))
 
 		select {
 		case msgCh <- &BridgeMessage{Key: key, Payload: payload}:
 		default:
-			log.Printf("[MQTT] Bridge buffer full → dropping message")
+			log.Printf("[MQTT] Buffer full → drop message")
 		}
 	})
 
 	return mqtt.NewClient(opts)
+}
+
+func loadTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error) {
+	certpool := x509.NewCertPool()
+
+	// CA
+	caCert, err := os.ReadFile(caPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read CA file: %w", err)
+	}
+	if ok := certpool.AppendCertsFromPEM(caCert); !ok {
+		return nil, fmt.Errorf("failed to append CA certificate")
+	}
+
+	// Client certificate
+	clientCert, err := tls.LoadX509KeyPair(certPath, keyPath)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load client cert/key: %w", err)
+	}
+
+	return &tls.Config{
+		RootCAs:            certpool,
+		Certificates:       []tls.Certificate{clientCert},
+		InsecureSkipVerify: false,
+		MinVersion:         tls.VersionTLS12,
+	}, nil
 }
