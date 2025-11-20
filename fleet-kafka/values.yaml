@@ -37,7 +37,7 @@ telemetryTopic:
 bridge:
   enabled: true
 
-  image: "quay.io/suchugh/mqtt-kafka-bridge:2.0.10"
+  image: "quay.io/suchugh/mqtt-kafka-bridge:2.0.11"
   replicas: 12          # scale horizontally for 1M/s
   workerCount: 64    # increase for higher throughput
   resources:
