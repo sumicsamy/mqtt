@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -17,7 +19,7 @@ import (
 
 	"github.com/IBM/sarama"
 	"github.com/eclipse/paho.golang/autopaho"
-	"github.com/eclipse/paho.golang/paho"
+	paho "github.com/eclipse/paho.golang/paho"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -64,6 +66,10 @@ type Config struct {
 	MqttPassword    string
 	MqttSharedGroup string // $share/<group>/...
 
+	MqttTLSCA   string
+	MqttTLSCert string
+	MqttTLSKey  string
+
 	KafkaBrokers  []string
 	KafkaTopic    string
 	KafkaClientID string
@@ -91,19 +97,23 @@ func mustInt(key, def string) int {
 
 func loadConfig() *Config {
 	cfg := &Config{
-		MqttBrokers:     strings.Split(getenv("MQTT_BROKERS", "mqtt://mqtt:1883"), ","),
+		MqttBrokers:     strings.Split(getenv("MQTT_BROKERS", "tls://mqtt-lb.mqtt-broker.svc.cluster.local:8883"), ","),
 		MqttTopicFilter: getenv("MQTT_TOPIC", "mine/fleet/+/truck/+/telemetry"),
 		MqttClientID:    getenv("MQTT_CLIENT_ID", "mqtt-kafka-bridge"),
 		MqttUsername:    getenv("MQTT_USERNAME", ""),
 		MqttPassword:    getenv("MQTT_PASSWORD", ""),
 		MqttSharedGroup: getenv("MQTT_SHARED_GROUP", "bridge"),
 
+		MqttTLSCA:   getenv("MQTT_TLS_CA", "/certs/ca.crt"),
+		MqttTLSCert: getenv("MQTT_TLS_CERT", "/certs/tls.crt"),
+		MqttTLSKey:  getenv("MQTT_TLS_KEY", "/certs/tls.key"),
+
 		KafkaBrokers:  strings.Split(getenv("KAFKA_BROKERS", "fleet-kafka-kafka-bootstrap:9092"), ","),
 		KafkaTopic:    getenv("KAFKA_TOPIC", "truck-telemetry"),
 		KafkaClientID: getenv("KAFKA_CLIENT_ID", "mqtt-kafka-bridge"),
 
-		WorkerCount:   mustInt("WORKER_COUNT", "8"),
-		MessageBuffer: mustInt("MESSAGE_BUFFER", "100000"),
+		WorkerCount:   mustInt(getenv("WORKER_COUNT", "32"), "32"),
+		MessageBuffer: mustInt(getenv("MESSAGE_BUFFER", "100000"), "100000"),
 		PromPort:      getenv("PROM_PORT", "8080"),
 	}
 
@@ -158,23 +168,32 @@ func deriveKey(jsonPayload []byte) string {
 	return t.Region + ":" + t.Truck
 }
 
-/************** Kafka **************/
+/************** TLS Helper **************/
 
-func newKafkaProducer(cfg *Config) sarama.AsyncProducer {
-	c := sarama.NewConfig()
-	c.Version = sarama.V3_3_0_0
-	c.Producer.Return.Errors = true
-	c.Producer.RequiredAcks = sarama.WaitForLocal
-	c.Producer.Compression = sarama.CompressionSnappy
-	c.Producer.Flush.Frequency = 20 * time.Millisecond
-	c.ClientID = cfg.KafkaClientID
+func loadTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error) {
+	rootCAs := x509.NewCertPool()
 
-	p, err := sarama.NewAsyncProducer(cfg.KafkaBrokers, c)
+	caCert, err := os.ReadFile(caPath)
 	if err != nil {
-		log.Fatalf("[KAFKA] Producer init error: %v", err)
+		return nil, fmt.Errorf("read CA file: %w", err)
 	}
-	return p
+	if ok := rootCAs.AppendCertsFromPEM(caCert); !ok {
+		return nil, fmt.Errorf("append CA cert failed")
+	}
+
+	clientCert, err := tls.LoadX509KeyPair(certPath, keyPath)
+	if err != nil {
+		return nil, fmt.Errorf("load client cert/key: %w", err)
+	}
+
+	return &tls.Config{
+		RootCAs:      rootCAs,
+		Certificates: []tls.Certificate{clientCert},
+		MinVersion:   tls.VersionTLS12,
+	}, nil
 }
+
+/************** Kafka worker **************/
 
 func worker(ctx context.Context, wg *sync.WaitGroup, producer sarama.AsyncProducer, topic string, ch <-chan *BridgeMessage) {
 	defer wg.Done()
@@ -196,47 +215,66 @@ func worker(ctx context.Context, wg *sync.WaitGroup, producer sarama.AsyncProduc
 	}
 }
 
-/************** MQTT v5 with autopaho **************/
+func newKafkaProducer(cfg *Config) sarama.AsyncProducer {
+	c := sarama.NewConfig()
+	c.Version = sarama.V3_3_0_0
 
-func newMQTTConnection(ctx context.Context, cfg *Config, msgCh chan<- *BridgeMessage) *autopaho.ConnectionManager {
-	if len(cfg.MqttBrokers) == 0 || cfg.MqttBrokers[0] == "" {
-		log.Fatalf("[MQTT] MQTT_BROKERS is empty or invalid")
+	// Throughput settings
+	c.Producer.Return.Errors = true
+	c.Producer.RequiredAcks = sarama.NoResponse // <-- BIGGEST BOOST
+	c.Producer.Compression = sarama.CompressionLZ4
+
+	// Batch aggressively
+	c.Producer.Flush.Frequency = 1 * time.Millisecond
+	c.Producer.Flush.Messages = 1000
+	c.Producer.Flush.Bytes = 2 * 1024 * 1024
+
+	// Channels
+	c.ChannelBufferSize = 4096
+
+	p, err := sarama.NewAsyncProducer(cfg.KafkaBrokers, c)
+	if err != nil {
+		log.Fatalf("[KAFKA] Producer init error: %v", err)
 	}
+	return p
+}
 
+/************** MQTT v5 (autopaho) **************/
+
+func buildAutopahoConfig(ctx context.Context, cfg *Config, msgCh chan<- *BridgeMessage) (*autopaho.ConnectionManager, error) {
+	// Parse broker URLs
 	var urls []*url.URL
 	for _, raw := range cfg.MqttBrokers {
-		u, err := url.Parse(strings.TrimSpace(raw))
+		raw = strings.TrimSpace(raw)
+		if raw == "" {
+			continue
+		}
+		u, err := url.Parse(raw)
 		if err != nil {
-			log.Fatalf("[MQTT] invalid broker URL %q: %v", raw, err)
+			return nil, fmt.Errorf("parse MQTT broker URL %q: %w", raw, err)
 		}
 		urls = append(urls, u)
 	}
+	if len(urls) == 0 {
+		return nil, fmt.Errorf("no valid MQTT broker URLs")
+	}
 
-	// Router: handles all incoming publishes
-	router := paho.NewStandardRouterWithDefault(func(p *paho.Publish) {
-		payload := append([]byte(nil), p.Payload...)
-		key := deriveKey(payload)
-
-		mqttIn.Inc()
-		bufGauge.Set(float64(len(msgCh)))
-
-		select {
-		case msgCh <- &BridgeMessage{Key: key, Payload: payload}:
-		default:
-			log.Printf("[MQTT] Buffer full → dropping message (topic=%s)", p.Topic)
-		}
-	})
+	tlsCfg, err := loadTLSConfig(cfg.MqttTLSCA, cfg.MqttTLSCert, cfg.MqttTLSKey)
+	if err != nil {
+		return nil, fmt.Errorf("TLS config error: %w", err)
+	}
 
 	sharedTopic := fmt.Sprintf("$share/%s/%s", cfg.MqttSharedGroup, cfg.MqttTopicFilter)
 
-	cliCfg := autopaho.ClientConfig{
+	clientCfg := autopaho.ClientConfig{
 		ServerUrls:                    urls,
-		KeepAlive:                     20,
+		TlsCfg:                        tlsCfg,
+		KeepAlive:                     30,
 		CleanStartOnInitialConnection: false,
-		// Keep session alive for a while to survive short outages
-		SessionExpiryInterval: 600,
-		OnConnectionUp: func(cm *autopaho.ConnectionManager, connAck *paho.Connack) {
-			log.Printf("[MQTT] connection up, subscribing to %s (QoS=%d)", sharedTopic, cfg.MqttQos)
+		SessionExpiryInterval:         600,
+
+		OnConnectionUp: func(cm *autopaho.ConnectionManager, ca *paho.Connack) {
+			log.Printf("[MQTT] connection up, subscribing to shared topic: %s", sharedTopic)
 
 			_, err := cm.Subscribe(context.Background(), &paho.Subscribe{
 				Subscriptions: []paho.SubscribeOptions{
@@ -247,51 +285,68 @@ func newMQTTConnection(ctx context.Context, cfg *Config, msgCh chan<- *BridgeMes
 				},
 			})
 			if err != nil {
-				log.Printf("[MQTT] subscribe failed: %v (no messages will be received until this succeeds)", err)
+				log.Printf("[MQTT] subscribe failed: %v", err)
 				return
 			}
-			log.Printf("[MQTT] subscription to %s established", sharedTopic)
+			log.Printf("[MQTT] subscribed to %s", sharedTopic)
 		},
+
+		OnConnectionDown: func() bool {
+			log.Printf("[MQTT] connection down, will retry")
+			return true // keep retrying
+		},
+
 		OnConnectError: func(err error) {
 			log.Printf("[MQTT] error whilst attempting connection: %v", err)
 		},
-		// Username / password (MQTT 5 CONNECT properties)
-		ConnectUsername: cfg.MqttUsername,
-		ConnectPassword: []byte(cfg.MqttPassword),
 
-		// Base MQTT v5 client config
+		// Base paho client config used for each connection
 		ClientConfig: paho.ClientConfig{
 			ClientID: cfg.MqttClientID,
-			Router:   router,
-			OnClientError: func(err error) {
-				log.Printf("[MQTT] client error: %v", err)
-			},
-			OnServerDisconnect: func(d *paho.Disconnect) {
-				if d.Properties != nil {
-					log.Printf("[MQTT] server requested disconnect: %s", d.Properties.ReasonString)
-				} else {
-					log.Printf("[MQTT] server requested disconnect; reason code: %d", d.ReasonCode)
-				}
+			// Incoming messages handler (added below via AddOnPublishReceived)
+			OnPublishReceived: []func(m paho.PublishReceived) (bool, error){
+				func(m paho.PublishReceived) (bool, error) {
+					payload := m.Packet.Payload
+					mqttIn.Inc()
+
+					key := deriveKey(payload)
+					log.Printf("[MQTT5] OnPublishReceived with payload %s key", string(key))
+					select {
+					case msgCh <- &BridgeMessage{Key: key, Payload: payload}:
+					default:
+						log.Printf("[MQTT5] buffer full, dropping")
+					}
+					return true, nil
+				},
 			},
 		},
 	}
 
-	log.Printf("[MQTT] brokers: %v", cfg.MqttBrokers)
-	log.Printf("[MQTT] topic filter: %s", cfg.MqttTopicFilter)
-	log.Printf("[MQTT] shared subscription: %s", sharedTopic)
-	log.Printf("[MQTT] clientID: %s", cfg.MqttClientID)
-
-	cm, err := autopaho.NewConnection(ctx, cliCfg)
+	// Create connection manager (starts background connect/reconnect loop)
+	cm, err := autopaho.NewConnection(ctx, clientCfg)
 	if err != nil {
-		log.Fatalf("[MQTT] failed to create connection manager: %v", err)
+		return nil, fmt.Errorf("NewConnection: %w", err)
 	}
 
-	// Wait for first successful connection
-	if err := cm.AwaitConnection(ctx); err != nil {
-		log.Fatalf("[MQTT] initial connection failed: %v", err)
-	}
+	// Handler for incoming PUBLISH packets
+	cm.AddOnPublishReceived(func(pr autopaho.PublishReceived) (bool, error) {
 
-	return cm
+		payload := append([]byte(nil), pr.Packet.Payload...)
+		key := deriveKey(payload)
+		log.Printf("[MQTT] additional OnPublishReceived handler called %s", key)
+		mqttIn.Inc()
+		bufGauge.Set(float64(len(msgCh)))
+
+		select {
+		case msgCh <- &BridgeMessage{Key: key, Payload: payload}:
+		default:
+			log.Printf("[MQTT] buffer full → dropping message")
+		}
+
+		return true, nil
+	})
+
+	return cm, nil
 }
 
 /************** Main **************/
@@ -304,35 +359,45 @@ func main() {
 	}
 
 	log.Printf("[KAFKA] Brokers: %v", cfg.KafkaBrokers)
+	log.Printf("[MQTT] Brokers: %v", cfg.MqttBrokers)
+	log.Printf("[MQTT] Topic filter: %s", cfg.MqttTopicFilter)
+	log.Printf("[MQTT] Shared group: %s", cfg.MqttSharedGroup)
 
 	msgCh := make(chan *BridgeMessage, cfg.MessageBuffer)
 
-	// Kafka producer + error logger
+	// Kafka producer
 	producer := newKafkaProducer(cfg)
 	defer producer.Close()
 
+	// Background logging for Kafka async errors
 	go func() {
 		for err := range producer.Errors() {
 			kafkaErr.Inc()
-			log.Printf("[KAFKA] Error: %v", err)
+			log.Printf("[KAFKA] error: %v", err)
 		}
 	}()
 
-	// Context + signal handling
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	defer stop()
-
 	// Worker pool
+	ctx, cancel := context.WithCancel(context.Background())
 	var wg sync.WaitGroup
 	for i := 0; i < cfg.WorkerCount; i++ {
 		wg.Add(1)
 		go worker(ctx, &wg, producer, cfg.KafkaTopic, msgCh)
 	}
 
-	// MQTT v5 connection (AutoPaho handles reconnects)
-	cm := newMQTTConnection(ctx, cfg, msgCh)
+	// MQTT v5 connection manager
+	cm, err := buildAutopahoConfig(ctx, cfg, msgCh)
+	if err != nil {
+		log.Fatalf("[MQTT] config/init error: %v", err)
+	}
 
-	// Prometheus endpoint
+	// Wait for connection to come up once
+	if err := cm.AwaitConnection(ctx); err != nil {
+		log.Fatalf("[MQTT] AwaitConnection error: %v", err)
+	}
+	log.Printf("[MQTT] initial connection established")
+
+	// Prometheus HTTP
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())
 		log.Printf("[HTTP] Serving metrics on :%s/metrics", cfg.PromPort)
@@ -341,20 +406,21 @@ func main() {
 		}
 	}()
 
-	// Wait for termination signal
-	<-ctx.Done()
-	log.Printf("[MAIN] signal received → shutting down")
+	// Graceful shutdown
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	<-sig
 
-	// Ask MQTT manager to disconnect cleanly
-	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
-	defer cancel()
+	log.Printf("[MAIN] Shutting down...")
+	cancel()
+
+	shutdownCtx, cancel2 := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel2()
+
 	if err := cm.Disconnect(shutdownCtx); err != nil {
 		log.Printf("[MQTT] disconnect error: %v", err)
 	}
-	<-cm.Done() // wait for MQTT to finish
-
 	close(msgCh)
 	wg.Wait()
-
-	log.Printf("[MAIN] shutdown complete")
+	log.Printf("[MAIN] Shutdown complete")
 }
