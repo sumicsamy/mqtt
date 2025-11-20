@@ -70,6 +70,7 @@ spec:
     output:   
       type: docker
       image: quay.io/suchugh/fleet-kafka:latest
+      pushSecret: suchugh-mqtt-pull-secret
     plugins: 
       - name: mqtt-connector
         artifacts:
