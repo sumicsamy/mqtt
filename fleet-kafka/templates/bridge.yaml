@@ -57,7 +57,9 @@ spec:
             - name: MQTT_TLS_CERT
               value: "/certs/tls.crt"
             - name: MQTT_TLS_KEY
-              value: "/certs/tls.key"   
+              value: "/certs/tls.key"
+            - name: WORKER_COUNT
+              value: "{{ $.Values.bridge.workerCount }}"     
           ports:
             - name: http
               containerPort: 8080

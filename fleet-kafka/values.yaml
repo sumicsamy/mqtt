@@ -39,7 +39,7 @@ bridge:
 
   image: "quay.io/suchugh/mqtt-kafka-bridge:2.0.9"
   replicas: 6          # scale horizontally for 1M/s
-
+  workerCount: 32    # increase for higher throughput
   resources:
     requests:
       cpu: "2"
