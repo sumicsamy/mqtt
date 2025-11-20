@@ -73,7 +73,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      strimzi.io/name: {{ .Values.kafka.clusterName }}-kafka-exporter
+      strimzi.io/name: {{ .Values.kafka.clusterName }}-kafka
   namespaceSelector:
     matchNames:
       - {{ .Values.namespace }}
