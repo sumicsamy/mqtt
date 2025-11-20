@@ -48,6 +48,10 @@ metadata:
   annotations:
     strimzi.io/use-connector-resources: "true"
 spec:
+  logging:
+    type: inline
+    loggers:
+      rootLogger.level: INFO
   version: "4.0.0"       # adjust to your Kafka version
   replicas: {{ .Values.connect.replicas }}
   bootstrapServers: "fleet-kafka-kafka-bootstrap:9092"
@@ -62,19 +66,23 @@ spec:
     limits:
       cpu: {{ .Values.connect.resources.limits.cpu }}
       memory: {{ .Values.connect.resources.limits.memory }}
+  build:
+    output:   
+      type: docker
+      image: quay.io/suchugh/fleet-kafka:latest
+    plugins: 
+      - name: mqtt-connector
+        artifacts:
+          - type: jar
+            url: https://github.com/sumicsamy/mqtt/releases/download/v1.0.0/kafka-connect-mqtt-assembly-10.0.3.jar
+            sha512sum: sha256:69d1c7df057a16f3c48fe314d4aba4366c31c41c33e80caba3cab72ba06db7a8    
   template:
     pod:
-      volumes:
-        - name: mqtt-plugin-volume
-          persistentVolumeClaim:
-            claimName: mqtt-plugin-pvc
-        - name: certs-volume
-          secret:
-            secretName: {{ .Values.bridge.mqtt.clientId }}-tls    
+      - name: certs-volume
+        secret:
+          secretName: {{ .Values.bridge.mqtt.clientId }}-tls    
     buildContainer:
       volumeMounts:
-        - name: mqtt-plugin-volume
-          mountPath: {{ .Values.connect.pluginPath }}
         - name: certs-volume
           mountPath: /mnt/certs/ 
           readOnly: true
