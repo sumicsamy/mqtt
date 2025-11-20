@@ -34,7 +34,6 @@ spec:
   {{- if .Values.kafkaExporter.enabled }}
   kafkaExporter:
     topicRegex: {{ .Values.telemetryTopic.name }}
-    groupRegex: {{ .Values.kafkaExporter.groupRegex | ".*" }}
 {{- end }}            
   entityOperator:
     topicOperator: {}
