@@ -203,7 +203,7 @@ func worker(ctx context.Context, wg *sync.WaitGroup, producer sarama.AsyncProduc
 			return
 		case m, ok := <-ch:
 			if !ok {
-				log.Printf("error publishing to kafka %s", string(m.Payload))
+				log.Printf("[KAFKA] message channel closed")
 				return
 			}
 			producer.Input() <- &sarama.ProducerMessage{
