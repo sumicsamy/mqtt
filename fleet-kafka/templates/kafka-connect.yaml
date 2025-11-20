@@ -76,7 +76,7 @@ spec:
         - name: mqtt-plugin-volume
           mountPath: {{ .Values.connect.pluginPath }}
         - name: certs-volume
-          mountPath: /certs  
+          mountPath: /mnt/certs/ 
           readOnly: true
   config:
     key.converter: {{ .Values.mqttConnector.kafka.keyConverter }}
@@ -106,8 +106,8 @@ spec:
     poll.interval.ms: "{{ .Values.mqttConnector.tuning.pollIntervalMs }}"
     producer.override.batch.size: "{{ .Values.mqttConnector.tuning.batchMaxSize }}"
     producer.override.linger.ms: "{{ .Values.mqttConnector.tuning.pollIntervalMs }}"
-    connect.mqtt.ssl.ca.cert: /certs/ca.crt
-    connect.mqtt.ssl.cert: /certs/tls.crt
-    connect.mqtt.ssl.key: /certs/tls.key
+    connect.mqtt.ssl.ca.cert: /mnt/certs/ca.crt
+    connect.mqtt.ssl.cert: /mnt/certs/tls.crt
+    connect.mqtt.ssl.key: /mnt/certs/tls.key
 
 
