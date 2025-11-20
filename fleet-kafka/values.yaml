@@ -114,9 +114,7 @@ connect:
     - name: mqtt-source-connector
       jars:
         - kafka-connect-mqtt-assembly-10.0.3.jar
-      configMapName: mqtt-connect-plugin-cm
-  replicas: 3
-  image: "quay.io/strimzi/kafka-connect:latest"  # adjust to your version
+  replicas: 1
   resources:
     requests:
       cpu: "2"
@@ -125,8 +123,6 @@ connect:
       cpu: "4"
       memory: "8Gi"
   pluginPath: /opt/kafka/plugins/mqtt
-  pluginConfigMap: mqtt-connect-plugin-cm
-
 
 mqttConnector:
   name: mqtt-to-kafka-telemetry
