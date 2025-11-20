@@ -71,7 +71,7 @@ spec:
         - name: certs-volume
           secret:
             secretName: {{ .Values.bridge.mqtt.clientId }}-tls    
-    connectContainer:
+    buildContainer:
       volumeMounts:
         - name: mqtt-plugin-volume
           mountPath: {{ .Values.connect.pluginPath }}
