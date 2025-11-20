@@ -160,6 +160,17 @@ type BridgeMessage struct {
 	Payload []byte
 }
 
+func deriveKeyFromTopic(topic string) string {
+	parts := strings.Split(topic, "/")
+	// expecting topic pattern: mine/fleet/<region>/truck/<truckID>/telemetry
+	if len(parts) >= 5 {
+		region := parts[2]
+		truck := parts[4]
+		return region + ":" + truck
+	}
+	return "unknown:unknown"
+}
+
 func deriveKey(jsonPayload []byte) string {
 	var t Telemetry
 	if err := json.Unmarshal(jsonPayload, &t); err != nil {
@@ -227,7 +238,7 @@ func newKafkaProducer(cfg *Config) sarama.AsyncProducer {
 
 	// Batch aggressively
 	c.Producer.Flush.Frequency = 1 * time.Millisecond
-	c.Producer.Flush.Messages = 1000
+	c.Producer.Flush.Messages = 100
 	c.Producer.Flush.Bytes = 2 * 1024 * 1024
 
 	// Channels
@@ -310,8 +321,14 @@ func buildAutopahoConfig(ctx context.Context, cfg *Config, msgCh chan<- *BridgeM
 					payload := m.Packet.Payload
 					mqttIn.Inc()
 
-					key := deriveKey(payload)
-					// log.Printf("[MQTT5] OnPublishReceived with payload %s key", string(key))
+					//
+
+					key := deriveKeyFromTopic(m.Packet.Topic)
+					if key == "unknown:unknown" {
+						log.Printf("[MQTT5] warning: could not derive key from topic %s", m.Packet.Topic)
+						key = deriveKey(payload)
+					}
+
 					select {
 					case msgCh <- &BridgeMessage{Key: key, Payload: payload}:
 					default:

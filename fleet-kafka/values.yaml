@@ -35,10 +35,10 @@ telemetryTopic:
 # MQTT→Kafka High-Performance Bridge (Go code)
 # ============================================================
 bridge:
-  enabled: true
+  enabled: false
 
   image: "quay.io/suchugh/mqtt-kafka-bridge:2.0.12"
-  replicas: 12          # scale horizontally for 1M/s
+  replicas: 0          # scale horizontally for 1M/s
   workerCount: 64    # increase for higher throughput
   resources:
     requests:
@@ -98,8 +98,54 @@ serviceMonitor:
   # Adjust this label to match your Prometheus installation
   labelSelector:
     release: "prometheus"
-#########
+# ============================================================
+# KAFKA EXPORTER
+# ============================================================
 kafkaExporter:
   enabled: true
   topicRegex: ".*"
   groupRegex: ".*"
+
+# ============================================================
+# Kafka Connect with MQTT Source Connector
+# ============================================================
+connect:
+  extraPlugins:
+    - name: mqtt-source-connector
+      jars:
+        - kafka-connect-mqtt-assembly-10.0.3.jar
+      configMapName: mqtt-connect-plugin-cm
+  replicas: 3
+  image: "quay.io/strimzi/kafka-connect:latest"  # adjust to your version
+  resources:
+    requests:
+      cpu: "2"
+      memory: "4Gi"
+    limits:
+      cpu: "4"
+      memory: "8Gi"
+  pluginPath: /opt/kafka/plugins/mqtt
+  pluginConfigMap: mqtt-connect-plugin-cm
+
+
+mqttConnector:
+  name: mqtt-to-kafka-telemetry
+  tasksMax: 6
+  mqtt:
+    brokers: "ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"
+    topicFilter: "mine/fleet/+/truck/+/telemetry"
+    qos: 0
+    clientId: mqtt-kafka-connect-bridge
+  kafka:
+    targetTopic: truck-telemetry
+    keyConverter: org.apache.kafka.connect.storage.StringConverter
+    valueConverter: org.apache.kafka.connect.json.JsonConverter
+    valueConverterSchemasEnable: "false"
+  tuning:
+    pollIntervalMs: 100
+    batchMaxSize: 1000
+    bufferMemory: 33554432 
+
+# ============================================================
+# End of file
+# ============================================================

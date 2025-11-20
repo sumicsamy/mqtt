@@ -62,7 +62,7 @@ data:
 ---
 {{- if and .Values.kafkaExporter.enabled .Values.serviceMonitor.enabled }}
 apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
+kind: PodMonitor
 metadata:
   name: {{ .Values.kafka.clusterName }}-kafka-exporter
   namespace: {{ .Values.namespace }}
@@ -77,8 +77,7 @@ spec:
   namespaceSelector:
     matchNames:
       - {{ .Values.namespace }}
-  endpoints:
+  podMetricsEndpoints:
     - port: tcp-prometheus
-      interval: 30s
       path: /metrics
 {{- end }}
