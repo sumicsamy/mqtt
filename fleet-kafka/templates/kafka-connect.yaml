@@ -78,10 +78,11 @@ spec:
             sha512sum: sha256:69d1c7df057a16f3c48fe314d4aba4366c31c41c33e80caba3cab72ba06db7a8    
   template:
     pod:
+      volumes:
       - name: certs-volume
         secret:
           secretName: {{ .Values.bridge.mqtt.clientId }}-tls    
-    buildContainer:
+    connectContainer:
       volumeMounts:
         - name: certs-volume
           mountPath: /mnt/certs/ 
