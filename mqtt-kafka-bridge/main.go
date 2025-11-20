@@ -112,8 +112,8 @@ func loadConfig() *Config {
 		KafkaTopic:    getenv("KAFKA_TOPIC", "truck-telemetry"),
 		KafkaClientID: getenv("KAFKA_CLIENT_ID", "mqtt-kafka-bridge"),
 
-		WorkerCount:   mustInt(getenv("WORKER_COUNT", "32"), "32"),
-		MessageBuffer: mustInt(getenv("MESSAGE_BUFFER", "100000"), "100000"),
+		WorkerCount:   mustInt("WORKER_COUNT", "32"),
+		MessageBuffer: mustInt("MESSAGE_BUFFER", "100000"),
 		PromPort:      getenv("PROM_PORT", "8080"),
 	}
 
@@ -203,6 +203,7 @@ func worker(ctx context.Context, wg *sync.WaitGroup, producer sarama.AsyncProduc
 			return
 		case m, ok := <-ch:
 			if !ok {
+				log.Printf("error publishing to kafka %s", string(m.Payload))
 				return
 			}
 			producer.Input() <- &sarama.ProducerMessage{
@@ -310,7 +311,7 @@ func buildAutopahoConfig(ctx context.Context, cfg *Config, msgCh chan<- *BridgeM
 					mqttIn.Inc()
 
 					key := deriveKey(payload)
-					log.Printf("[MQTT5] OnPublishReceived with payload %s key", string(key))
+					// log.Printf("[MQTT5] OnPublishReceived with payload %s key", string(key))
 					select {
 					case msgCh <- &BridgeMessage{Key: key, Payload: payload}:
 					default:
@@ -328,23 +329,23 @@ func buildAutopahoConfig(ctx context.Context, cfg *Config, msgCh chan<- *BridgeM
 		return nil, fmt.Errorf("NewConnection: %w", err)
 	}
 
-	// Handler for incoming PUBLISH packets
-	cm.AddOnPublishReceived(func(pr autopaho.PublishReceived) (bool, error) {
+	// // Handler for incoming PUBLISH packets
+	// cm.AddOnPublishReceived(func(pr autopaho.PublishReceived) (bool, error) {
 
-		payload := append([]byte(nil), pr.Packet.Payload...)
-		key := deriveKey(payload)
-		log.Printf("[MQTT] additional OnPublishReceived handler called %s", key)
-		mqttIn.Inc()
-		bufGauge.Set(float64(len(msgCh)))
+	// 	payload := append([]byte(nil), pr.Packet.Payload...)
+	// 	key := deriveKey(payload)
+	// 	log.Printf("[MQTT] additional OnPublishReceived handler called %s", key)
+	// 	mqttIn.Inc()
+	// 	bufGauge.Set(float64(len(msgCh)))
 
-		select {
-		case msgCh <- &BridgeMessage{Key: key, Payload: payload}:
-		default:
-			log.Printf("[MQTT] buffer full → dropping message")
-		}
+	// 	select {
+	// 	case msgCh <- &BridgeMessage{Key: key, Payload: payload}:
+	// 	default:
+	// 		log.Printf("[MQTT] buffer full → dropping message")
+	// 	}
 
-		return true, nil
-	})
+	// 	return true, nil
+	// })
 
 	return cm, nil
 }

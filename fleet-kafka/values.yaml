@@ -38,19 +38,19 @@ bridge:
   enabled: true
 
   image: "quay.io/suchugh/mqtt-kafka-bridge:2.0.10"
-  replicas: 6          # scale horizontally for 1M/s
-  workerCount: 32    # increase for higher throughput
+  replicas: 12          # scale horizontally for 1M/s
+  workerCount: 64    # increase for higher throughput
   resources:
     requests:
-      cpu: "2"
-      memory: "4Gi"
+      cpu: "1"
+      memory: "2Gi"
     limits:
       cpu: "4"
       memory: "8Gi"
 
   # MQTT broker (Artemis)
   mqtt:
-    brokers: " tls://fleet-manager-broker-mqtts-0-svc.mqtt-broker.svc.cluster.local:8883, tls://fleet-manager-broker-mqtts-1-svc.mqtt-broker.svc.cluster.local:8883,tls://fleet-manager-broker-mqtts-2-svc.mqtt-broker.svc.cluster.local:8883"
+    brokers: " tls://mqtt-lb.mqtt-broker.svc.cluster.local:8883 "
     topic: "mine/fleet/+/truck/+/telemetry"
     qos: 0                    # recommended for 1M/s
     clientId: "mqtt-kafka-bridge"
