@@ -64,7 +64,6 @@ bridge:
 
   # Internal parameters
   prometheusPort: "8080"
-  workerCount: 8
   messageBuffer: 100000
 
 
@@ -99,3 +98,8 @@ serviceMonitor:
   # Adjust this label to match your Prometheus installation
   labelSelector:
     release: "prometheus"
+#########
+kafkaExporter:
+  enabled: true
+  topicRegex: ".*"
+  groupRegex: ".*"

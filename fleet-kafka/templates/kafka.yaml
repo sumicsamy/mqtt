@@ -25,6 +25,19 @@ spec:
       transaction.state.log.min.isr: 2
       default.replication.factor: 3
       min.insync.replicas: 2
+    metricsConfig:
+        type: jmxPrometheusExporter
+        valueFrom:
+          configMapKeyRef:  
+            name: {{ .Values.kafka.clusterName }}-metrics
+            key: kafka-metrics-config.yaml
+  {{- if .Values.kafkaExporter.enabled }}
+  kafkaExporter:
+    topicRegex: {{ .Values.kafkaExporter.topicRegex | quote }}
+    groupRegex: {{ .Values.kafkaExporter.groupRegex | quote }}
+    logging:
+      logLevel: INFO
+{{- end }}            
   entityOperator:
     topicOperator: {}
     userOperator: {}
