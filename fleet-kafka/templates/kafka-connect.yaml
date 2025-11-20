@@ -74,8 +74,7 @@ spec:
       - name: mqtt-connector
         artifacts:
           - type: jar
-            url: https://github.com/sumicsamy/mqtt/releases/download/v1.0.0/kafka-connect-mqtt-assembly-10.0.3.jar
-            sha512sum: sha256:69d1c7df057a16f3c48fe314d4aba4366c31c41c33e80caba3cab72ba06db7a8    
+            url: https://github.com/sumicsamy/mqtt/releases/download/v1.0.0/kafka-connect-mqtt-assembly-10.0.3.jar   
   template:
     pod:
       volumes:
