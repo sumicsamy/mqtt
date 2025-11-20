@@ -122,7 +122,7 @@ connect:
     limits:
       cpu: "4"
       memory: "8Gi"
-  pluginPath: /mnt/kafka/plugins/mqtt
+  pluginPath: /opt/kafka/plugins/
 
 mqttConnector:
   name: mqtt-to-kafka-telemetry
