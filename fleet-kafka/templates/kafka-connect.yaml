@@ -71,13 +71,13 @@ spec:
         - name: certs-volume
           secret:
             secretName: {{ .Values.bridge.mqtt.clientId }}-tls    
-      kafkaConnectContainer:
-        volumeMounts:
-          - name: mqtt-plugin-volume
-            mountPath: {{ .Values.connect.pluginPath }}
-          - name: certs-volume
-            mountPath: /certs  
-            readOnly: true
+    connectContainer:
+      volumeMounts:
+        - name: mqtt-plugin-volume
+          mountPath: {{ .Values.connect.pluginPath }}
+        - name: certs-volume
+          mountPath: /certs  
+          readOnly: true
   config:
     key.converter: {{ .Values.mqttConnector.kafka.keyConverter }}
     value.converter: {{ .Values.mqttConnector.kafka.valueConverter }}
