@@ -69,7 +69,7 @@ metadata:
   namespace: {{ .Values.namespace }}
   metadata:
     labels:
-      strimzi.io/cluster: {{ .Values.kafka.clusterName }}
+      strimzi.io/cluster: fleet-connect
 spec:
   class: io.lenses.streamreactor.connect.mqtt.source.MqttSourceConnector
   tasksMax: {{ .Values.mqttConnector.tasksMax }}
@@ -88,8 +88,23 @@ spec:
     connect.mqtt.ssl.ca.cert: /mnt/certs/ca.crt
     connect.mqtt.ssl.cert: /mnt/certs/tls.crt
     connect.mqtt.ssl.key: /mnt/certs/tls.key
+    # 🔥 REQUIRED: QoS level (0 recommended for high throughput)
+    connect.mqtt.service.quality: "0"
+
+    # 🔥 REQUIRED: KCQL mapping (MQTT → Kafka)
+    # FORMAT:
+    #   INSERT INTO kafkaTopic SELECT * FROM mqttTopic
+    connect.mqtt.kcql: >-
+      INSERT INTO truck-telemetry
+      SELECT * FROM `mine/fleet/+/truck/+/telemetry`
+      WITHFORMAT JSON
+
+    # OPTIONAL - tuning
+    poll.interval.ms: "100"
+    # producer.override.batch.size: "1000"
+    # producer.override.linger.ms: "100"
     producer.override.max.request.size: "400000000"
-    producer.override.buffer.memory: "536870912"
+    producer.override.buffer.memory: "536870912"    
 ---
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
