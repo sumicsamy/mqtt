@@ -67,7 +67,8 @@ spec:
         -Dhawtio.realm=console
         -XX:+UseG1GC
         -XX:MaxGCPauseMillis=50
-        -Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider  
+        -Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider
+        -Damq.security=true  
   deploymentPlan:
     size: 1
     persistenceEnabled: true
