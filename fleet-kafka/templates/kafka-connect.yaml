@@ -76,7 +76,6 @@ spec:
   config:
     connect.mqtt.hosts: "{{ .Values.mqttConnector.mqtt.brokers }}"
     connect.mqtt.topic: "{{ .Values.mqttConnector.mqtt.topicFilter }}"
-    connect.mqtt.qos: "{{ .Values.mqttConnector.mqtt.qos }}"
     connect.mqtt.client.id: "{{ .Values.mqttConnector.mqtt.clientId }}"
     topics: "{{ .Values.mqttConnector.kafka.targetTopic }}"
     key.converter: "{{ .Values.mqttConnector.kafka.keyConverter }}"
@@ -88,8 +87,9 @@ spec:
     connect.mqtt.ssl.ca.cert: /mnt/certs/ca.crt
     connect.mqtt.ssl.cert: /mnt/certs/tls.crt
     connect.mqtt.ssl.key: /mnt/certs/tls.key
+    connect.mqtt.clean: false
     # 🔥 REQUIRED: QoS level (0 recommended for high throughput)
-    connect.mqtt.service.quality: "0"
+    connect.mqtt.service.quality: "{{ .Values.mqttConnector.mqtt.qos }}"
 
     # 🔥 REQUIRED: KCQL mapping (MQTT → Kafka)
     # FORMAT:
@@ -98,9 +98,6 @@ spec:
       INSERT INTO truck-telemetry
       SELECT * FROM `mine/fleet/+/truck/+/telemetry`
       WITHFORMAT JSON
-
-    # OPTIONAL - tuning
-    poll.interval.ms: "100"
     # producer.override.batch.size: "1000"
     # producer.override.linger.ms: "100"
     producer.override.max.request.size: "400000000"
