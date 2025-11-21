@@ -55,10 +55,6 @@ spec:
   version: "4.0.0"       # adjust to your Kafka version
   replicas: {{ .Values.connect.replicas }}
   bootstrapServers: "fleet-kafka-kafka-bootstrap:9092"
-  tls:
-    trustedCertificates:
-      - secretName: fleet-root-trust
-        pattern: '*.pem'
   resources:
     requests:
       cpu: {{ .Values.connect.resources.requests.cpu }}
@@ -91,9 +87,21 @@ spec:
     key.converter: {{ .Values.mqttConnector.kafka.keyConverter }}
     value.converter: {{ .Values.mqttConnector.kafka.valueConverter }}
     value.converter.schemas.enable: {{ .Values.mqttConnector.kafka.valueConverterSchemasEnable }}
+    group.id: fleet-connect
     offset.storage.topic: connect-offsets
     config.storage.topic: connect-configs
     status.storage.topic: connect-status
+    offset.storage.replication.factor: 3
+    config.storage.replication.factor: 3
+    status.storage.replication.factor: 3
+
+    key.converter: org.apache.kafka.connect.storage.StringConverter
+    value.converter: org.apache.kafka.connect.json.JsonConverter
+    value.converter.schemas.enable: "false"
+
+    # REQUIRED for >100 MB messages:
+    producer.max.request.size: 400000000
+    producer.buffer.memory: 536870912
 ---
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnector
@@ -118,5 +126,46 @@ spec:
     connect.mqtt.ssl.ca.cert: /mnt/certs/ca.crt
     connect.mqtt.ssl.cert: /mnt/certs/tls.crt
     connect.mqtt.ssl.key: /mnt/certs/tls.key
+    producer.override.max.request.size: "400000000"
+    producer.override.buffer.memory: "536870912"
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: connect-offsets
+  namespace: fleet-kafka
+  labels:
+    strimzi.io/cluster: fleet-kafka
+spec:
+  partitions: 25
+  replicas: 3
+  config:
+    cleanup.policy: compact
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: connect-configs
+  namespace: fleet-kafka
+  labels:
+    strimzi.io/cluster: fleet-kafka
+spec:
+  partitions: 1
+  replicas: 3
+  config:
+    cleanup.policy: compact
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: connect-status
+  namespace: fleet-kafka
+  labels:
+    strimzi.io/cluster: fleet-kafka
+spec:
+  partitions: 5
+  replicas: 3
+  config:
+    cleanup.policy: compact
 
 
