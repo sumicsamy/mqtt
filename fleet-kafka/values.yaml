@@ -126,11 +126,11 @@ connect:
 
 mqttConnector:
   name: mqtt-to-kafka-telemetry
-  tasksMax: 6
+  tasksMax: 8
   mqtt:
     brokers: "ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"
     topicFilter: "mine/fleet/+/truck/+/telemetry"
-    qos: 0
+    qos: 1
     clientId: mqtt-kafka-connect-bridge
   kafka:
     targetTopic: truck-telemetry
