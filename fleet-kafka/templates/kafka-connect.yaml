@@ -16,7 +16,7 @@ spec:
   logging:
     type: inline
     loggers:
-      rootLogger.level: WARN
+      rootLogger.level: DEBUG
   version: "4.0.0"       # adjust to your Kafka version
   replicas: {{ .Values.connect.replicas }}
   bootstrapServers: "fleet-kafka-kafka-bootstrap:9092"
