@@ -35,10 +35,10 @@ telemetryTopic:
 # MQTT→Kafka High-Performance Bridge (Go code)
 # ============================================================
 bridge:
-  enabled: false
+  enabled: true
 
   image: "quay.io/suchugh/mqtt-kafka-bridge:2.0.12"
-  replicas: 0          # scale horizontally for 1M/s
+  replicas: 1          # scale horizontally for 1M/s
   workerCount: 64    # increase for higher throughput
   resources:
     requests:
@@ -52,7 +52,7 @@ bridge:
   mqtt:
     brokers: " tls://mqtt-lb.mqtt-broker.svc.cluster.local:8883 "
     topic: "mine/fleet/+/truck/+/telemetry"
-    qos: 0                    # recommended for 1M/s
+    qos: 1                    # recommended for 1M/s
     clientId: "mqtt-kafka-bridge"
 
 
