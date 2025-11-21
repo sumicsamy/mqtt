@@ -81,18 +81,17 @@ spec:
   tasksMax: {{ .Values.mqttConnector.tasksMax }}
   config:
     connect.mqtt.hosts: "{{ .Values.mqttConnector.mqtt.brokers }}"
-    connect.mqtt.topic: "{{ .Values.mqttConnector.mqtt.topicFilter }}"
     connect.mqtt.client.id: "{{ .Values.mqttConnector.mqtt.clientId }}"
-    topics: "{{ .Values.mqttConnector.kafka.targetTopic }}"
     key.converter: "{{ .Values.mqttConnector.kafka.keyConverter }}"
     value.converter: "{{ .Values.mqttConnector.kafka.valueConverter }}"
     value.converter.schemas.enable: "{{ .Values.mqttConnector.kafka.valueConverterSchemasEnable }}"
     poll.interval.ms: "{{ .Values.mqttConnector.tuning.pollIntervalMs }}"
-    producer.override.batch.size: "{{ .Values.mqttConnector.tuning.batchMaxSize }}"
-    producer.override.linger.ms: "{{ .Values.mqttConnector.tuning.pollIntervalMs }}"
+    # producer.override.batch.size: "{{ .Values.mqttConnector.tuning.batchMaxSize }}"
+    # producer.override.linger.ms: "{{ .Values.mqttConnector.tuning.pollIntervalMs }}"
     connect.mqtt.ssl.ca.cert: /mnt/certs/ca.crt
     connect.mqtt.ssl.cert: /mnt/certs/tls.crt
     connect.mqtt.ssl.key: /mnt/certs/tls.key
+    connect.mqtt.ssl.enabled: true
     connect.mqtt.clean: false
     # 🔥 REQUIRED: QoS level (0 recommended for high throughput)
     connect.mqtt.service.quality: "{{ .Values.mqttConnector.mqtt.qos }}"
@@ -105,10 +104,11 @@ spec:
       INSERT INTO truck-telemetry
       SELECT * FROM `mine/fleet/+/truck/+/telemetry`
       WITHFORMAT JSON
-    # producer.override.batch.size: "1000"
-    # producer.override.linger.ms: "100"
-    producer.override.max.request.size: "400000000"
-    producer.override.buffer.memory: "536870912"    
+    # # producer.override.batch.size: "1000"
+    # # producer.override.linger.ms: "100"
+    # producer.override.max.request.size: "400000000"
+    # producer.override.buffer.memory: "536870912"
+    topics: "truck-telemetry"
 ---
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic
