@@ -51,6 +51,7 @@ spec:
     - journalPoolFiles=50
     - addressSetting.\"mine.fleet.#\".defaultConsumerWindowSize=10485760
     - addressSetting.\"mine.fleet.#\".defaultAddressRoutingType=ANYCAST
+    - addressSetting.\"mine.fleet.#\".defaultQueueRoutingType=ANYCAST
     - addressSetting.\"mine.fleet.#\".enableMetrics=true
     - addressSetting.\"mine.fleet.#\".autoCreateAddresses=true
     - addressSetting.\"mine.fleet.#\".autoCreateQueues=true
