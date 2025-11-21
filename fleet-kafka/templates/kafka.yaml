@@ -27,7 +27,7 @@ spec:
       min.insync.replicas: 2
       # 🔥 Broker can RECEIVE messages up to 400 MB
       message.max.bytes: 400000000
-
+      socket.request.max.bytes: 400000000 
       # 🔥 Broker can SEND (replicate) messages up to 400 MB
       replica.fetch.max.bytes: 400000000
 
