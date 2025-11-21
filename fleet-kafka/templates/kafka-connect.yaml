@@ -96,7 +96,7 @@ spec:
     # 🔥 REQUIRED: QoS level (0 recommended for high throughput)
     connect.mqtt.service.quality: "{{ .Values.mqttConnector.mqtt.qos }}"
     connect.progress.enabled: true
-
+    connect.mqtt.log.message: true
     # 🔥 REQUIRED: KCQL mapping (MQTT → Kafka)
     # FORMAT:
     #   INSERT INTO kafkaTopic SELECT * FROM mqttTopic
