@@ -16,7 +16,7 @@ spec:
   logging:
     type: inline
     loggers:
-      rootLogger.level: DEBUG
+      rootLogger.level: WARN
   version: "4.0.0"       # adjust to your Kafka version
   replicas: {{ .Values.connect.replicas }}
   bootstrapServers: "fleet-kafka-kafka-bootstrap:9092"
@@ -85,7 +85,7 @@ spec:
     key.converter: "{{ .Values.mqttConnector.kafka.keyConverter }}"
     value.converter: "{{ .Values.mqttConnector.kafka.valueConverter }}"
     value.converter.schemas.enable: "{{ .Values.mqttConnector.kafka.valueConverterSchemasEnable }}"
-    poll.interval.ms: "{{ .Values.mqttConnector.tuning.pollIntervalMs }}"
+    # poll.interval.ms: "{{ .Values.mqttConnector.tuning.pollIntervalMs }}"
     # producer.override.batch.size: "{{ .Values.mqttConnector.tuning.batchMaxSize }}"
     # producer.override.linger.ms: "{{ .Values.mqttConnector.tuning.pollIntervalMs }}"
     connect.mqtt.ssl.ca.cert: /mnt/certs/ca.crt

@@ -11,3 +11,4 @@ spec:
   config:
     retention.ms: {{ .Values.telemetryTopic.retentionMs }}
     max.message.bytes: 400000000
+    
