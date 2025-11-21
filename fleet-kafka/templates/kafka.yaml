@@ -25,6 +25,17 @@ spec:
       transaction.state.log.min.isr: 2
       default.replication.factor: 3
       min.insync.replicas: 2
+      # 🔥 Broker can RECEIVE messages up to 400 MB
+      message.max.bytes: 400000000
+
+      # 🔥 Broker can SEND (replicate) messages up to 400 MB
+      replica.fetch.max.bytes: 400000000
+
+      # 🔥 Broker fetcher for consumers
+      fetch.message.max.bytes: 400000000
+
+      # optional: increase request timeout for large batches
+      request.timeout.ms: 60000
     metricsConfig:
         type: jmxPrometheusExporter
         valueFrom:
