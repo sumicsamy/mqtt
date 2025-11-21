@@ -72,7 +72,7 @@ spec:
         -XX:MaxGCPauseMillis=50
         -Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider  
   deploymentPlan:
-    size: 3
+    size: 1
     persistenceEnabled: true
     clustered: true
     journalType: aio
