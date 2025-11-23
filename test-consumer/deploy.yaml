@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mqtt-consumer
+  namespace: mqtt-perf
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mqtt-consumer
+  template:
+    metadata:
+      labels:
+        app: mqtt-consumer
+    spec:
+      containers:
+      - name: consumer
+        image: quay.io/suchugh/test-consumer:0.0.1
+        imagePullPolicy: Always
+
+        env:
+        - name: BROKER_URL
+          value: "ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"
+
+        # For shared-sub: $share/<group>/
+        - name: MQTT_TOPIC
+          value: "$share/loadtest/mine/fleet/+/truck/+/telemetry"
+
+        - name: CLIENT_ID
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+
+        volumeMounts:
+        - name: mqtt-certs
+          mountPath: /certs
+          readOnly: true
+
+        resources:
+          requests:
+            cpu: "500m"
+            memory: "128Mi"
+          limits:
+            cpu: "2000m"
+            memory: "256Mi"
+
+      volumes:
+      - name: mqtt-certs
+        secret:
+          secretName: mqtt-kafka-bridge-tls
