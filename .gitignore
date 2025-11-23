@@ -222,3 +222,5 @@ producer
 */bin
 */bin/*
 .DS_Store
+*/.ssh*
+logs
