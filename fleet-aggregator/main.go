@@ -1,10 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -45,60 +43,168 @@ type Telemetry struct {
 		Lat int     `json:"lat"`
 		Sig int     `json:"sig"`
 	} `json:"sys"`
-	GeoJSON map[string]interface{} `json:"geojson"`
+	State string `json:"state"`
 }
 
 /************** Prometheus Metrics **************/
 
 var (
 	msgCount = prometheus.NewCounterVec(
-		prometheus.CounterOpts{Name: "kafka_telemetry_messages_total"},
+		prometheus.CounterOpts{
+			Name: "kafka_telemetry_messages_total",
+			Help: "Total number of telemetry messages consumed from Kafka",
+		},
 		[]string{"region", "truck"},
 	)
 
 	msgRate = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "kafka_telemetry_messages_per_second"},
+		prometheus.GaugeOpts{
+			Name: "kafka_telemetry_messages_per_second",
+			Help: "Approx message rate per truck (msgs/sec) over a 1s window",
+		},
 		[]string{"region", "truck"},
 	)
 
 	latencyHist = prometheus.NewHistogramVec(
 		prometheus.HistogramOpts{
 			Name:    "telemetry_delivery_latency_seconds",
+			Help:    "End-to-end delivery latency from telemetry TS to consumer time",
 			Buckets: prometheus.LinearBuckets(0.1, 0.25, 20),
 		},
 		[]string{"region", "truck"},
 	)
 
 	truckSpeed = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "truck_speed_kph"},
+		prometheus.GaugeOpts{
+			Name: "truck_speed_kph",
+			Help: "Truck speed in km/h",
+		},
 		[]string{"region", "truck"},
 	)
 
 	truckFuel = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "truck_fuel_percent"},
+		prometheus.GaugeOpts{
+			Name: "truck_fuel_percent",
+			Help: "Truck fuel level percentage",
+		},
 		[]string{"region", "truck"},
 	)
 
 	truckLoad = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "truck_payload_tonnes"},
+		prometheus.GaugeOpts{
+			Name: "truck_payload_tonnes",
+			Help: "Truck payload in tonnes",
+		},
 		[]string{"region", "truck"},
 	)
 
 	truckLat = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "truck_latitude"},
+		prometheus.GaugeOpts{
+			Name: "truck_latitude",
+			Help: "Truck latitude in decimal degrees",
+		},
 		[]string{"region", "truck"},
 	)
 
 	truckLon = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "truck_longitude"},
+		prometheus.GaugeOpts{
+			Name: "truck_longitude",
+			Help: "Truck longitude in decimal degrees",
+		},
 		[]string{"region", "truck"},
 	)
 
 	backpressureEvents = prometheus.NewCounterVec(
-		prometheus.CounterOpts{Name: "kafka_backpressure_events_total"},
+		prometheus.CounterOpts{
+			Name: "kafka_backpressure_events_total",
+			Help: "Count of messages whose delivery latency exceeded the backpressure threshold",
+		},
 		[]string{"region", "truck"},
 	)
+
+	// Engine metrics
+	engineRPM = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "truck_engine_rpm",
+			Help: "Truck engine revolutions per minute",
+		},
+		[]string{"region", "truck"},
+	)
+
+	engineTemp = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "truck_engine_temp_celsius",
+			Help: "Truck engine temperature in Celsius",
+		},
+		[]string{"region", "truck"},
+	)
+
+	engineOil = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "truck_engine_oil_bar",
+			Help: "Truck engine oil pressure (simulated in bar)",
+		},
+		[]string{"region", "truck"},
+	)
+
+	// System metrics
+	sysCPU = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "truck_sys_cpu_percent",
+			Help: "Onboard system CPU utilisation percent",
+		},
+		[]string{"region", "truck"},
+	)
+
+	sysMem = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "truck_sys_mem_percent",
+			Help: "Onboard system memory utilisation percent",
+		},
+		[]string{"region", "truck"},
+	)
+
+	sysTemp = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "truck_sys_temp_celsius",
+			Help: "Onboard system temperature in Celsius",
+		},
+		[]string{"region", "truck"},
+	)
+
+	sysNetLatency = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "truck_sys_network_latency_ms",
+			Help: "Onboard system network latency in milliseconds",
+		},
+		[]string{"region", "truck"},
+	)
+
+	sysSignal = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "truck_sys_signal_dbm",
+			Help: "Onboard radio signal strength in dBm",
+		},
+		[]string{"region", "truck"},
+	)
+
+	truckState = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "truck_state",
+			Help: "Truck state gauge (queueing_loader, loading, driving_to_crusher, etc.)",
+		},
+		[]string{"region", "truck", "state"},
+	)
 )
+
+// all possible states from simulator
+var allStates = []string{
+	"driving_to_crusher",
+	"unloading",
+	"driving_to_loader",
+	"queueing_loader",
+	"loading",
+}
 
 /************** Init Prometheus **************/
 func init() {
@@ -107,35 +213,10 @@ func init() {
 		truckSpeed, truckFuel, truckLoad,
 		truckLat, truckLon,
 		backpressureEvents,
+		engineRPM, engineTemp, engineOil,
+		sysCPU, sysMem, sysTemp, sysNetLatency, sysSignal,
+		truckState,
 	)
-}
-
-/************** Loki Push **************/
-func pushToLoki(entry map[string]interface{}) {
-	lokiURL := os.Getenv("LOKI_PUSH_URL") // e.g. http://loki-gateway.openshift-logging.svc:3100/loki/api/v1/push
-	if lokiURL == "" {
-		return
-	}
-
-	line, _ := json.Marshal(entry)
-
-	body := map[string]interface{}{
-		"streams": []map[string]interface{}{
-			{
-				"stream": map[string]string{
-					"app":    "fleet-telemetry-consumer",
-					"region": entry["region"].(string),
-					"truck":  entry["truck"].(string),
-				},
-				"values": [][]string{
-					{fmt.Sprintf("%d", time.Now().UnixNano()), string(line)},
-				},
-			},
-		},
-	}
-
-	b, _ := json.Marshal(body)
-	http.Post(lokiURL, "application/json", bytes.NewBuffer(b))
 }
 
 /************** Kafka Consumer **************/
@@ -151,7 +232,10 @@ func (ConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim
 
 	for msg := range claim.Messages() {
 		var t Telemetry
-		json.Unmarshal(msg.Value, &t)
+		if err := json.Unmarshal(msg.Value, &t); err != nil {
+			log.Printf("json decode failed: %v", err)
+			continue
+		}
 
 		labels := []string{t.Region, t.Truck}
 
@@ -165,17 +249,34 @@ func (ConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim
 		truckLat.WithLabelValues(labels...).Set(t.Loc.Lat)
 		truckLon.WithLabelValues(labels...).Set(t.Loc.Lon)
 
-		// End to end latency
-		ts, _ := time.Parse(time.RFC3339, t.TS)
-		latency := time.Since(ts).Seconds()
-		latencyHist.WithLabelValues(labels...).Observe(latency)
+		// Engine metrics
+		engineRPM.WithLabelValues(labels...).Set(float64(t.Eng.Rpm))
+		engineTemp.WithLabelValues(labels...).Set(t.Eng.Tmp)
+		engineOil.WithLabelValues(labels...).Set(t.Eng.Oil)
 
-		// Backpressure threshold
-		if latency > 0.5 { // 500 ms
-			backpressureEvents.WithLabelValues(labels...).Inc()
+		// System metrics
+		sysCPU.WithLabelValues(labels...).Set(float64(t.Sys.Cpu))
+		sysMem.WithLabelValues(labels...).Set(float64(t.Sys.Mem))
+		sysTemp.WithLabelValues(labels...).Set(t.Sys.Tmp)
+		sysNetLatency.WithLabelValues(labels...).Set(float64(t.Sys.Lat))
+		sysSignal.WithLabelValues(labels...).Set(float64(t.Sys.Sig))
+
+		// End to end latency
+		ts, err := time.Parse(time.RFC3339, t.TS)
+		if err == nil {
+			latency := time.Since(ts).Seconds()
+			if latency < 0 {
+				latency = 0
+			}
+			latencyHist.WithLabelValues(labels...).Observe(latency)
+
+			// Backpressure threshold
+			if latency > 0.5 { // 500 ms
+				backpressureEvents.WithLabelValues(labels...).Inc()
+			}
 		}
 
-		// Message rate
+		// Message rate approximation per truck
 		count++
 		if time.Since(last) > 1*time.Second {
 			msgRate.WithLabelValues(labels...).Set(float64(count))
@@ -183,22 +284,11 @@ func (ConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim
 			last = time.Now()
 		}
 
-		// ---------------------- Loki Structured Log ----------------------
-		geo := map[string]interface{}{
-			"ts":      t.TS,
-			"region":  t.Region,
-			"truck":   t.Truck,
-			"lat":     t.Loc.Lat,
-			"lon":     t.Loc.Lon,
-			"speed":   t.Spd,
-			"payload": t.Load.PayT,
-			"fuel":    t.Eng.Fuel,
-			"state":   t.GeoJSON["properties"].(map[string]interface{})["state"],
-			"feature": t.GeoJSON, // Full GeoJSON Feature
+		// Truck state: reset all, then set current to 1
+		for _, s := range allStates {
+			truckState.WithLabelValues(t.Region, t.Truck, s).Set(0)
 		}
-
-		fmt.Println(toJson(geo))
-		pushToLoki(geo)
+		truckState.WithLabelValues(t.Region, t.Truck, t.State).Set(1)
 
 		sess.MarkMessage(msg, "")
 	}
@@ -206,17 +296,15 @@ func (ConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim
 	return nil
 }
 
-func toJson(v interface{}) string {
-	b, _ := json.Marshal(v)
-	return string(b)
-}
-
 /************** MAIN **************/
 func main() {
 	// Start Prometheus server
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())
-		http.ListenAndServe(":8081", nil)
+		log.Println("Serving metrics on :8081/metrics")
+		if err := http.ListenAndServe(":8081", nil); err != nil {
+			log.Fatalf("metrics server error: %v", err)
+		}
 	}()
 
 	brokers := getenv("KAFKA_BROKERS", "fleet-kafka-kafka-bootstrap:9092")
@@ -226,16 +314,23 @@ func main() {
 	cfg := sarama.NewConfig()
 	cfg.Version = sarama.V3_3_0_0
 	cfg.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+	cfg.Consumer.Offsets.Initial = sarama.OffsetNewest
 
 	cg, err := sarama.NewConsumerGroup(strings.Split(brokers, ","), group, cfg)
 	if err != nil {
-		log.Fatal("consumer group:", err)
+		log.Fatal("consumer group init error:", err)
 	}
+	defer cg.Close()
 
 	ctx := context.Background()
+	handler := &ConsumerGroupHandler{}
+
+	log.Printf("Kafka consumer starting. Brokers=%s, Topic=%s, Group=%s", brokers, topic, group)
+
 	for {
-		if err := cg.Consume(ctx, []string{topic}, &ConsumerGroupHandler{}); err != nil {
+		if err := cg.Consume(ctx, []string{topic}, handler); err != nil {
 			log.Println("consume error:", err)
+			time.Sleep(2 * time.Second)
 		}
 	}
 }

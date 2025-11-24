@@ -16,7 +16,7 @@ spec:
       - site-perth
   podMetricsEndpoints:
   - path: /metrics
-    port: 8000
+    port: http-metrics
 ---
 {{- else }}
 apiVersion: monitoring.coreos.com/v1
@@ -36,5 +36,5 @@ spec:
       - site-emqx-perth
   podMetricsEndpoints:
   - path: /metrics
-    port: 8000
+    port: http-metrics
 {{- end }}
