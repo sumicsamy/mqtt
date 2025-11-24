@@ -1,0 +1,33 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: trust-manager
+  namespace: openshift-gitops       # Argo CD control namespace
+spec:
+  project: mqtt
+  source:
+    repoURL: https://charts.jetstack.io
+    chart: trust-manager
+    targetRevision: v0.20.2           # or a fixed version like "v0.10.0"
+    helm:
+      releaseName: trust-manager
+      values: |
+        app:
+          webhook:
+            tls:
+              helmCert:
+                enabled: true
+          trust:
+            namespace: cert-manager
+        secretTargets:
+          enabled: true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cert-manager          # same as your `--namespace` flag
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=false
