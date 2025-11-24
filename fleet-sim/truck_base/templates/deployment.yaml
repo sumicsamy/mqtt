@@ -12,6 +12,7 @@ spec:
     metadata:
       labels:
         app: truck-{{ .Values.siteId }}-{{ .Values.truckId }}
+        fleet_sim: "true"
     spec:
       containers:
       - name: truck
@@ -34,3 +35,4 @@ spec:
         - name: certs
           secret:
             secretName: truck-{{ .Values.siteId }}-{{ .Values.truckId }}-tls
+

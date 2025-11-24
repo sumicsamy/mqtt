@@ -1,0 +1,40 @@
+{{- if eq .Values.platform "amq" }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: fleet-sim-pod-monitor
+  labels:
+    fleet_sim: "true"
+spec:
+  selector:
+    matchLabels:
+      fleet_sim: "true"
+  namespaceSelector:
+    matchNames:
+      - site-pilbara
+      - site-tomprice
+      - site-perth
+  podMetricsEndpoints:
+  - path: /metrics
+    port: 8000
+---
+{{- else }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: fleet-sim-pod-monitor
+  labels:
+    fleet_sim: "true"
+spec:
+  selector:
+    matchLabels:
+      fleet_sim: "true"
+  namespaceSelector:
+    matchNames:
+      - site-emqx-pilbara
+      - site-emqx-tomprice
+      - site-emqx-perth
+  podMetricsEndpoints:
+  - path: /metrics
+    port: 8000
+{{- end }}
