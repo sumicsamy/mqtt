@@ -1,12 +1,12 @@
 sites:
   - id: pilbara
-    namespace: site-pilbara
+    namespace: site-emqx-pilbara
     truckCount: 1
   - id: tomprice
-    namespace: site-tomprice
+    namespace: site-emqx-tomprice
     truckCount: 1
   - id: perth
-    namespace: site-perth
+    namespace: site-emqx-perth
     truckCount: 1
 
 
