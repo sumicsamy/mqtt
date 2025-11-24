@@ -34,7 +34,7 @@ func main() {
 
 	clientID := os.Getenv("CLIENT_ID")
 	if clientID == "" {
-		clientID = "fast-mqtt-consumer"
+		clientID = "mqtt-consumer"
 	}
 
 	// ---------------------------------------------------------
@@ -76,13 +76,20 @@ func main() {
 	// ---------------------------------------------------------
 	var msgCount uint64
 
+	// router := paho.NewStandardRouter()
+	// router.DefaultHandler(func(p *paho.Publish) {
+	// 	atomic.AddUint64(&msgCount, 1)
+	// 	fmt.Printf("defaulthandler received message with topic: %s\n", p.Topic)
+	// })
+
 	// ---------------------------------------------------------
 	//  AUTOPAHO CONFIG
 	// ---------------------------------------------------------
 	cfg := autopaho.ClientConfig{
-		ServerUrls: []*url.URL{parsedURL},
-		TlsCfg:     tlsCfg,
-		KeepAlive:  30,
+		ServerUrls:      []*url.URL{parsedURL},
+		TlsCfg:          tlsCfg,
+		KeepAlive:       30,
+		ConnectUsername: clientID,
 
 		CleanStartOnInitialConnection: true,
 		SessionExpiryInterval:         300,
