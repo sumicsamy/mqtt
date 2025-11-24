@@ -5,8 +5,8 @@ sites:
   - id: tomprice
     namespace: site-emqx-tomprice
     truckCount: 1
-  - id: perth
-    namespace: site-emqx-perth
+  - id: paraburdoo
+    namespace: site-emqx-paraburdoo
     truckCount: 1
 
 

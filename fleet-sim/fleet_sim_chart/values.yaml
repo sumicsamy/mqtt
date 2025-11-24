@@ -5,8 +5,8 @@ sites:
   - id: tomprice
     namespace: site-tomprice
     truckCount: 4
-  - id: perth
-    namespace: site-perth
+  - id: paraburdoo
+    namespace: site-paraburdoo
     truckCount: 4
 
 

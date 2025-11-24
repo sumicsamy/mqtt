@@ -13,7 +13,7 @@ spec:
     matchNames:
       - site-pilbara
       - site-tomprice
-      - site-perth
+      - site-paraburdoo
   podMetricsEndpoints:
   - path: /metrics
     port: http-metrics
@@ -33,7 +33,7 @@ spec:
     matchNames:
       - site-emqx-pilbara
       - site-emqx-tomprice
-      - site-emqx-perth
+      - site-emqx-paraburdoo
   podMetricsEndpoints:
   - path: /metrics
     port: http-metrics
