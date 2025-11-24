@@ -15,7 +15,7 @@ spec:
       httpHeaderName1: Authorization
       tlsSkipVerify: true
     secureJsonData:
-      httpHeaderValue1: "Bearer sha256~tk3Uju95bzDdc00cDp8r1fP7En_AhGe4OoxclCKStdY"
+      httpHeaderValue1: "Bearer sha256~tDu4WDZI0fEhYZB-ftnfJvfNvgYBKmpyLOohrrhzRZw"
     type: prometheus
     url: 'https://thanos-querier.openshift-monitoring.svc.cluster.local:9091'
   instanceSelector:
