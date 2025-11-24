@@ -75,8 +75,8 @@ aggregator:
   enabled: true
 
   image: "quay.io/suchugh/fleet-aggregator:2.0.2"
-  replicas: 3
-  port: 8080
+  replicas: 1
+  port: 8081
   prometheusPath: "/metrics"
 
   resources:

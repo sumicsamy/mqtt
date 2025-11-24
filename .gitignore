@@ -224,3 +224,5 @@ producer
 .DS_Store
 */.ssh*
 logs
+
+docs/
