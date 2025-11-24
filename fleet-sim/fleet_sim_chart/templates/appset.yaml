@@ -17,7 +17,7 @@ spec:
                                                      
   template:
     metadata:
-      name: "{{`{{siteId}}`}}-truck-{{`{{truckId}}`}}"
+      name: "{{`{{siteId}}`}}-truck-{{`{{truckId}}`}}-simulator-{{ .Values.platform}}"
     spec:
       project: fleet-simulator-{{ .Values.platform}}
       source:
