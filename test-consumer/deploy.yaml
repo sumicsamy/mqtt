@@ -1,3 +1,16 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: mqtt-consumer-tls
+  namespace: mqtt-perf
+spec:
+  secretName: mqtt-consumer-tls
+  commonName: mqtt-consumer
+  usages: ["client auth"]
+  issuerRef:
+    name: fleet-issuer
+    kind: ClusterIssuer
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -47,4 +60,4 @@ spec:
       volumes:
       - name: mqtt-certs
         secret:
-          secretName: mqtt-kafka-bridge-tls
+          secretName: mqtt-consumer-tls
