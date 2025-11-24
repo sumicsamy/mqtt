@@ -7,6 +7,7 @@ metadata:
   name: fleet-monitoring
   namespace: grafana
 spec:
+  version: docker.io/grafana/grafana@sha256:e0b95a0e84e14c3d1ba32c658c4756fcf9b83a43013c8de9eacc05d40af19a5c
   config:
     auth:
       disable_login_form: 'false'
