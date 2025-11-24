@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: emqx-tls
+  namespace: emqx
+spec:
+  secretName: emqx-tls
+  commonName: emqx-listeners.emqx.svc.cluster.local
+  usages: ["client auth"]
+  issuerRef:
+    name: fleet-issuer
+    kind: ClusterIssuer

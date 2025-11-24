@@ -4,7 +4,7 @@ metadata:
   name: fleet-simulator-emqx
   namespace: openshift-gitops
 spec:
-  project: fleet-simulator  
+  project: fleet-simulator-emqx 
   source:
     repoURL: 'https://github.com/sumicsamy/mqtt.git'       # your repo
     targetRevision: main                                   # branch
