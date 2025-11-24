@@ -48,3 +48,11 @@ spec:
       waitTakeover: 10
     initialDelaySeconds: 10
     type: Recreate
+  listeners:
+    ssl:
+      name: ssl
+      bind:
+        port: 8883
+      tls:
+        enabled: true
+        secretName: emqx-tls  

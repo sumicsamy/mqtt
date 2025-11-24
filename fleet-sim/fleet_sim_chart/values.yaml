@@ -1,17 +1,17 @@
 sites:
   - id: pilbara
     namespace: site-pilbara
-    truckCount: 1
+    truckCount: 4
   - id: tomprice
     namespace: site-tomprice
-    truckCount: 1
+    truckCount: 4
   - id: perth
     namespace: site-perth
-    truckCount: 1
+    truckCount: 4
 
 
 brokerHost: mqtt-lb.mqtt-broker.svc.cluster.local
 brokerPort: 8883
 repoURL: https://github.com/sumicsamy/mqtt.git
-image: quay.io/suchugh/fleet-sim:0.0.18
+image: quay.io/suchugh/fleet-sim:0.0.19
 platform: amq

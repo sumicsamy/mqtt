@@ -1,13 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/IBM/sarama"
@@ -15,8 +16,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-/***************** Telemetry Struct *****************/
-
+/************** Telemetry Schema **************/
 type Telemetry struct {
 	TS     string `json:"ts"`
 	Region string `json:"region"`
@@ -45,174 +45,205 @@ type Telemetry struct {
 		Lat int     `json:"lat"`
 		Sig int     `json:"sig"`
 	} `json:"sys"`
+	GeoJSON map[string]interface{} `json:"geojson"`
 }
 
-/***************** Prometheus Metrics *****************/
+/************** Prometheus Metrics **************/
 
 var (
-	mps = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{
-			Name: "fleet_mps",
-			Help: "Messages per second per truck",
+	msgCount = prometheus.NewCounterVec(
+		prometheus.CounterOpts{Name: "kafka_telemetry_messages_total"},
+		[]string{"region", "truck"},
+	)
+
+	msgRate = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "kafka_telemetry_messages_per_second"},
+		[]string{"region", "truck"},
+	)
+
+	latencyHist = prometheus.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "telemetry_delivery_latency_seconds",
+			Buckets: prometheus.LinearBuckets(0.1, 0.25, 20),
 		},
 		[]string{"region", "truck"},
 	)
 
-	speed = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "fleet_speed", Help: "Latest truck speed"},
+	truckSpeed = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "truck_speed_kph"},
 		[]string{"region", "truck"},
 	)
 
-	rpmGauge = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "fleet_rpm", Help: "Latest engine RPM"},
+	truckFuel = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "truck_fuel_percent"},
 		[]string{"region", "truck"},
 	)
 
-	fuelGauge = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "fleet_fuel_pct", Help: "Fuel percentage"},
+	truckLoad = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "truck_payload_tonnes"},
 		[]string{"region", "truck"},
 	)
 
-	payT = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "fleet_load_pay_t", Help: "Payload tonnes"},
+	truckLat = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "truck_latitude"},
 		[]string{"region", "truck"},
 	)
 
-	locLat = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "fleet_loc_lat", Help: "Latitude"},
+	truckLon = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "truck_longitude"},
 		[]string{"region", "truck"},
 	)
 
-	locLon = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "fleet_loc_lon", Help: "Longitude"},
-		[]string{"region", "truck"},
-	)
-
-	locAlt = prometheus.NewGaugeVec(
-		prometheus.GaugeOpts{Name: "fleet_loc_alt", Help: "Altitude"},
+	backpressureEvents = prometheus.NewCounterVec(
+		prometheus.CounterOpts{Name: "kafka_backpressure_events_total"},
 		[]string{"region", "truck"},
 	)
 )
 
-var (
-	lock     sync.Mutex
-	counters = map[string]int{}
-)
-
+/************** Init Prometheus **************/
 func init() {
 	prometheus.MustRegister(
-		mps, speed, rpmGauge, fuelGauge, payT,
-		locLat, locLon, locAlt,
+		msgCount, msgRate, latencyHist,
+		truckSpeed, truckFuel, truckLoad,
+		truckLat, truckLon,
+		backpressureEvents,
 	)
 }
 
-/***************** MAIN *****************/
-
-func main() {
-
-	brokers := os.Getenv("KAFKA_BOOTSTRAP_SERVERS")
-	topic := os.Getenv("KAFKA_TOPIC")
-	port := os.Getenv("PROM_PORT")
-	if port == "" {
-		port = "8080"
+/************** Loki Push **************/
+func pushToLoki(entry map[string]interface{}) {
+	lokiURL := os.Getenv("LOKI_PUSH_URL") // e.g. http://loki-gateway.openshift-logging.svc:3100/loki/api/v1/push
+	if lokiURL == "" {
+		return
 	}
 
-	/***************** Kafka Consumer Config *****************/
+	line, _ := json.Marshal(entry)
 
-	cfg := sarama.NewConfig()
-
-	cfg.Version = sarama.V3_3_0_0 // IBM fork supported constant
-	cfg.Consumer.Return.Errors = true
-	cfg.Consumer.Offsets.Initial = sarama.OffsetNewest
-	cfg.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
-
-	group, err := sarama.NewConsumerGroup(strings.Split(brokers, ","), "fleet-aggregator", cfg)
-	if err != nil {
-		log.Fatalf("Kafka consumer init failed: %v", err)
+	body := map[string]interface{}{
+		"streams": []map[string]interface{}{
+			{
+				"stream": map[string]string{
+					"app":    "fleet-telemetry-consumer",
+					"region": entry["region"].(string),
+					"truck":  entry["truck"].(string),
+				},
+				"values": [][]string{
+					{fmt.Sprintf("%d", time.Now().UnixNano()), string(line)},
+				},
+			},
+		},
 	}
 
-	ctx := context.Background()
-
-	// Consumer loop (required for rebalancing)
-	go func() {
-		for {
-			if err := group.Consume(ctx, []string{topic}, handler{}); err != nil {
-				log.Printf("Consumer error: %v", err)
-			}
-
-			// If context is cancelled → exit
-			if ctx.Err() != nil {
-				return
-			}
-		}
-	}()
-
-	// Handle async errors (important!)
-	go func() {
-		for err := range group.Errors() {
-			log.Printf("Kafka CG error: %v", err)
-		}
-	}()
-
-	/***************** MPS updater *****************/
-
-	go func() {
-		for {
-			time.Sleep(time.Second)
-
-			lock.Lock()
-			for key, count := range counters {
-				parts := strings.Split(key, ":")
-				region, truck := parts[0], parts[1]
-				mps.WithLabelValues(region, truck).Set(float64(count))
-			}
-			counters = map[string]int{}
-			lock.Unlock()
-		}
-	}()
-
-	/***************** Metrics Endpoint *****************/
-
-	http.Handle("/metrics", promhttp.Handler())
-	log.Printf("Serving metrics on :%s/metrics", port)
-
-	if err := http.ListenAndServe(":"+port, nil); err != nil {
-		log.Fatalf("HTTP server error: %v", err)
-	}
+	b, _ := json.Marshal(body)
+	http.Post(lokiURL, "application/json", bytes.NewBuffer(b))
 }
 
-/***************** Kafka Consumer Handler *****************/
+/************** Kafka Consumer **************/
+type ConsumerGroupHandler struct{}
 
-type handler struct{}
+func (ConsumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
+func (ConsumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
 
-func (handler) Setup(_ sarama.ConsumerGroupSession) error   { return nil }
-func (handler) Cleanup(_ sarama.ConsumerGroupSession) error { return nil }
+func (ConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 
-func (handler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	last := time.Now()
+	count := 0
 
 	for msg := range claim.Messages() {
-
 		var t Telemetry
-		if err := json.Unmarshal(msg.Value, &t); err == nil {
+		json.Unmarshal(msg.Value, &t)
 
-			key := t.Region + ":" + t.Truck
+		labels := []string{t.Region, t.Truck}
 
-			lock.Lock()
-			counters[key]++
-			lock.Unlock()
+		// ---------------------- Prometheus Metrics ----------------------
+		msgCount.WithLabelValues(labels...).Inc()
 
-			speed.WithLabelValues(t.Region, t.Truck).Set(t.Spd)
-			rpmGauge.WithLabelValues(t.Region, t.Truck).Set(float64(t.Eng.Rpm))
-			fuelGauge.WithLabelValues(t.Region, t.Truck).Set(t.Eng.Fuel)
-			payT.WithLabelValues(t.Region, t.Truck).Set(t.Load.PayT)
+		// Speed, fuel, load, coords
+		truckSpeed.WithLabelValues(labels...).Set(t.Spd)
+		truckFuel.WithLabelValues(labels...).Set(t.Eng.Fuel)
+		truckLoad.WithLabelValues(labels...).Set(t.Load.PayT)
+		truckLat.WithLabelValues(labels...).Set(t.Loc.Lat)
+		truckLon.WithLabelValues(labels...).Set(t.Loc.Lon)
 
-			locLat.WithLabelValues(t.Region, t.Truck).Set(t.Loc.Lat)
-			locLon.WithLabelValues(t.Region, t.Truck).Set(t.Loc.Lon)
-			locAlt.WithLabelValues(t.Region, t.Truck).Set(t.Loc.Alt)
+		// End to end latency
+		ts, _ := time.Parse(time.RFC3339, t.TS)
+		latency := time.Since(ts).Seconds()
+		latencyHist.WithLabelValues(labels...).Observe(latency)
+
+		// Backpressure threshold
+		if latency > 0.5 { // 500 ms
+			backpressureEvents.WithLabelValues(labels...).Inc()
 		}
+
+		// Message rate
+		count++
+		if time.Since(last) > 1*time.Second {
+			msgRate.WithLabelValues(labels...).Set(float64(count))
+			count = 0
+			last = time.Now()
+		}
+
+		// ---------------------- Loki Structured Log ----------------------
+		geo := map[string]interface{}{
+			"ts":      t.TS,
+			"region":  t.Region,
+			"truck":   t.Truck,
+			"lat":     t.Loc.Lat,
+			"lon":     t.Loc.Lon,
+			"speed":   t.Spd,
+			"payload": t.Load.PayT,
+			"fuel":    t.Eng.Fuel,
+			"state":   t.GeoJSON["properties"].(map[string]interface{})["state"],
+			"feature": t.GeoJSON, // Full GeoJSON Feature
+		}
+
+		fmt.Println(toJson(geo))
+		pushToLoki(geo)
 
 		sess.MarkMessage(msg, "")
 	}
 
 	return nil
+}
+
+func toJson(v interface{}) string {
+	b, _ := json.Marshal(v)
+	return string(b)
+}
+
+/************** MAIN **************/
+func main() {
+	// Start Prometheus server
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(":8081", nil)
+	}()
+
+	brokers := getenv("KAFKA_BROKERS", "fleet-kafka-kafka-bootstrap:9092")
+	topic := getenv("KAFKA_TOPIC", "truck-telemetry")
+	group := getenv("KAFKA_GROUP", "fleet-consumer")
+
+	cfg := sarama.NewConfig()
+	cfg.Version = sarama.V3_3_0_0
+	cfg.Consumer.Group.Rebalance.Strategy = sarama.BalanceStrategyRange
+
+	cg, err := sarama.NewConsumerGroup(strings.Split(brokers, ","), group, cfg)
+	if err != nil {
+		log.Fatal("consumer group:", err)
+	}
+
+	ctx := context.Background()
+	for {
+		if err := cg.Consume(ctx, []string{topic}, &ConsumerGroupHandler{}); err != nil {
+			log.Println("consume error:", err)
+		}
+	}
+}
+
+func getenv(k, def string) string {
+	v := os.Getenv(k)
+	if v == "" {
+		return def
+	}
+	return v
 }

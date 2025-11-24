@@ -13,5 +13,5 @@ sites:
 brokerHost: emqx-listeners.emqx.svc.cluster.local
 brokerPort: 8883
 repoURL: https://github.com/sumicsamy/mqtt.git
-image: quay.io/suchugh/fleet-sim:0.0.18
+image: quay.io/suchugh/fleet-sim:0.0.19
 platform: emqx
