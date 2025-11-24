@@ -51,5 +51,5 @@ spec:
     app: fleet-aggregator
   ports:
     - name: http
-      port: 8080
-      targetPort: 8080
+      port: 8081
+      targetPort: 8081
