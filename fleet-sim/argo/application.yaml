@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: fleet-simulator
+  name: fleet-simulator-amq
   namespace: openshift-gitops
 spec:
   project: fleet-simulator  
@@ -26,7 +26,7 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: fleet-simulator
+  name: fleet-simulator-amq
   namespace: openshift-gitops
 spec:
   description: Project to manage all fleet truck simulator Applications
