@@ -107,7 +107,6 @@ bridge:
   # Kafka side
   kafka:
     brokers: "fleet-kafka-kafka-bootstrap.fleet-kafka.svc.cluster.local:9092"
-    topic: "truck-telemetry"
     clientId: "mqtt-kafka-bridge"
   # Internal parameters
   prometheusPort: "8080"

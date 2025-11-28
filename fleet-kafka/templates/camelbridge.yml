@@ -76,7 +76,7 @@ spec:
             - name: BRIDGE_ID
               value: {{ $.Values.bridge.mqtt.clientId }}
             - name: KAFKA_TOPIC
-              value: {{ $.Values.bridge.kafka.topic }}
+              value: {{ $.Values.telemetryTopic.name }}
             - name: KAFKA_BROKERS
               value: {{ $.Values.bridge.kafka.brokers }}
             - name: MQTT_TLS_CA

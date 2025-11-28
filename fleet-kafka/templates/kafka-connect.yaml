@@ -102,14 +102,14 @@ spec:
     # FORMAT:
     #   INSERT INTO kafkaTopic SELECT * FROM mqttTopic
     connect.mqtt.kcql: >-
-      INSERT INTO truck-telemetry
+      INSERT INTO {{ .Values.telemetryTopic.name}}
       SELECT * FROM `mine/fleet/+/truck/+/telemetry`
       WITHFORMAT JSON
     # # producer.override.batch.size: "1000"
     # # producer.override.linger.ms: "100"
     # producer.override.max.request.size: "400000000"
     # producer.override.buffer.memory: "536870912"
-    topics: "truck-telemetry"
+    topics: "{{ .Values.telemetryTopic.name}}"
 ---
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaTopic

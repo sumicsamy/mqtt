@@ -43,7 +43,7 @@ spec:
             - name: KAFKA_BROKERS
               value: "{{ $.Values.bridge.kafka.brokers }}"
             - name: KAFKA_TOPIC
-              value: "{{ $.Values.bridge.kafka.topic }}"
+              value: "{{ $.Values.telemetryTopic.name }}"
             - name: KAFKA_CLIENT_ID
               value: "{{ $.Values.bridge.kafka.clientId }}"
             - name: WORKER_COUNT
