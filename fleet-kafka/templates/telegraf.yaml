@@ -1,0 +1,181 @@
+{{- if eq .Values.consumer "telegraf" }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.telegraf.namespace }}
+  labels:
+    argocd.argoproj.io/managed-by: openshift-gitops
+---    
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: telegraf-tls
+  namespace: {{ .Values.telegraf.namespace }}
+spec:
+  secretName: telegraf-tls
+  commonName: telegraf.{{ .Values.telegraf.namespace }}.svc.cluster.local
+  usages: ["client auth"]
+  issuerRef:
+    name: fleet-issuer
+    kind: ClusterIssuer
+
+--- 
+{{- range $i, $v := until (.Values.size | int) }}  
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: telegraf-{{ $i }}
+  namespace: {{ $.Values.telegraf.namespace }}
+  labels:
+    app: telegraf-{{ $i }}
+  annotations:
+    checksum/configmap: {{ include (print $.Template.BasePath "/telegraf.yaml") $ | sha256sum }}  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telegraf-{{ $i }}
+  template:
+    metadata:
+      labels:
+        app: telegraf-{{ $i }}
+    spec:
+      containers:
+      - name: telegraf
+        image: {{ $.Values.telegraf.image }}
+        imagePullPolicy: IfNotPresent
+        ports:
+          - name: metrics
+            containerPort: 9273
+        volumeMounts:
+          - name: config
+            mountPath: /etc/telegraf/telegraf.conf
+            subPath: telegraf.conf
+          - name: certs
+            mountPath: /certs
+ 
+        resources:
+          requests:
+            cpu: "1"
+            memory: "512Mi"
+          limits:
+            cpu: "2"
+            memory: "1Gi"
+      volumes:
+        - name: config
+          configMap:
+            name: telegraf-config-{{ $i }}
+        - name: certs
+          secret:
+            secretName: telegraf-tls       
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telegraf-{{ $i }}
+  namespace: {{ $.Values.telegraf.namespace }}
+  labels:
+    app: telegraf-{{ $i }}
+spec:
+  selector:
+    app: telegraf-{{ $i }}
+  ports:
+    - name: metrics
+      port: 9273
+      targetPort: 9273
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: telegraf-{{ $i }}
+  namespace: {{ $.Values.telegraf.namespace }}
+  labels:
+    release: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: telegraf-{{ $i }}
+  endpoints:
+    - port: metrics
+      interval: 15s
+  namespaceSelector:
+    matchNames:
+      - fleet-metrics
+---      
+{{- end  }}
+         
+{{- $groups := .Values.sharedGroups | default (list "telegraf-g1" "telegraf-g2" "telegraf-g3") -}}
+{{- $gCount := len $groups -}}
+
+{{- range $i, $_ := until (.Values.size | int) }}
+{{- $group := index $groups (mod $i $gCount) }}
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: telegraf-config-{{ $i }}
+  namespace: {{ $.Values.telegraf.namespace }}
+data:
+  telegraf.conf: |
+    [agent]
+      interval = "100ms"
+      flush_interval = "100ms"
+      metric_buffer_limit = 8000000     # bump for high throughput
+      round_interval = false
+      debug = false
+      quiet = true
+
+    [[inputs.mqtt_consumer]]
+      tls_ca = "/certs/ca.crt"
+      tls_cert = "/certs/tls.crt"
+      tls_key = "/certs/tls.key"
+      servers = ["ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"]
+      qos = 0
+      max_undelivered_messages = 8000000
+      persistent_session = false
+      insecure_skip_verify = true
+
+      # each Telegraf instance gets a unique client_id and one shared group
+      client_id = "telegraf-{{ $group }}-{{ $i }}"
+      topics = ["$share/{{ $group }}/mine/fleet/+/truck/+/telemetry"]
+
+      data_format = "json_v2"
+
+      [[inputs.mqtt_consumer.json_v2]]
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "spd"        type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "eng.rpm"    type = "int"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "eng.tmp"    type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "eng.fuel"   type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "load.pay_t" type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "sys.cpu"    type = "int"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "sys.tmp"    type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "loc.lat"    type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "loc.lon"    type = "float"
+        [[inputs.mqtt_consumer.json_v2.field]]
+          path = "loc.alt"    type = "float"
+
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path = "truck"
+        [[inputs.mqtt_consumer.json_v2.tag]]
+          path = "region"
+
+    [[outputs.prometheus_client]]
+      listen = ":9273"
+      metric_version = 2
+      path = "/metrics"
+      expiration_interval = "0s"
+
+    [[outputs.file]]
+      files = ["stdout"]
+      data_format = "json"
+---
+{{- end }}
+{{- end }}

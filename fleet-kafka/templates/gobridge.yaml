@@ -1,4 +1,4 @@
-{{- if .Values.bridge.enabled }}
+{{- if and (eq .Values.bridge.type "go") (eq .Values.consumer "aggregator") }}
 {{ range $i, $_ := until (.Values.bridge.replicas | int) }}
 apiVersion: apps/v1
 kind: Deployment

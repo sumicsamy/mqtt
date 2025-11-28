@@ -1,3 +1,4 @@
+{{- if and (eq .Values.bridge.type "connect") (eq .Values.consumer "aggregator") }}
 ---
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaConnect
@@ -332,5 +333,5 @@ data:
       name: kafka_connect_coordinator_$1
       help: "Kafka Connect JMX metric assignment information"
       type: GAUGE
-
+{{- end }}
 

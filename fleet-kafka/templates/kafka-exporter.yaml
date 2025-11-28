@@ -1,3 +1,4 @@
+{{- if eq .Values.consumer "aggregator" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -173,16 +174,12 @@ data:
       type: GAUGE
 
 ---
-{{- if and .Values.kafkaExporter.enabled .Values.serviceMonitor.enabled }}
+{{- if and .Values.kafkaExporter.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
   name: {{ .Values.kafka.clusterName }}-kafka-exporter
   namespace: {{ .Values.namespace }}
-  labels:
-    {{- range $k, $v := .Values.serviceMonitor.labelSelector }}
-    {{ $k }}: {{ $v | quote }}
-    {{- end }}
 spec:
   selector:
     matchLabels:
@@ -276,3 +273,4 @@ spec:
       targetLabel: node_ip
       replacement: $1
       action: replace
+{{- end }}

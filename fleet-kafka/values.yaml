@@ -2,7 +2,7 @@
 # Global Namespace
 # ============================================================
 namespace: fleet-kafka
-
+consumer: aggregator #  aggregator | telegraf
 
 # ============================================================
 # Kafka Cluster (AMQ Streams)
@@ -23,7 +23,7 @@ kafka:
 # Telemetry Topic (Incoming raw telemetry from 1700 trucks)
 # ============================================================
 telemetryTopic:
-  name: truck-telemetry
+  name: fleet-telemetry
   partitions: 48              # good for ~1M msg/sec
   replicationFactor: 3
   retentionMs: 86400000       # 1 day retention
@@ -35,36 +35,85 @@ telemetryTopic:
 # MQTT→Kafka High-Performance Bridge (Go code)
 # ============================================================
 bridge:
-  enabled: true
+  type: go # go | camel | connect
+  # ============================================================
+  # Go-based MQTT→Kafka Bridge
+  # ============================================================
+  go:
+    image: "quay.io/suchugh/mqtt-kafka-bridge:2.0.12"
+    replicas: 2          # scale horizontally for 1M/s
+    workerCount: 64    # increase for higher throughput
+    resources:
+      requests:
+        cpu: "1"
+        memory: "2Gi"
+      limits:
+        cpu: "4"
+        memory: "8Gi"
+  # ============================================================
+  # Camel-based MQTT→Kafka Bridge
+  # ============================================================        
+  camel:
+    image: "quay.io/suchugh/mqtt-kafka-camel:1.0.2"
+    replicas: 1
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1Gi"
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+  # ============================================================
+  # Kafka Connect with MQTT Source Connector
+  # ============================================================
+  connect:
+    extraPlugins:
+      - name: mqtt-source-connector
+        jars:
+          - kafka-connect-mqtt-assembly-10.0.3.jar
+    replicas: 1
+    resources:
+      requests:
+        cpu: "2"
+        memory: "4Gi"
+      limits:
+        cpu: "4"
+        memory: "8Gi"
+    pluginPath: /opt/kafka/plugins/
 
-  image: "quay.io/suchugh/mqtt-kafka-bridge:2.0.12"
-  replicas: 2          # scale horizontally for 1M/s
-  workerCount: 64    # increase for higher throughput
-  resources:
-    requests:
-      cpu: "1"
-      memory: "2Gi"
-    limits:
-      cpu: "4"
-      memory: "8Gi"
-
+    mqttConnector:
+      name: mqtt-to-kafka-telemetry
+      tasksMax: 8
+      mqtt:
+        brokers: "ssl://fleet-manager-broker-mqtts-0-svc.mqtt-broker.svc.cluster.local:8883"
+        topicFilter: "mine/fleet/+/truck/+/telemetry"
+        qos: 1
+        clientId: mqtt-kafka-connect-bridge
+      kafka:
+        targetTopic: truck-telemetry
+        keyConverter: org.apache.kafka.connect.storage.StringConverter
+        valueConverter: org.apache.kafka.connect.json.JsonConverter
+        valueConverterSchemasEnable: "false"
+      tuning:
+        pollIntervalMs: 100
+        batchMaxSize: 1000
+        bufferMemory: 33554432
   # MQTT broker (Artemis)
   mqtt:
-    brokers: " tls://mqtt-lb.mqtt-broker.svc.cluster.local:8883 "
-    topic: "mine/fleet/+/truck/+/telemetry"
+    brokers: " tls://mqtt-lb.mqtt-broker.svc.cluster.local:8883"
+    topic: "$share/camel/mine/fleet/+/truck/+/telemetry"
     qos: 1                    # recommended for 1M/s
     clientId: "mqtt-kafka-bridge"
-
-
   # Kafka side
   kafka:
     brokers: "fleet-kafka-kafka-bootstrap:9092"
     topic: "truck-telemetry"
     clientId: "mqtt-kafka-bridge"
-
   # Internal parameters
   prometheusPort: "8080"
   messageBuffer: 100000
+
+
 
 
 
@@ -72,8 +121,7 @@ bridge:
 # Aggregator (Kafka → Prometheus metrics)
 # ============================================================
 aggregator:
-  enabled: true
-
+  namespace: fleet-metrics
   image: "quay.io/suchugh/fleet-aggregator:2.0.6"
   replicas: 1
   port: 8081
@@ -87,17 +135,30 @@ aggregator:
       cpu: "2"
       memory: "4Gi"
 
+# =============================================================
+# Telegraf MQTT Consumer (Prometheus metrics exporter)  
+# =============================================================
+telegraf:
+  namespace: fleet-metrics
+  image: "docker.io/library/telegraf:1.33"
+  # How many Telegraf instances you want
+  size: 22   # e.g., 30 pods, adjust based on testing
 
+  # Shared subscription groups (3 queues)
+  sharedGroups:
+    - telegraf-g0
+    - telegraf-g1
+    - telegraf-g2
+    - telegraf-g3
+    - telegraf-g4
+    - telegraf-g5
+    - telegraf-g6
+    - telegraf-g7
+    - telegraf-g8
+    - telegraf-g9
+    - telegraf-g10
+    - telegraf-g11
 
-# ============================================================
-# ServiceMonitor (Prometheus Operator / OpenShift UWM)
-# ============================================================
-serviceMonitor:
-  enabled: true
-
-  # Adjust this label to match your Prometheus installation
-  labelSelector:
-    release: "prometheus"
 # ============================================================
 # KAFKA EXPORTER
 # ============================================================
@@ -105,42 +166,6 @@ kafkaExporter:
   enabled: true
   topicRegex: ".*"
   groupRegex: ".*"
-
-# ============================================================
-# Kafka Connect with MQTT Source Connector
-# ============================================================
-connect:
-  extraPlugins:
-    - name: mqtt-source-connector
-      jars:
-        - kafka-connect-mqtt-assembly-10.0.3.jar
-  replicas: 1
-  resources:
-    requests:
-      cpu: "2"
-      memory: "4Gi"
-    limits:
-      cpu: "4"
-      memory: "8Gi"
-  pluginPath: /opt/kafka/plugins/
-
-mqttConnector:
-  name: mqtt-to-kafka-telemetry
-  tasksMax: 8
-  mqtt:
-    brokers: "ssl://fleet-manager-broker-mqtts-0-svc.mqtt-broker.svc.cluster.local:8883"
-    topicFilter: "mine/fleet/+/truck/+/telemetry"
-    qos: 1
-    clientId: mqtt-kafka-connect-bridge
-  kafka:
-    targetTopic: truck-telemetry
-    keyConverter: org.apache.kafka.connect.storage.StringConverter
-    valueConverter: org.apache.kafka.connect.json.JsonConverter
-    valueConverterSchemasEnable: "false"
-  tuning:
-    pollIntervalMs: 100
-    batchMaxSize: 1000
-    bufferMemory: 33554432 
 
 # ============================================================
 # End of file

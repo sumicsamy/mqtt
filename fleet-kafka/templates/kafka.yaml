@@ -1,3 +1,4 @@
+{{- if eq .Values.consumer "aggregator" }}
 apiVersion: kafka.strimzi.io/v1beta2
 kind: Kafka
 metadata:
@@ -70,4 +71,18 @@ spec:
     size: {{ .Values.kafka.storageSize }}
     deleteClaim: true
     kraftMetadata: shared
-
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: {{ .Values.telemetryTopic.name }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    strimzi.io/cluster: {{ .Values.kafka.clusterName }}
+spec:
+  partitions: {{ .Values.telemetryTopic.partitions }}
+  replicas: 3
+  config:
+    retention.ms: {{ .Values.telemetryTopic.retentionMs }}
+    max.message.bytes: 400000000
+{{- end }}
