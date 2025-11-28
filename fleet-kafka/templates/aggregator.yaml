@@ -1,4 +1,11 @@
 {{- if eq .Values.consumer "aggregator" }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ .Values.aggregator.namespace }}
+  labels:
+    argocd.argoproj.io/managed-by: openshift-gitops
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
