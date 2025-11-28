@@ -17,16 +17,21 @@ import (
 
 /************** Telemetry Schema **************/
 
+// TelemetryFragment handles the fragmented JSON payloads from the bridge.
+// We use pointers (*Type) to detect which fields are present in the message.
 type TelemetryFragment struct {
 	TS string `json:"ts"`
 
 	// --- Location Payload ---
+	// "lat" is shared with System (latency), so we inspect context
+	// "lon", "alt" are unique to Location
 	Lat *float64 `json:"lat"`
 	Lon *float64 `json:"lon"`
 	Alt *float64 `json:"alt"`
 
 	// --- Engine Payload ---
-	Rpm  *int     `json:"rpm"`
+	Rpm *int `json:"rpm"`
+	// "tmp" is shared with System, so we inspect context
 	Tmp  *float64 `json:"tmp"`
 	Oil  *float64 `json:"oil"`
 	Fuel *float64 `json:"fuel"`
@@ -39,8 +44,10 @@ type TelemetryFragment struct {
 	// --- System Payload ---
 	Cpu *int `json:"cpu"`
 	Mem *int `json:"mem"`
+	// Tmp (System Temp) - shared key
+	// Lat (Network Latency) - shared key
 	Sig *int `json:"sig"`
-	// Renamed from "lat" to avoid confusion
+	// New simulator uses specific key for network latency
 	NetworkLatency *int `json:"network_latency"`
 
 	// --- Status Payload ---
@@ -341,12 +348,14 @@ func (ConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim
 		msgCount.WithLabelValues(labels...).Inc()
 
 		// --- LOCATION Message ---
+		// We use presence of "Lon" to confirm this is a Location message
 		if t.Lon != nil && t.Lat != nil {
 			truckLat.WithLabelValues(labels...).Set(*t.Lat)
 			truckLon.WithLabelValues(labels...).Set(*t.Lon)
 		}
 
 		// --- ENGINE Message ---
+		// "Rpm" is unique to engine
 		if t.Rpm != nil {
 			engineRPM.WithLabelValues(labels...).Set(float64(*t.Rpm))
 			if t.Tmp != nil {
@@ -366,18 +375,25 @@ func (ConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim
 		}
 
 		// --- SYSTEM Message ---
+		// "Cpu" is unique to system
 		if t.Cpu != nil {
 			sysCPU.WithLabelValues(labels...).Set(float64(*t.Cpu))
 			if t.Mem != nil {
 				sysMem.WithLabelValues(labels...).Set(float64(*t.Mem))
 			}
-			// Updated: "network_latency" field
+
+			// Check specifically for "network_latency" field first
 			if t.NetworkLatency != nil {
 				sysNetLatency.WithLabelValues(labels...).Set(float64(*t.NetworkLatency))
+			} else if t.Lat != nil {
+				// Backward compatibility if simulator sends 'lat' in system context
+				sysNetLatency.WithLabelValues(labels...).Set(float64(*t.Lat))
 			}
+
 			if t.Sig != nil {
 				sysSignal.WithLabelValues(labels...).Set(float64(*t.Sig))
 			}
+			// System uses 'tmp' for Board Temp
 			if t.Tmp != nil {
 				sysTemp.WithLabelValues(labels...).Set(*t.Tmp)
 			}
@@ -389,21 +405,20 @@ func (ConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim
 				truckSpeed.WithLabelValues(labels...).Set(*t.Spd)
 			}
 
-			// State
+			// Truck state: reset all, then set current to 1
 			for _, s := range allStates {
 				truckState.WithLabelValues(region, truck, s).Set(0)
 			}
 			truckState.WithLabelValues(region, truck, *t.State).Set(1)
 
-			// Target Info
+			// Target Tracking
 			if t.TargetID != nil && t.TargetType != nil {
-				// Reset any potential stale target types for this truck?
-				// For simplicity, we just set the gauge. Ideally you'd zero out the other type.
 				truckTarget.WithLabelValues(region, truck, *t.TargetType).Set(float64(*t.TargetID))
 			}
 		}
 
 		// --- Common Metadata ---
+		// End to end latency
 		if t.TS != "" {
 			ts, err := time.Parse(time.RFC3339, t.TS)
 			if err == nil {
@@ -412,12 +427,15 @@ func (ConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim
 					latency = 0
 				}
 				latencyHist.WithLabelValues(labels...).Observe(latency)
-				if latency > 0.5 {
+
+				// Backpressure threshold
+				if latency > 0.5 { // 500 ms
 					backpressureEvents.WithLabelValues(labels...).Inc()
 				}
 			}
 		}
 
+		// Message rate approximation per truck
 		count++
 		if time.Since(last) > 1*time.Second {
 			msgRate.WithLabelValues(labels...).Set(float64(count))
@@ -444,8 +462,10 @@ func main() {
 
 	pushStaticSiteLocations()
 
+	// FIX: Use KAFKA_BOOTSTRAP_SERVERS matching the deployment env var
 	brokers := getenv("KAFKA_BOOTSTRAP_SERVERS", "")
 	if brokers == "" {
+		// Fallback for local dev or if env var is actually KAFKA_BROKERS
 		brokers = getenv("KAFKA_BROKERS", "fleet-kafka-kafka-bootstrap:9092")
 	}
 
