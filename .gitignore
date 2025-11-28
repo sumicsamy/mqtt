@@ -217,6 +217,13 @@ pull_secret.json
 TrustPolicy.json
 amq-broker/ssl/
 producer
+grafana/dummy
+*/target/
+*/.mvn/
+*/.idea/
+*/.vscode/
+*/.pytest_cache/
+*/.venv/
 
 */go.sum
 */bin
@@ -226,3 +233,6 @@ producer
 logs
 
 docs/
+*/.gitignore
+*/.dockerignore
+.vscode
