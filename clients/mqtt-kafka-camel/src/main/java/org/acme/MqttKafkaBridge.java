@@ -25,6 +25,8 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import java.io.FileReader;
+import java.security.Security;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 @ApplicationScoped
 public class MqttKafkaBridge extends RouteBuilder {
@@ -41,6 +43,7 @@ public class MqttKafkaBridge extends RouteBuilder {
     @Singleton
     @Named("customSocketFactory")
     public SSLSocketFactory customSocketFactory() throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
 
         // 1. Load CA Certificate (TrustStore)
         CertificateFactory cf = CertificateFactory.getInstance("X.509");

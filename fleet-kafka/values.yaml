@@ -54,7 +54,7 @@ bridge:
   # Camel-based MQTT→Kafka Bridge
   # ============================================================        
   camel:
-    image: "quay.io/suchugh/mqtt-kafka-camel:1.0.3"
+    image: "quay.io/suchugh/mqtt-kafka-camel:1.0.4"
     replicas: 1
     resources:
       requests:
