@@ -101,7 +101,7 @@ bridge:
   # MQTT broker (Artemis)
   mqtt:
     brokers: " ssl://mqtt-lb.mqtt-broker.svc.cluster.local:8883"
-    topic: "$share/camel/mine/fleet/+/truck/+/telemetry"
+    topic: "$share/camel/mine/fleet/+/truck/#"
     qos: 1                    # recommended for 1M/s
     clientId: "mqtt-kafka-bridge"
   # Kafka side
