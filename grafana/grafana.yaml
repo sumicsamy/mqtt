@@ -26,3 +26,17 @@ spec:
         kind: Service
         name: fleet-monitoring-service
         weight: 100
+  serviceAccount:
+    metadata:
+      annotations:
+        serviceaccounts.openshift.io/oauth-redirectreference.primary: '{"kind":"OAuthRedirectReference","apiVersion":"v1","reference":{"kind":"Route","name":"fleet-monitoring-route"}}'
+      
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: fleet-monitoring-sa-token
+  namespace: fleet-metrics
+  annotations:
+    kubernetes.io/service-account.name: fleet-monitoring-sa
+type: kubernetes.io/service-account-token        
