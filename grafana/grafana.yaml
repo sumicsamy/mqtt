@@ -36,7 +36,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: fleet-monitoring-sa-token
-  namespace: fleet-metrics
+  namespace: grafana
   annotations:
     kubernetes.io/service-account.name: fleet-monitoring-sa
 type: kubernetes.io/service-account-token        
