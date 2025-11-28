@@ -14,6 +14,7 @@ metadata:
     app.kubernetes.io/part-of: fleet-telemetry
     app.openshift.io/runtime: quarkus
   name: mqtt-kafka-camel
+  namespace: {{ .Values.namespace }}
 spec:
   ports:
     - name: http
@@ -40,6 +41,7 @@ metadata:
     app.kubernetes.io/part-of: fleet-telemetry
     app.kubernetes.io/name: mqtt-kafka-camel
   name: mqtt-kafka-camel
+  namespace: {{ .Values.namespace }}
 spec:
   replicas: {{ .Values.bridge.camel.replicas }}
   selector:
@@ -112,11 +114,15 @@ metadata:
     app.kubernetes.io/part-of: fleet-telemetry
     app.openshift.io/runtime: quarkus
   name: mqtt-kafka-camel
+  namespace: {{ .Values.namespace }}
 spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: mqtt-kafka-camel
       app.kubernetes.io/part-of: fleet-telemetry
+  namespaceSelector:
+    matchNames:
+      - {{ .Values.namespace }}   
   endpoints:
     - scheme: http
       targetPort: 8080
