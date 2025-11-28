@@ -1,5 +1,5 @@
 {{- if and (eq .Values.bridge.type "go") (eq .Values.consumer "aggregator") }}
-{{ range $i, $_ := until (.Values.bridge.replicas | int) }}
+{{ range $i, $_ := until (.Values.bridge.go.replicas | int) }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,7 +29,7 @@ spec:
           volumeMounts:
             - name: broker-certs
               mountPath: /certs
-          image: {{ $.Values.bridge.image }}
+          image: {{ $.Values.bridge.go.image }}
           imagePullPolicy: IfNotPresent
           env:
             - name: MQTT_BROKERS
@@ -47,7 +47,7 @@ spec:
             - name: KAFKA_CLIENT_ID
               value: "{{ $.Values.bridge.kafka.clientId }}"
             - name: WORKER_COUNT
-              value: "{{ $.Values.bridge.workerCount }}"
+              value: "{{ $.Values.bridge.go.workerCount }}"
             - name: MESSAGE_BUFFER
               value: "{{ $.Values.bridge.messageBuffer }}"
             - name: PROM_PORT
@@ -58,19 +58,17 @@ spec:
               value: "/certs/tls.crt"
             - name: MQTT_TLS_KEY
               value: "/certs/tls.key"
-            - name: WORKER_COUNT
-              value: "{{ $.Values.bridge.workerCount }}"     
           ports:
             - name: http
               containerPort: 8080
           resources:
-{{- toYaml $.Values.bridge.resources | nindent 12 }}
+{{- toYaml $.Values.bridge.go.resources | nindent 12 }}
 ---
 {{- end }}
 {{- end }}
 ---
-{{- if .Values.bridge.enabled }}
-{{ range $i, $_ := until (.Values.bridge.replicas | int)}}
+{{- if and (eq .Values.bridge.type "go") (eq .Values.consumer "aggregator") }}
+{{ range $i, $_ := until (.Values.bridge.go.replicas | int)}}
 apiVersion: v1
 kind: Service
 metadata:
@@ -90,16 +88,12 @@ spec:
 {{- end }}
 {{- end }}
 ---
-{{- if and .Values.bridge.enabled .Values.serviceMonitor.enabled }}
+{{- if and (eq .Values.bridge.type "go") (eq .Values.consumer "aggregator") }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ .Values.bridge.mqtt.clientId }}
   namespace: {{ .Values.namespace }}
-  labels:
-    {{- range $k, $v := .Values.serviceMonitor.labelSelector }}
-    {{ $k }}: {{ $v | quote }}
-    {{- end }}
 spec:
   selector:
     matchLabels:

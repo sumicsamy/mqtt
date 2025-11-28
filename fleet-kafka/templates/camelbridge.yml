@@ -93,12 +93,7 @@ spec:
               name: mqtt-certs
               readOnly: false
           resources:
-            requests:
-              cpu: "{{ $.Values.bridge.camel.resources.requests.cpu }}"
-              memory: "{{ $.Values.bridge.camel.resources.requests.memory }}"
-            limits:
-              cpu: "{{ $.Values.bridge.camel.resources.limits.cpu }}"
-              memory: "{{ $.Values.bridge.camel.resources.limits.memory }}"    
+{{- toYaml $.Values.bridge.go.resources | nindent 12 }} 
       volumes:
         - name: mqtt-certs
           secret:

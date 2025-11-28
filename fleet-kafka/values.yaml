@@ -35,7 +35,7 @@ telemetryTopic:
 # MQTT→Kafka High-Performance Bridge (Go code)
 # ============================================================
 bridge:
-  type: go # go | camel | connect
+  type: camel # go | camel | connect
   # ============================================================
   # Go-based MQTT→Kafka Bridge
   # ============================================================
