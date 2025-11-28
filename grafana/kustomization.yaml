@@ -3,4 +3,4 @@ resources:
   - grafana.yaml
   - datasource-prometheus.yaml
   - rbac.yaml
-  - fleet-metrics-db.yaml
+  # - fleet-metrics-db.yaml

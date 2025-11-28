@@ -1,0 +1,128 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    app.openshift.io/vcs-uri: <<unknown>>
+    app.quarkus.io/quarkus-version: 3.27.0.redhat-00001
+    app.quarkus.io/commit-id: fb4745dcb882d4fbf1eef66991b66d1ef66f6783
+    app.quarkus.io/vcs-uri: https://github.com/sumicsamy/mqtt.git
+    app.quarkus.io/build-timestamp: 2025-11-28 - 03:59:55 +0000
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /q/metrics
+    prometheus.io/port: "8080"
+    prometheus.io/scheme: http
+  labels:
+    app.kubernetes.io/name: mqtt-to-kafka
+    app.kubernetes.io/part-of: fleet-telemetry
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/managed-by: quarkus
+    app.openshift.io/runtime: quarkus
+  name: mqtt-to-kafka
+spec:
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app.kubernetes.io/name: mqtt-to-kafka
+    app.kubernetes.io/part-of: fleet-telemetry
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    app.openshift.io/vcs-uri: <<unknown>>
+    app.quarkus.io/quarkus-version: 3.27.0.redhat-00001
+    app.quarkus.io/commit-id: fb4745dcb882d4fbf1eef66991b66d1ef66f6783
+    app.quarkus.io/vcs-uri: https://github.com/sumicsamy/mqtt.git
+    app.quarkus.io/build-timestamp: 2025-11-28 - 03:59:55 +0000
+    prometheus.io/scrape: "true"
+    prometheus.io/path: /q/metrics
+    prometheus.io/port: "8080"
+    prometheus.io/scheme: http
+  labels:
+    app.kubernetes.io/managed-by: quarkus
+    app.openshift.io/runtime: quarkus
+    app.kubernetes.io/part-of: fleet-telemetry
+    app.kubernetes.io/name: mqtt-to-kafka
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  name: mqtt-to-kafka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/part-of: fleet-telemetry
+      app.kubernetes.io/name: mqtt-to-kafka
+      app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  template:
+    metadata:
+      annotations:
+        alpha.image.policy.openshift.io/resolve-names: '*'
+        app.openshift.io/vcs-uri: <<unknown>>
+        app.quarkus.io/quarkus-version: 3.27.0.redhat-00001
+        app.quarkus.io/commit-id: fb4745dcb882d4fbf1eef66991b66d1ef66f6783
+        app.quarkus.io/vcs-uri: https://github.com/sumicsamy/mqtt.git
+        app.quarkus.io/build-timestamp: 2025-11-28 - 03:59:55 +0000
+        prometheus.io/scrape: "true"
+        prometheus.io/path: /q/metrics
+        prometheus.io/port: "8080"
+        prometheus.io/scheme: http
+      labels:
+        app.kubernetes.io/managed-by: quarkus
+        app.openshift.io/runtime: quarkus
+        app.kubernetes.io/part-of: fleet-telemetry
+        app.kubernetes.io/name: mqtt-to-kafka
+        app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    spec:
+      containers:
+        - env:
+            - name: MQTT_BROKER_URL
+              value: tcp://mqtt-broker:1883
+            - name: KAFKA_TOPIC
+              value: truck-telemetry
+            - name: MQTT_TOPIC
+              value: mine/fleet/+/truck/+/#
+            - name: KAFKA_BROKERS
+              value: my-cluster-kafka-bootstrap:9092
+            - name: BRIDGE_ID
+              value: camel-mqtt-bridge-01
+          image: quay.io/suchugh/mqtt-kafka-camel:1.0.1
+          imagePullPolicy: Always
+          name: mqtt-to-kafka
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  annotations:
+    app.openshift.io/vcs-uri: <<unknown>>
+    app.quarkus.io/quarkus-version: 3.27.0.redhat-00001
+    app.quarkus.io/commit-id: fb4745dcb882d4fbf1eef66991b66d1ef66f6783
+    app.quarkus.io/vcs-uri: https://github.com/sumicsamy/mqtt.git
+    app.quarkus.io/build-timestamp: 2025-11-28 - 03:59:55 +0000
+  labels:
+    app.kubernetes.io/name: mqtt-to-kafka
+    app.kubernetes.io/part-of: fleet-telemetry
+    app.kubernetes.io/version: 1.0.0-SNAPSHOT
+    app.kubernetes.io/managed-by: quarkus
+    app.openshift.io/runtime: quarkus
+  name: mqtt-to-kafka
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mqtt-to-kafka
+      app.kubernetes.io/part-of: fleet-telemetry
+      app.kubernetes.io/version: 1.0.0-SNAPSHOT
+  endpoints:
+    - scheme: http
+      targetPort: 8080
+      path: /q/metrics
+      interval: 10s
+      honorLabels: true

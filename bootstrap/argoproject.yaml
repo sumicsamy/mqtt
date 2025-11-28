@@ -23,4 +23,5 @@ spec:
     kind: Secret
     jsonPointers:
     - /metadata/annotations/kubectl.kubernetes.io~1last-applied-configuration
-    - /metadata/annotations    
+    - /metadata/annotations
+    - /metadata/labels   

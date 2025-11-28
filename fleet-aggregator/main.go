@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -197,6 +198,80 @@ var (
 	)
 )
 
+var (
+	loaderLat = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "loader_latitude"},
+		[]string{"region", "loader_id"},
+	)
+	loaderLon = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "loader_longitude"},
+		[]string{"region", "loader_id"},
+	)
+
+	crusherLat = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "crusher_latitude"},
+		[]string{"region", "crusher_id"},
+	)
+	crusherLon = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{Name: "crusher_longitude"},
+		[]string{"region", "crusher_id"},
+	)
+)
+
+func pushStaticSiteLocations() {
+	sites := map[string]struct {
+		loaders  []struct{ Lat, Lon float64 }
+		crushers []struct{ Lat, Lon float64 }
+	}{
+		"pilbara": {
+			loaders: []struct{ Lat, Lon float64 }{
+				{-22.29500, 117.76500},
+				{-22.29620, 117.77050},
+				{-22.29350, 117.76800},
+			},
+			crushers: []struct{ Lat, Lon float64 }{
+				{-22.30000, 117.78000},
+				{-22.29200, 117.79000},
+			},
+		},
+		"tomprice": {
+			loaders: []struct{ Lat, Lon float64 }{
+				{-22.69150, 117.80000},
+				{-22.68880, 117.80850},
+				{-22.68620, 117.79780},
+			},
+			crushers: []struct{ Lat, Lon float64 }{
+				{-22.69500, 117.80500},
+				{-22.68500, 117.78500},
+			},
+		},
+		"paraburdoo": {
+			loaders: []struct{ Lat, Lon float64 }{
+				{-23.20520, 117.66500},
+				{-23.20780, 117.67000},
+				{-23.20200, 117.66250},
+			},
+			crushers: []struct{ Lat, Lon float64 }{
+				{-23.21000, 117.67500},
+				{-23.20000, 117.68000},
+			},
+		},
+	}
+
+	for region, v := range sites {
+		for i, l := range v.loaders {
+			id := fmt.Sprintf("%d", i)
+			loaderLat.WithLabelValues(region, id).Set(l.Lat)
+			loaderLon.WithLabelValues(region, id).Set(l.Lon)
+		}
+		for i, c := range v.crushers {
+			id := fmt.Sprintf("%d", i)
+			crusherLat.WithLabelValues(region, id).Set(c.Lat)
+			crusherLon.WithLabelValues(region, id).Set(c.Lon)
+		}
+	}
+}
+
 // all possible states from simulator
 var allStates = []string{
 	"driving_to_crusher",
@@ -215,7 +290,7 @@ func init() {
 		backpressureEvents,
 		engineRPM, engineTemp, engineOil,
 		sysCPU, sysMem, sysTemp, sysNetLatency, sysSignal,
-		truckState,
+		truckState, loaderLat, loaderLon, crusherLat, crusherLon,
 	)
 }
 
@@ -306,6 +381,8 @@ func main() {
 			log.Fatalf("metrics server error: %v", err)
 		}
 	}()
+
+	pushStaticSiteLocations()
 
 	brokers := getenv("KAFKA_BROKERS", "fleet-kafka-kafka-bootstrap:9092")
 	topic := getenv("KAFKA_TOPIC", "truck-telemetry")

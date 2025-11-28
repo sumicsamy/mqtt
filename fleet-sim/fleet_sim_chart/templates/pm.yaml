@@ -1,19 +1,16 @@
-{{- if eq .Values.platform "amq" }}
+{{- range $site := .Values.sites }}
+{{- if eq $.Values.platform "amq" }}
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
   name: fleet-sim-pod-monitor
+  namespace: {{ $site.namespace }}
   labels:
     fleet_sim: "true"
 spec:
   selector:
     matchLabels:
       fleet_sim: "true"
-  namespaceSelector:
-    matchNames:
-      - site-pilbara
-      - site-tomprice
-      - site-paraburdoo
   podMetricsEndpoints:
   - path: /metrics
     port: http-metrics
@@ -23,18 +20,15 @@ apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
   name: fleet-sim-pod-monitor
+  namespace: {{ $site.namespace }}
   labels:
     fleet_sim: "true"
 spec:
   selector:
     matchLabels:
       fleet_sim: "true"
-  namespaceSelector:
-    matchNames:
-      - site-emqx-pilbara
-      - site-emqx-tomprice
-      - site-emqx-paraburdoo
   podMetricsEndpoints:
   - path: /metrics
     port: http-metrics
+{{- end }}
 {{- end }}

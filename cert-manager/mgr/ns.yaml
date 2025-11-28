@@ -8,3 +8,4 @@ metadata:
     argocd.argoproj.io/sync-wave: "0"
   labels:
     inject-fleet-ca: enabled
+    
