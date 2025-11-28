@@ -16,35 +16,39 @@ import (
 )
 
 /************** Telemetry Schema **************/
-type Telemetry struct {
-	TS     string `json:"ts"`
-	Region string `json:"region"`
-	Truck  string `json:"truck"`
-	Loc    struct {
-		Lat float64 `json:"lat"`
-		Lon float64 `json:"lon"`
-		Alt float64 `json:"alt"`
-	} `json:"loc"`
-	Spd float64 `json:"spd"`
-	Eng struct {
-		Rpm  int     `json:"rpm"`
-		Tmp  float64 `json:"tmp"`
-		Oil  float64 `json:"oil"`
-		Fuel float64 `json:"fuel"`
-	} `json:"eng"`
-	Load struct {
-		GrossT float64 `json:"gross_t"`
-		PayT   float64 `json:"pay_t"`
-		Tray   float64 `json:"tray"`
-	} `json:"load"`
-	Sys struct {
-		Cpu int     `json:"cpu"`
-		Mem int     `json:"mem"`
-		Tmp float64 `json:"tmp"`
-		Lat int     `json:"lat"`
-		Sig int     `json:"sig"`
-	} `json:"sys"`
-	State string `json:"state"`
+
+type TelemetryFragment struct {
+	TS string `json:"ts"`
+
+	// --- Location Payload ---
+	Lat *float64 `json:"lat"`
+	Lon *float64 `json:"lon"`
+	Alt *float64 `json:"alt"`
+
+	// --- Engine Payload ---
+	Rpm  *int     `json:"rpm"`
+	Tmp  *float64 `json:"tmp"`
+	Oil  *float64 `json:"oil"`
+	Fuel *float64 `json:"fuel"`
+
+	// --- Load Payload ---
+	GrossT *float64 `json:"gross_t"`
+	PayT   *float64 `json:"pay_t"`
+	Tray   *float64 `json:"tray"`
+
+	// --- System Payload ---
+	Cpu *int `json:"cpu"`
+	Mem *int `json:"mem"`
+	Sig *int `json:"sig"`
+	// Renamed from "lat" to avoid confusion
+	NetworkLatency *int `json:"network_latency"`
+
+	// --- Status Payload ---
+	State      *string  `json:"state"`
+	Spd        *float64 `json:"spd"`
+	RateHz     *float64 `json:"rate_hz"`
+	TargetID   *int     `json:"target_id"`
+	TargetType *string  `json:"target_type"`
 }
 
 /************** Prometheus Metrics **************/
@@ -196,6 +200,15 @@ var (
 		},
 		[]string{"region", "truck", "state"},
 	)
+
+	// New Metric for Target Tracking
+	truckTarget = prometheus.NewGaugeVec(
+		prometheus.GaugeOpts{
+			Name: "truck_target_id",
+			Help: "ID of the crusher or loader the truck is targeting",
+		},
+		[]string{"region", "truck", "target_type"},
+	)
 )
 
 var (
@@ -290,7 +303,7 @@ func init() {
 		backpressureEvents,
 		engineRPM, engineTemp, engineOil,
 		sysCPU, sysMem, sysTemp, sysNetLatency, sysSignal,
-		truckState, loaderLat, loaderLon, crusherLat, crusherLon,
+		truckState, truckTarget, loaderLat, loaderLon, crusherLat, crusherLon,
 	)
 }
 
@@ -306,64 +319,111 @@ func (ConsumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim
 	count := 0
 
 	for msg := range claim.Messages() {
-		var t Telemetry
+		// 1. Identify Identity from Kafka Key (Region:Truck)
+		key := string(msg.Key)
+		parts := strings.Split(key, ":")
+		if len(parts) != 2 {
+			sess.MarkMessage(msg, "")
+			continue
+		}
+		region := parts[0]
+		truck := parts[1]
+		labels := []string{region, truck}
+
+		// 2. Unmarshal into generic fragment
+		var t TelemetryFragment
 		if err := json.Unmarshal(msg.Value, &t); err != nil {
 			log.Printf("json decode failed: %v", err)
 			continue
 		}
 
-		labels := []string{t.Region, t.Truck}
-
 		// ---------------------- Prometheus Metrics ----------------------
 		msgCount.WithLabelValues(labels...).Inc()
 
-		// Speed, fuel, load, coords
-		truckSpeed.WithLabelValues(labels...).Set(t.Spd)
-		truckFuel.WithLabelValues(labels...).Set(t.Eng.Fuel)
-		truckLoad.WithLabelValues(labels...).Set(t.Load.PayT)
-		truckLat.WithLabelValues(labels...).Set(t.Loc.Lat)
-		truckLon.WithLabelValues(labels...).Set(t.Loc.Lon)
+		// --- LOCATION Message ---
+		if t.Lon != nil && t.Lat != nil {
+			truckLat.WithLabelValues(labels...).Set(*t.Lat)
+			truckLon.WithLabelValues(labels...).Set(*t.Lon)
+		}
 
-		// Engine metrics
-		engineRPM.WithLabelValues(labels...).Set(float64(t.Eng.Rpm))
-		engineTemp.WithLabelValues(labels...).Set(t.Eng.Tmp)
-		engineOil.WithLabelValues(labels...).Set(t.Eng.Oil)
-
-		// System metrics
-		sysCPU.WithLabelValues(labels...).Set(float64(t.Sys.Cpu))
-		sysMem.WithLabelValues(labels...).Set(float64(t.Sys.Mem))
-		sysTemp.WithLabelValues(labels...).Set(t.Sys.Tmp)
-		sysNetLatency.WithLabelValues(labels...).Set(float64(t.Sys.Lat))
-		sysSignal.WithLabelValues(labels...).Set(float64(t.Sys.Sig))
-
-		// End to end latency
-		ts, err := time.Parse(time.RFC3339, t.TS)
-		if err == nil {
-			latency := time.Since(ts).Seconds()
-			if latency < 0 {
-				latency = 0
+		// --- ENGINE Message ---
+		if t.Rpm != nil {
+			engineRPM.WithLabelValues(labels...).Set(float64(*t.Rpm))
+			if t.Tmp != nil {
+				engineTemp.WithLabelValues(labels...).Set(*t.Tmp)
 			}
-			latencyHist.WithLabelValues(labels...).Observe(latency)
-
-			// Backpressure threshold
-			if latency > 0.5 { // 500 ms
-				backpressureEvents.WithLabelValues(labels...).Inc()
+			if t.Oil != nil {
+				engineOil.WithLabelValues(labels...).Set(*t.Oil)
+			}
+			if t.Fuel != nil {
+				truckFuel.WithLabelValues(labels...).Set(*t.Fuel)
 			}
 		}
 
-		// Message rate approximation per truck
+		// --- LOAD Message ---
+		if t.GrossT != nil {
+			truckLoad.WithLabelValues(labels...).Set(*t.PayT)
+		}
+
+		// --- SYSTEM Message ---
+		if t.Cpu != nil {
+			sysCPU.WithLabelValues(labels...).Set(float64(*t.Cpu))
+			if t.Mem != nil {
+				sysMem.WithLabelValues(labels...).Set(float64(*t.Mem))
+			}
+			// Updated: "network_latency" field
+			if t.NetworkLatency != nil {
+				sysNetLatency.WithLabelValues(labels...).Set(float64(*t.NetworkLatency))
+			}
+			if t.Sig != nil {
+				sysSignal.WithLabelValues(labels...).Set(float64(*t.Sig))
+			}
+			if t.Tmp != nil {
+				sysTemp.WithLabelValues(labels...).Set(*t.Tmp)
+			}
+		}
+
+		// --- STATUS Message ---
+		if t.State != nil {
+			if t.Spd != nil {
+				truckSpeed.WithLabelValues(labels...).Set(*t.Spd)
+			}
+
+			// State
+			for _, s := range allStates {
+				truckState.WithLabelValues(region, truck, s).Set(0)
+			}
+			truckState.WithLabelValues(region, truck, *t.State).Set(1)
+
+			// Target Info
+			if t.TargetID != nil && t.TargetType != nil {
+				// Reset any potential stale target types for this truck?
+				// For simplicity, we just set the gauge. Ideally you'd zero out the other type.
+				truckTarget.WithLabelValues(region, truck, *t.TargetType).Set(float64(*t.TargetID))
+			}
+		}
+
+		// --- Common Metadata ---
+		if t.TS != "" {
+			ts, err := time.Parse(time.RFC3339, t.TS)
+			if err == nil {
+				latency := time.Since(ts).Seconds()
+				if latency < 0 {
+					latency = 0
+				}
+				latencyHist.WithLabelValues(labels...).Observe(latency)
+				if latency > 0.5 {
+					backpressureEvents.WithLabelValues(labels...).Inc()
+				}
+			}
+		}
+
 		count++
 		if time.Since(last) > 1*time.Second {
 			msgRate.WithLabelValues(labels...).Set(float64(count))
 			count = 0
 			last = time.Now()
 		}
-
-		// Truck state: reset all, then set current to 1
-		for _, s := range allStates {
-			truckState.WithLabelValues(t.Region, t.Truck, s).Set(0)
-		}
-		truckState.WithLabelValues(t.Region, t.Truck, t.State).Set(1)
 
 		sess.MarkMessage(msg, "")
 	}
@@ -384,7 +444,11 @@ func main() {
 
 	pushStaticSiteLocations()
 
-	brokers := getenv("KAFKA_BROKERS", "fleet-kafka-kafka-bootstrap:9092")
+	brokers := getenv("KAFKA_BOOTSTRAP_SERVERS", "")
+	if brokers == "" {
+		brokers = getenv("KAFKA_BROKERS", "fleet-kafka-kafka-bootstrap:9092")
+	}
+
 	topic := getenv("KAFKA_TOPIC", "truck-telemetry")
 	group := getenv("KAFKA_GROUP", "fleet-consumer")
 
