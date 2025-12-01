@@ -83,14 +83,15 @@ spec:
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 10
-            labelSelector:
-              matchExpressions:
-                - key: ActiveMQArtemis
-                  operator: In
-                  values:
-                    - fleet-manager-broker
-            topologyKey: kubernetes.io/hostname
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                  - key: ActiveMQArtemis
+                    operator: In
+                    values:
+                      - fleet-manager-broker
+              topologyKey: kubernetes.io/hostname
+              weight: 10
   console:
     expose: true
   
