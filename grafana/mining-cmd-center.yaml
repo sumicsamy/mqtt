@@ -1,11 +1,7 @@
 apiVersion: dashboard.grafana.app/v2beta1
 kind: Dashboard
 metadata:
-  name: ro4875g
-  generation: 8
-  creationTimestamp: '2025-11-30T15:49:47Z'
-  labels: {}
-  annotations: {}
+  name: mining-cmd-center
 spec:
   annotations:
     - kind: AnnotationQuery

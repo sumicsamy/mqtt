@@ -555,7 +555,7 @@ spec:
           kind: DataQuery
           spec:
             qryType: 1
-            query: label_values(namespace)
+            query: label_values({namespace=~"site-paraburdoo|site-pilbara|site-tomprice"},namespace)
             refId: PrometheusVariableQueryEditor-VariableQuery
           version: v0
         refresh: onDashboardLoad

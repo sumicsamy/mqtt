@@ -3,4 +3,7 @@ resources:
   - grafana.yaml
   - datasource-prometheus.yaml
   - rbac.yaml
+  - bridge-camel-db.yaml
+  - mining-cmd-center.yaml
+  - simulator-db.yaml
   # - fleet-metrics-db.yaml

@@ -2,18 +2,7 @@ apiVersion: dashboard.grafana.app/v2beta1
 kind: Dashboard
 metadata:
   name: mqtt-kafka-bridge-001
-  namespace: default
-  uid: CXPGsTOEfYu5mFIG4pYAYA3wgzcgDrZKwT1nTQEjE5MX
-  resourceVersion: '1'
-  generation: 2
-  creationTimestamp: '2025-11-28T17:52:21Z'
-  labels:
-    grafana.app/deprecatedInternalID: '2'
-  annotations:
-    grafana.app/createdBy: user:ef5i31zhmhrlsd
-    grafana.app/updatedBy: user:ef5i31zhmhrlsd
-    grafana.app/updatedTimestamp: '2025-11-28T17:52:21Z'
-    grafana.app/saved-from-ui: Grafana v12.4.0-19628459846 (39dc659ad8)
+  namespace: grafana
 spec:
   annotations:
     - kind: AnnotationQuery
