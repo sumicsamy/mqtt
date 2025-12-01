@@ -69,20 +69,13 @@ spec:
         -Djava.nio.channels.spi.SelectorProvider=sun.nio.ch.EPollSelectorProvider
         -Damq.security=true  
   deploymentPlan:
-    size: 1
-    persistenceEnabled: true
-    clustered: true
+    size: {{ .Values.broker.replicas }}
+    persistenceEnabled: {{ .Values.broker.persistence.enabled }}
+    clustered: {{ .Values.broker.clustered }}
     journalType: aio
     enableMetricsPlugin: true
     storage:
-      size: 150Gi
-    resources:
-      requests:
-        memory: 32Gi
-        cpu: "8000m"
-      limits:
-        memory: "64Gi"
-        cpu: "12000m"
+      size: {{ .Values.broker.persistence.size }}
     extraMounts:
       secrets:
       - "fleet-manager-broker-jaas-config"

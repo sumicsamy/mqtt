@@ -9,3 +9,17 @@ sites:
     namespace: site-paraburdoo
     truckCount: 100
 brokerNamespace: mqtt-broker    
+
+broker:
+  replicas: 20
+  clustered: false
+  persistence:
+    enabled: false
+    size: 200Gi
+  resources:
+    requests:
+      memory: 32Gi
+      cpu: "2000m"
+    limits:
+      memory: "64Gi"
+      cpu: "6000m"  
