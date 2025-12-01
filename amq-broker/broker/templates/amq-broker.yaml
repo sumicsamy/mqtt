@@ -80,16 +80,16 @@ spec:
       secrets:
       - "fleet-manager-broker-jaas-config"
       - "site-roles-bp"
-    affinity:
-      podAntiAffinity:
-        requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-                - key: ActiveMQArtemis
-                  operator: In
-                  values:
-                    - fleet-manager-broker
-            topologyKey: kubernetes.io/hostname
+    # affinity:
+    #   podAntiAffinity:
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #       - labelSelector:
+    #           matchExpressions:
+    #             - key: ActiveMQArtemis
+    #               operator: In
+    #               values:
+    #                 - fleet-manager-broker
+    #         topologyKey: kubernetes.io/hostname
   console:
     expose: true
   
