@@ -91,7 +91,7 @@ spec:
                     values:
                       - fleet-manager-broker
               topologyKey: kubernetes.io/hostname
-              weight: 10
+            weight: 10
   console:
     expose: true
   
