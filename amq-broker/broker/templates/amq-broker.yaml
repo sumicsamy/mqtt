@@ -83,7 +83,8 @@ spec:
     affinity:
       podAntiAffinity:
         preferredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
+          - weight: 10
+            labelSelector:
               matchExpressions:
                 - key: ActiveMQArtemis
                   operator: In
