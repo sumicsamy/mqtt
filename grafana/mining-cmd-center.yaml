@@ -1,9 +1,9 @@
 apiVersion: dashboard.grafana.app/v2beta1
 kind: Dashboard
 metadata:
-  name: mining-fleet-001
-  generation: 9
-  creationTimestamp: '2025-11-28T18:06:08Z'
+  name: ro4875g
+  generation: 8
+  creationTimestamp: '2025-11-30T15:49:47Z'
   labels: {}
   annotations: {}
 spec:
@@ -429,11 +429,13 @@ spec:
                     group: prometheus
                     kind: DataQuery
                     spec:
-                      editorMode: builder
-                      expr: truck_latitude{region="$region", truck=~"$truck"}
+                      editorMode: code
+                      exemplar: false
+                      expr: 'truck_latitude{region="$region", truck=~"$truck"} '
                       format: table
                       instant: true
                       legendFormat: truck_latitude
+                      range: false
                     version: v0
                   refId: A
               - kind: PanelQuery
@@ -444,10 +446,12 @@ spec:
                     kind: DataQuery
                     spec:
                       editorMode: code
+                      exemplar: false
                       expr: truck_longitude{region="$region", truck=~"$truck"}
                       format: table
                       instant: true
                       legendFormat: truck_longitude
+                      range: false
                     version: v0
                   refId: B
               - kind: PanelQuery
@@ -534,29 +538,243 @@ spec:
                       legendFormat: crusher_longitude
                     version: v0
                   refId: H
+              - kind: PanelQuery
+                spec:
+                  hidden: false
+                  query:
+                    group: prometheus
+                    kind: DataQuery
+                    spec:
+                      editorMode: builder
+                      exemplar: false
+                      expr: truck_state{region="$region", truck=~"$truck"} == 1
+                      format: table
+                      instant: true
+                      legendFormat: State
+                      range: false
+                    version: v0
+                  refId: I
             queryOptions: {}
             transformations:
-              - kind: seriesToColumns
+              - kind: concatenate
                 spec:
-                  id: seriesToColumns
+                  id: concatenate
                   options:
-                    byField: region
-                    mode: outer
+                    frameNameLabel: truckdata
+                    frameNameMode: label
+                  topic: series
+              - kind: concatenate
+                spec:
+                  filter:
+                    id: byRefId
+                    options: /^(?:E|F)$/
+                  id: concatenate
+                  options:
+                    frameNameLabel: loader
+                    frameNameMode: label
+                  topic: series
+              - kind: concatenate
+                spec:
+                  filter:
+                    id: byRefId
+                    options: /^(?:G|H)$/
+                  id: concatenate
+                  options:
+                    frameNameLabel: crusher
+                    frameNameMode: label
+                  topic: series
+              - kind: joinByField
+                spec:
+                  disabled: true
+                  filter:
+                    id: byRefId
+                    options: /^(?:)$/
+                  id: joinByField
+                  options:
+                    byField: truck 1
+                    mode: inner
+                  topic: series
               - kind: organize
                 spec:
                   id: organize
                   options:
-                    excludeByName: {}
-                    indexByName: {}
+                    excludeByName:
+                      Time: true
+                      Time 1: false
+                      Time 2: true
+                      Time 3: true
+                      Time 4: true
+                      Time 5: true
+                      'Value #I': true
+                      __name__: true
+                      __name__ 1: true
+                      __name__ 2: true
+                      __name__ 3: true
+                      __name__ 4: true
+                      __name__ 5: true
+                      __name__ 6: true
+                      __name__ 7: true
+                      __name__ 8: true
+                      __name__ 9: true
+                      container: true
+                      container 1: true
+                      container 2: true
+                      container 3: true
+                      container 4: true
+                      container 5: true
+                      container 6: true
+                      container 7: true
+                      container 8: true
+                      container 9: true
+                      crusher_id 2: true
+                      endpoint: true
+                      endpoint 1: true
+                      endpoint 2: true
+                      endpoint 3: true
+                      endpoint 4: true
+                      endpoint 5: true
+                      endpoint 6: true
+                      endpoint 7: true
+                      endpoint 8: true
+                      endpoint 9: true
+                      instance: true
+                      instance 1: true
+                      instance 2: true
+                      instance 3: true
+                      instance 4: true
+                      instance 5: true
+                      instance 6: true
+                      instance 7: true
+                      instance 8: true
+                      instance 9: true
+                      job: true
+                      job 1: true
+                      job 2: true
+                      job 3: true
+                      job 4: true
+                      job 5: true
+                      job 6: true
+                      job 7: true
+                      job 8: true
+                      job 9: true
+                      loader_id 2: true
+                      namespace: true
+                      namespace 1: true
+                      namespace 2: true
+                      namespace 3: true
+                      namespace 4: true
+                      namespace 5: true
+                      namespace 6: true
+                      namespace 7: true
+                      namespace 8: true
+                      namespace 9: true
+                      pod: true
+                      pod 1: true
+                      pod 2: true
+                      pod 3: true
+                      pod 4: true
+                      pod 5: true
+                      pod 6: true
+                      pod 7: true
+                      pod 8: true
+                      pod 9: true
+                      prometheus: true
+                      prometheus 1: true
+                      prometheus 2: true
+                      prometheus 3: true
+                      prometheus 4: true
+                      prometheus 5: true
+                      prometheus 6: true
+                      prometheus 7: true
+                      prometheus 8: true
+                      prometheus 9: true
+                      region: true
+                      region 1: true
+                      region 2: true
+                      region 3: true
+                      region 4: true
+                      region 5: true
+                      region 6: true
+                      region 7: true
+                      region 8: true
+                      region 9: true
+                      service: true
+                      service 1: true
+                      service 2: true
+                      service 3: true
+                      service 4: true
+                      service 5: true
+                      service 6: true
+                      service 7: true
+                      service 8: true
+                      service 9: true
+                      truck 2: true
+                      truck 3: true
+                      truck 4: true
+                      truck 5: true
+                    includeByName: {}
+                    indexByName:
+                      Time 1: 2
+                      Time 2: 14
+                      Time 3: 26
+                      Time 4: 38
+                      'Value #A': 13
+                      'Value #B': 25
+                      'Value #C': 37
+                      'Value #D': 1
+                      __name__ 1: 3
+                      __name__ 2: 15
+                      __name__ 3: 27
+                      __name__ 4: 39
+                      container 1: 4
+                      container 2: 16
+                      container 3: 28
+                      container 4: 40
+                      endpoint 1: 5
+                      endpoint 2: 17
+                      endpoint 3: 29
+                      endpoint 4: 41
+                      instance 1: 6
+                      instance 2: 18
+                      instance 3: 30
+                      instance 4: 42
+                      job 1: 7
+                      job 2: 19
+                      job 3: 31
+                      job 4: 43
+                      namespace 1: 8
+                      namespace 2: 20
+                      namespace 3: 32
+                      namespace 4: 44
+                      pod 1: 9
+                      pod 2: 21
+                      pod 3: 33
+                      pod 4: 45
+                      prometheus 1: 10
+                      prometheus 2: 22
+                      prometheus 3: 34
+                      prometheus 4: 46
+                      region 1: 11
+                      region 2: 23
+                      region 3: 35
+                      region 4: 47
+                      service 1: 12
+                      service 2: 24
+                      service 3: 36
+                      service 4: 48
+                      truck: 0
+                    orderByMode: manual
                     renameByName:
                       'Value #A': lat
                       'Value #B': lon
                       'Value #C': Payload
                       'Value #D': Speed
-                      'Value #E': lat
-                      'Value #F': lon
-                      'Value #G': lat
-                      'Value #H': lon
+                      'Value #E': loader_lat
+                      'Value #F': loader_lon
+                      'Value #G': crusher_lat
+                      'Value #H': crusher_lon
+                      'Value #I': 'Crusher/Loader #ID'
+                      loader_id 2: ''
         description: Real-time location of Trucks, Crushers, and Loaders.
         id: 2
         links: []
@@ -584,9 +802,13 @@ spec:
               basemap:
                 config:
                   server: streets
+                  showLabels: true
+                  theme: auto
+                layer-tooltip: true
                 name: Layer 1
                 noRepeat: false
-                type: default
+                opacity: 0.9
+                type: xyz
               controls:
                 mouseWheelZoom: true
                 showAttribution: true
@@ -596,12 +818,7 @@ spec:
                 showZoom: true
               layers:
                 - config:
-                    showLocation: true
-                    size:
-                      field: Payload
-                      fixed: 5
-                      max: 15
-                      min: 2
+                    showLegend: true
                     style:
                       color:
                         field: Speed
@@ -609,28 +826,36 @@ spec:
                       opacity: 1
                       rotation:
                         fixed: 0
+                        max: 360
+                        min: -360
+                        mode: mod
                       size:
-                        fixed: 14
+                        fixed: 9
                         max: 15
                         min: 2
                       symbol:
-                        fixed: img/icons/unicons/truck-loading.svg
+                        fixed: img/icons/unicons/truck.svg
+                        mode: fixed
+                      symbolAlign:
+                        horizontal: center
+                        vertical: center
                       text:
-                        field: Truck
+                        field: Payload
                         fixed: ''
+                        mode: fixed
                       textConfig:
-                        fontSize: 12
+                        fontSize: 7
                         offsetX: 0
                         offsetY: 0
                         textAlign: center
                         textBaseline: middle
+                  layer-tooltip: true
                   location:
                     latitude: lat
                     longitude: lon
-                    lookup: coords
                     mode: coords
-                    source: coords
                   name: Trucks
+                  opacity: 1
                   tooltip: true
                   type: markers
                 - config:
@@ -644,7 +869,7 @@ spec:
                       rotation:
                         fixed: 0
                       size:
-                        fixed: 7
+                        fixed: 5
                         max: 15
                         min: 2
                       symbol:
@@ -653,13 +878,16 @@ spec:
                           https://png.pngtree.com/png-clipart/20241113/original/pngtree-yellow-front-wheel-loader-isolated-on-white-background-png-image_16986356.png
                         mode: fixed
                       text:
+                        field: loader_id
                         fixed: ''
+                        mode: field
                       textConfig:
                         fontSize: 12
                         offsetX: 0
                         offsetY: 0
                         textAlign: center
                         textBaseline: middle
+                  layer-tooltip: true
                   location:
                     latitude: 'Value #E'
                     longitude: 'Value #F'
@@ -670,28 +898,26 @@ spec:
                   tooltip: true
                   type: markers
                 - config:
-                    showLocation: true
-                    size:
-                      fixed: 8
+                    showLegend: true
                     style:
                       color:
                         fixed: red
                       opacity: 1
                       rotation:
                         fixed: 0
+                        max: 360
+                        min: -360
+                        mode: mod
                       size:
-                        fixed: 7
+                        fixed: 5
                         max: 15
                         min: 2
                       symbol:
-                        field: ''
-                        fixed: >-
-                          https://www.shutterstock.com/image-vector/isometric-view-mobile-rock-crusher-600w-2691823191.jpg
+                        fixed: img/icons/marker/circle.svg
                         mode: fixed
                       symbolAlign:
+                        horizontal: center
                         vertical: center
-                      text:
-                        fixed: ''
                       textConfig:
                         fontSize: 12
                         offsetX: 0
@@ -699,11 +925,9 @@ spec:
                         textAlign: center
                         textBaseline: middle
                   location:
-                    latitude: 'Value #G'
-                    longitude: 'Value #H'
-                    lookup: coords
+                    latitude: crusher_lat
+                    longitude: crusher_lon
                     mode: coords
-                    source: coords
                   name: Crushers
                   tooltip: true
                   type: markers
@@ -1013,13 +1237,9 @@ spec:
   links: []
   liveNow: false
   preload: false
-  tags:
-    - mining
-    - fleet
-    - kafka
-    - telemetry
+  tags: []
   timeSettings:
-    autoRefresh: 10s
+    autoRefresh: 5s
     autoRefreshIntervals:
       - 5s
       - 10s
@@ -1032,11 +1252,11 @@ spec:
       - 2h
       - 1d
     fiscalYearStartMonth: 0
-    from: now-15m
+    from: now-1m
     hideTimepicker: false
     timezone: browser
     to: now
-  title: Mining Fleet Command Center
+  title: Mining Fleet Command Center Copy
   variables:
     - kind: DatasourceVariable
       spec:

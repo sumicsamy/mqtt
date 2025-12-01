@@ -225,7 +225,8 @@ grafana/dummy
 */.pytest_cache/
 */.venv/
 
-*/go.sum
+*/**/go.sum
+
 */bin
 */bin/*
 .DS_Store
@@ -233,6 +234,8 @@ grafana/dummy
 logs
 
 docs/
-*/.gitignore
-*/.dockerignore
+*/**/.gitignore
+*/**/.dockerignore
 .vscode
+*/**/.mvn
+
