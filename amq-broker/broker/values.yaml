@@ -11,7 +11,7 @@ sites:
 brokerNamespace: mqtt-broker    
 
 broker:
-  replicas: 20
+  replicas: 2
   clustered: false
   persistence:
     enabled: false
