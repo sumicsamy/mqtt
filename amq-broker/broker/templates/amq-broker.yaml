@@ -40,6 +40,19 @@ spec:
       autoCreateAddresses: true
       autoDeleteQueues: false
       autoDeleteAddresses: false
+    - match: "load.#"
+      maxSizeBytes: -"1"
+      pageSizeBytes: "104857600"
+      addressFullPolicy: DROP
+      maxDeliveryAttempts: 1
+      redeliveryDelay: 0
+      enableMetrics: true
+      defaultConsumerWindowSize: 104857600
+      deadLetterAddress: "DLQ"
+      autoCreateQueues: true
+      autoCreateAddresses: true
+      autoDeleteQueues: false
+      autoDeleteAddresses: false  
     - match: "$.artemis.internal.#"
       maxSizeBytes: "10485760"
       addressFullPolicy: PAGE   
