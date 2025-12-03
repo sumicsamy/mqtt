@@ -22,7 +22,7 @@ spec:
       protocol: TCP
       targetPort: 8080
   selector:
-    app.kubernetes.io/name: mqtt-kafka-camel
+    app.openshift.io/runtime: quarkus
     app.kubernetes.io/part-of: fleet-telemetry
   type: ClusterIP
 ---
@@ -40,7 +40,7 @@ metadata:
   labels:
     app.openshift.io/runtime: quarkus
     app.kubernetes.io/part-of: fleet-telemetry
-    app.kubernetes.io/name: mqtt-kafka-camel
+    app.kubernetes.io/name: mqtt-kafka-camel-{{ $index }}
   name: mqtt-kafka-camel-{{ $index }}
   namespace: {{ $.Values.namespace }}
 spec:
@@ -48,7 +48,7 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/part-of: fleet-telemetry
-      app.kubernetes.io/name: mqtt-kafka-camel
+      app.kubernetes.io/name: mqtt-kafka-camel-{{ $index }}
   template:
     metadata:
       annotations:
@@ -62,7 +62,7 @@ spec:
       labels:
         app.openshift.io/runtime: quarkus
         app.kubernetes.io/part-of: fleet-telemetry
-        app.kubernetes.io/name: mqtt-kafka-camel
+        app.kubernetes.io/name: mqtt-kafka-camel-{{ $index }}
     spec:
       containers:
         - env:
@@ -120,7 +120,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: mqtt-kafka-camel
+      app.openshift.io/runtime: quarkus
       app.kubernetes.io/part-of: fleet-telemetry
   namespaceSelector:
     matchNames:
