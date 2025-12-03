@@ -40,6 +40,7 @@ metadata:
   labels:
     app.openshift.io/runtime: quarkus
     app.kubernetes.io/part-of: fleet-telemetry
+    app.openshift.io/name: mqtt-kafka-camel-{{ $index }}
   name: mqtt-kafka-camel-{{ $index }}
   namespace: {{ $.Values.namespace }}
 spec:
