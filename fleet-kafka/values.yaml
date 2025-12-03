@@ -55,7 +55,7 @@ bridge:
   # ============================================================        
   camel:
     image: "quay.io/suchugh/mqtt-kafka-camel:1.0.4"
-    replicas: 1
+    replicas: 3
     resources:
       requests:
         cpu: "500m"

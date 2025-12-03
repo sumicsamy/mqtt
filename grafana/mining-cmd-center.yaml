@@ -1,1325 +1,1380 @@
-apiVersion: dashboard.grafana.app/v2beta1
+apiVersion: grafana.integreatly.org/v1beta1
 kind: Dashboard
 metadata:
   name: mining-cmd-center
 spec:
-  annotations:
-    - kind: AnnotationQuery
-      spec:
-        builtIn: true
-        enable: true
-        hide: true
-        iconColor: rgba(0, 211, 255, 1)
-        name: Annotations & Alerts
-        query:
-          group: grafana
-          kind: DataQuery
-          spec: {}
-          version: v0
-  cursorSync: Crosshair
-  editable: true
-  elements:
-    panel-10:
-      kind: Panel
-      spec:
-        data:
-          kind: QueryGroup
-          spec:
-            queries:
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    datasource:
-                      name: ${datasource}
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      expr: >-
-                        truck_engine_temp_celsius{region="$region",
-                        truck=~"$truck"}
-                      legendFormat: '{{truck}} Engine'
-                    version: v0
-                  refId: A
-            queryOptions: {}
-            transformations: []
-        description: ''
-        id: 10
-        links: []
-        title: Engine Temperature
-        vizConfig:
-          group: timeseries
-          kind: VizConfig
-          spec:
-            fieldConfig:
-              defaults:
-                color:
-                  mode: palette-classic
-                custom:
-                  axisBorderShow: false
-                  axisCenteredZero: false
-                  axisColorMode: text
-                  axisLabel: ''
-                  axisPlacement: auto
-                  barAlignment: 0
-                  barWidthFactor: 0.6
-                  drawStyle: line
-                  fillOpacity: 10
-                  gradientMode: none
-                  hideFrom:
-                    legend: false
-                    tooltip: false
-                    viz: false
-                  insertNulls: false
-                  lineInterpolation: linear
-                  lineWidth: 1
-                  pointSize: 5
-                  scaleDistribution:
-                    type: linear
-                  showPoints: auto
-                  showValues: false
-                  spanNulls: false
-                  stacking:
-                    group: A
-                    mode: none
-                  thresholdsStyle:
-                    mode: 'off'
-                thresholds:
-                  mode: absolute
-                  steps:
-                    - color: green
-                      value: 0
-                unit: celsius
-              overrides: []
-            options:
-              legend:
-                calcs: []
-                displayMode: list
-                placement: bottom
-                showLegend: true
-              tooltip:
-                hideZeros: false
-                mode: single
-                sort: none
-          version: 12.4.0-19628459846
-    panel-11:
-      kind: Panel
-      spec:
-        data:
-          kind: QueryGroup
-          spec:
-            queries:
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    datasource:
-                      name: ${datasource}
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      expr: truck_engine_rpm{region="$region", truck=~"$truck"}
-                      legendFormat: '{{truck}}'
-                    version: v0
-                  refId: A
-            queryOptions: {}
-            transformations: []
-        description: ''
-        id: 11
-        links: []
-        title: Engine RPM
-        vizConfig:
-          group: timeseries
-          kind: VizConfig
-          spec:
-            fieldConfig:
-              defaults:
-                color:
-                  mode: palette-classic
-                custom:
-                  axisBorderShow: false
-                  axisCenteredZero: false
-                  axisColorMode: text
-                  axisLabel: ''
-                  axisPlacement: auto
-                  barAlignment: 0
-                  barWidthFactor: 0.6
-                  drawStyle: line
-                  fillOpacity: 10
-                  gradientMode: none
-                  hideFrom:
-                    legend: false
-                    tooltip: false
-                    viz: false
-                  insertNulls: false
-                  lineInterpolation: linear
-                  lineWidth: 1
-                  pointSize: 5
-                  scaleDistribution:
-                    type: linear
-                  showPoints: auto
-                  showValues: false
-                  spanNulls: false
-                  stacking:
-                    group: A
-                    mode: none
-                  thresholdsStyle:
-                    mode: 'off'
-                thresholds:
-                  mode: absolute
-                  steps:
-                    - color: green
-                      value: 0
-                unit: rpm
-              overrides: []
-            options:
-              legend:
-                calcs: []
-                displayMode: list
-                placement: bottom
-                showLegend: true
-              tooltip:
-                hideZeros: false
-                mode: single
-                sort: none
-          version: 12.4.0-19628459846
-    panel-12:
-      kind: Panel
-      spec:
-        data:
-          kind: QueryGroup
-          spec:
-            queries:
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    datasource:
-                      name: ${datasource}
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      expr: truck_sys_signal_dbm{region="$region", truck=~"$truck"}
-                      legendFormat: '{{truck}} Signal'
-                    version: v0
-                  refId: A
-            queryOptions: {}
-            transformations: []
-        description: ''
-        id: 12
-        links: []
-        title: Signal Strength (dBm)
-        vizConfig:
-          group: timeseries
-          kind: VizConfig
-          spec:
-            fieldConfig:
-              defaults:
-                color:
-                  mode: palette-classic
-                custom:
-                  axisBorderShow: false
-                  axisCenteredZero: false
-                  axisColorMode: text
-                  axisLabel: ''
-                  axisPlacement: auto
-                  barAlignment: 0
-                  barWidthFactor: 0.6
-                  drawStyle: line
-                  fillOpacity: 10
-                  gradientMode: none
-                  hideFrom:
-                    legend: false
-                    tooltip: false
-                    viz: false
-                  insertNulls: false
-                  lineInterpolation: linear
-                  lineWidth: 1
-                  pointSize: 5
-                  scaleDistribution:
-                    type: linear
-                  showPoints: auto
-                  showValues: false
-                  spanNulls: false
-                  stacking:
-                    group: A
-                    mode: none
-                  thresholdsStyle:
-                    mode: 'off'
-                thresholds:
-                  mode: absolute
-                  steps:
-                    - color: green
-                      value: 0
-                unit: dBm
-              overrides: []
-            options:
-              legend:
-                calcs: []
-                displayMode: list
-                placement: bottom
-                showLegend: true
-              tooltip:
-                hideZeros: false
-                mode: single
-                sort: none
-          version: 12.4.0-19628459846
-    panel-13:
-      kind: Panel
-      spec:
-        data:
-          kind: QueryGroup
-          spec:
-            queries:
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    datasource:
-                      name: ${datasource}
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      expr: >-
-                        histogram_quantile(0.95,
-                        sum(rate(telemetry_delivery_latency_seconds_bucket{region="$region"}[5m]))
-                        by (le, truck))
-                      legendFormat: '{{truck}} P95'
-                    version: v0
-                  refId: A
-            queryOptions: {}
-            transformations: []
-        description: ''
-        id: 13
-        links: []
-        title: End-to-End Latency (P95)
-        vizConfig:
-          group: timeseries
-          kind: VizConfig
-          spec:
-            fieldConfig:
-              defaults:
-                color:
-                  mode: palette-classic
-                custom:
-                  axisBorderShow: false
-                  axisCenteredZero: false
-                  axisColorMode: text
-                  axisLabel: ''
-                  axisPlacement: auto
-                  barAlignment: 0
-                  barWidthFactor: 0.6
-                  drawStyle: line
-                  fillOpacity: 10
-                  gradientMode: none
-                  hideFrom:
-                    legend: false
-                    tooltip: false
-                    viz: false
-                  insertNulls: false
-                  lineInterpolation: linear
-                  lineWidth: 1
-                  pointSize: 5
-                  scaleDistribution:
-                    type: linear
-                  showPoints: auto
-                  showValues: false
-                  spanNulls: false
-                  stacking:
-                    group: A
-                    mode: none
-                  thresholdsStyle:
-                    mode: 'off'
-                thresholds:
-                  mode: absolute
-                  steps:
-                    - color: green
-                      value: 0
-                unit: s
-              overrides: []
-            options:
-              legend:
-                calcs: []
-                displayMode: list
-                placement: bottom
-                showLegend: true
-              tooltip:
-                hideZeros: false
-                mode: single
-                sort: none
-          version: 12.4.0-19628459846
-    panel-14:
-      kind: Panel
-      spec:
-        data:
-          kind: QueryGroup
-          spec:
-            queries:
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    datasource:
-                      name: ${datasource}
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      editorMode: code
-                      expr: >-
-                        increase(kafka_backpressure_events_total{region="$region"}[1h])
-                      legendFormat: '{{truck}}'
-                      range: true
-                    version: v0
-                  refId: A
-            queryOptions: {}
-            transformations: []
-        description: ''
-        id: 14
-        links: []
-        title: Backpressure Events (1h)
-        vizConfig:
-          group: stat
-          kind: VizConfig
-          spec:
-            fieldConfig:
-              defaults:
-                color:
-                  mode: thresholds
-                thresholds:
-                  mode: absolute
-                  steps:
-                    - color: green
-                      value: 0
-                    - color: orange
-                      value: 1
-                    - color: red
-                      value: 5
-                unit: short
-              overrides: []
-            options:
-              colorMode: background
-              graphMode: none
-              justifyMode: auto
-              orientation: auto
-              percentChangeColorMode: standard
-              reduceOptions:
-                calcs:
-                  - sum
-                fields: ''
-                values: false
-              showPercentChange: false
-              textMode: auto
-              wideLayout: true
-          version: 12.4.0-19628459846
-    panel-2:
-      kind: Panel
-      spec:
-        data:
-          kind: QueryGroup
-          spec:
-            queries:
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      editorMode: code
-                      exemplar: false
-                      expr: 'truck_latitude{region="$region", truck=~"$truck"} '
-                      format: table
-                      instant: true
-                      legendFormat: truck_latitude
-                      range: false
-                    version: v0
-                  refId: A
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      editorMode: code
-                      exemplar: false
-                      expr: truck_longitude{region="$region", truck=~"$truck"}
-                      format: table
-                      instant: true
-                      legendFormat: truck_longitude
-                      range: false
-                    version: v0
-                  refId: B
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      editorMode: code
-                      expr: truck_payload_tonnes{region="$region", truck=~"$truck"}
-                      format: table
-                      instant: true
-                      legendFormat: truck_payload_tonnes
-                    version: v0
-                  refId: C
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      editorMode: code
-                      expr: truck_speed_kph{region="$region", truck=~"$truck"}
-                      format: table
-                      instant: true
-                      legendFormat: truck_speed_kph
-                    version: v0
-                  refId: D
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      editorMode: code
-                      expr: loader_latitude{region="$region"}
-                      format: table
-                      instant: true
-                      legendFormat: loader_latitude
-                    version: v0
-                  refId: E
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      editorMode: code
-                      expr: loader_longitude{region="$region"}
-                      format: table
-                      instant: true
-                      legendFormat: loader_longitude
-                    version: v0
-                  refId: F
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      editorMode: code
-                      expr: crusher_latitude{region="$region"}
-                      format: table
-                      instant: true
-                      legendFormat: crusher_latitude
-                    version: v0
-                  refId: G
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      editorMode: code
-                      expr: crusher_longitude{region="$region"}
-                      format: table
-                      instant: true
-                      legendFormat: crusher_longitude
-                    version: v0
-                  refId: H
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      editorMode: builder
-                      exemplar: false
-                      expr: truck_state{region="$region", truck=~"$truck"} == 1
-                      format: table
-                      instant: true
-                      legendFormat: State
-                      range: false
-                    version: v0
-                  refId: I
-            queryOptions: {}
-            transformations:
-              - kind: concatenate
-                spec:
-                  id: concatenate
-                  options:
-                    frameNameLabel: truckdata
-                    frameNameMode: label
-                  topic: series
-              - kind: concatenate
-                spec:
-                  filter:
-                    id: byRefId
-                    options: /^(?:E|F)$/
-                  id: concatenate
-                  options:
-                    frameNameLabel: loader
-                    frameNameMode: label
-                  topic: series
-              - kind: concatenate
-                spec:
-                  filter:
-                    id: byRefId
-                    options: /^(?:G|H)$/
-                  id: concatenate
-                  options:
-                    frameNameLabel: crusher
-                    frameNameMode: label
-                  topic: series
-              - kind: joinByField
-                spec:
-                  disabled: true
-                  filter:
-                    id: byRefId
-                    options: /^(?:)$/
-                  id: joinByField
-                  options:
-                    byField: truck 1
-                    mode: inner
-                  topic: series
-              - kind: organize
-                spec:
-                  id: organize
-                  options:
-                    excludeByName:
-                      Time: true
-                      Time 1: false
-                      Time 2: true
-                      Time 3: true
-                      Time 4: true
-                      Time 5: true
-                      'Value #I': true
-                      __name__: true
-                      __name__ 1: true
-                      __name__ 2: true
-                      __name__ 3: true
-                      __name__ 4: true
-                      __name__ 5: true
-                      __name__ 6: true
-                      __name__ 7: true
-                      __name__ 8: true
-                      __name__ 9: true
-                      container: true
-                      container 1: true
-                      container 2: true
-                      container 3: true
-                      container 4: true
-                      container 5: true
-                      container 6: true
-                      container 7: true
-                      container 8: true
-                      container 9: true
-                      crusher_id 2: true
-                      endpoint: true
-                      endpoint 1: true
-                      endpoint 2: true
-                      endpoint 3: true
-                      endpoint 4: true
-                      endpoint 5: true
-                      endpoint 6: true
-                      endpoint 7: true
-                      endpoint 8: true
-                      endpoint 9: true
-                      instance: true
-                      instance 1: true
-                      instance 2: true
-                      instance 3: true
-                      instance 4: true
-                      instance 5: true
-                      instance 6: true
-                      instance 7: true
-                      instance 8: true
-                      instance 9: true
-                      job: true
-                      job 1: true
-                      job 2: true
-                      job 3: true
-                      job 4: true
-                      job 5: true
-                      job 6: true
-                      job 7: true
-                      job 8: true
-                      job 9: true
-                      loader_id 2: true
-                      namespace: true
-                      namespace 1: true
-                      namespace 2: true
-                      namespace 3: true
-                      namespace 4: true
-                      namespace 5: true
-                      namespace 6: true
-                      namespace 7: true
-                      namespace 8: true
-                      namespace 9: true
-                      pod: true
-                      pod 1: true
-                      pod 2: true
-                      pod 3: true
-                      pod 4: true
-                      pod 5: true
-                      pod 6: true
-                      pod 7: true
-                      pod 8: true
-                      pod 9: true
-                      prometheus: true
-                      prometheus 1: true
-                      prometheus 2: true
-                      prometheus 3: true
-                      prometheus 4: true
-                      prometheus 5: true
-                      prometheus 6: true
-                      prometheus 7: true
-                      prometheus 8: true
-                      prometheus 9: true
-                      region: true
-                      region 1: true
-                      region 2: true
-                      region 3: true
-                      region 4: true
-                      region 5: true
-                      region 6: true
-                      region 7: true
-                      region 8: true
-                      region 9: true
-                      service: true
-                      service 1: true
-                      service 2: true
-                      service 3: true
-                      service 4: true
-                      service 5: true
-                      service 6: true
-                      service 7: true
-                      service 8: true
-                      service 9: true
-                      truck 2: true
-                      truck 3: true
-                      truck 4: true
-                      truck 5: true
-                    includeByName: {}
-                    indexByName:
-                      Time 1: 2
-                      Time 2: 14
-                      Time 3: 26
-                      Time 4: 38
-                      'Value #A': 13
-                      'Value #B': 25
-                      'Value #C': 37
-                      'Value #D': 1
-                      __name__ 1: 3
-                      __name__ 2: 15
-                      __name__ 3: 27
-                      __name__ 4: 39
-                      container 1: 4
-                      container 2: 16
-                      container 3: 28
-                      container 4: 40
-                      endpoint 1: 5
-                      endpoint 2: 17
-                      endpoint 3: 29
-                      endpoint 4: 41
-                      instance 1: 6
-                      instance 2: 18
-                      instance 3: 30
-                      instance 4: 42
-                      job 1: 7
-                      job 2: 19
-                      job 3: 31
-                      job 4: 43
-                      namespace 1: 8
-                      namespace 2: 20
-                      namespace 3: 32
-                      namespace 4: 44
-                      pod 1: 9
-                      pod 2: 21
-                      pod 3: 33
-                      pod 4: 45
-                      prometheus 1: 10
-                      prometheus 2: 22
-                      prometheus 3: 34
-                      prometheus 4: 46
-                      region 1: 11
-                      region 2: 23
-                      region 3: 35
-                      region 4: 47
-                      service 1: 12
-                      service 2: 24
-                      service 3: 36
-                      service 4: 48
-                      truck: 0
-                    orderByMode: manual
-                    renameByName:
-                      'Value #A': lat
-                      'Value #B': lon
-                      'Value #C': Payload
-                      'Value #D': Speed
-                      'Value #E': loader_lat
-                      'Value #F': loader_lon
-                      'Value #G': crusher_lat
-                      'Value #H': crusher_lon
-                      'Value #I': 'Crusher/Loader #ID'
-                      loader_id 2: ''
-        description: Real-time location of Trucks, Crushers, and Loaders.
-        id: 2
-        links: []
-        title: Site Map (Trucks, Loaders, Crushers)
-        vizConfig:
-          group: geomap
-          kind: VizConfig
-          spec:
-            fieldConfig:
-              defaults:
-                color:
-                  mode: thresholds
-                custom:
-                  hideFrom:
-                    legend: false
-                    tooltip: false
-                    viz: false
-                thresholds:
-                  mode: absolute
-                  steps:
-                    - color: green
-                      value: 0
-              overrides: []
-            options:
-              basemap:
-                config:
-                  server: streets
-                  showLabels: true
-                  theme: auto
-                layer-tooltip: true
-                name: Layer 1
-                noRepeat: false
-                opacity: 0.9
-                type: xyz
-              controls:
-                mouseWheelZoom: true
-                showAttribution: true
-                showDebug: false
-                showMeasure: false
-                showScale: false
-                showZoom: true
-              layers:
-                - config:
-                    showLegend: true
-                    style:
-                      color:
-                        field: Speed
-                        fixed: dark-green
-                      opacity: 1
-                      rotation:
-                        fixed: 0
-                        max: 360
-                        min: -360
-                        mode: mod
-                      size:
-                        fixed: 9
-                        max: 15
-                        min: 2
-                      symbol:
-                        fixed: img/icons/unicons/truck.svg
-                        mode: fixed
-                      symbolAlign:
-                        horizontal: center
-                        vertical: center
-                      text:
-                        field: Payload
-                        fixed: ''
-                        mode: fixed
-                      textConfig:
-                        fontSize: 7
-                        offsetX: 0
-                        offsetY: 0
-                        textAlign: center
-                        textBaseline: middle
-                  layer-tooltip: true
-                  location:
-                    latitude: lat
-                    longitude: lon
-                    mode: coords
-                  name: Trucks
-                  opacity: 1
-                  tooltip: true
-                  type: markers
-                - config:
-                    showLocation: true
-                    size:
-                      fixed: 8
-                    style:
-                      color:
-                        fixed: blue
-                      opacity: 1
-                      rotation:
-                        fixed: 0
-                      size:
-                        fixed: 5
-                        max: 15
-                        min: 2
-                      symbol:
-                        field: ''
-                        fixed: >-
-                          https://png.pngtree.com/png-clipart/20241113/original/pngtree-yellow-front-wheel-loader-isolated-on-white-background-png-image_16986356.png
-                        mode: fixed
-                      text:
-                        field: loader_id
-                        fixed: ''
-                        mode: field
-                      textConfig:
-                        fontSize: 12
-                        offsetX: 0
-                        offsetY: 0
-                        textAlign: center
-                        textBaseline: middle
-                  layer-tooltip: true
-                  location:
-                    latitude: 'Value #E'
-                    longitude: 'Value #F'
-                    lookup: coords
-                    mode: coords
-                    source: coords
-                  name: Loaders
-                  tooltip: true
-                  type: markers
-                - config:
-                    showLegend: true
-                    style:
-                      color:
-                        fixed: red
-                      opacity: 1
-                      rotation:
-                        fixed: 0
-                        max: 360
-                        min: -360
-                        mode: mod
-                      size:
-                        fixed: 5
-                        max: 15
-                        min: 2
-                      symbol:
-                        fixed: img/icons/marker/circle.svg
-                        mode: fixed
-                      symbolAlign:
-                        horizontal: center
-                        vertical: center
-                      textConfig:
-                        fontSize: 12
-                        offsetX: 0
-                        offsetY: 0
-                        textAlign: center
-                        textBaseline: middle
-                  location:
-                    latitude: crusher_lat
-                    longitude: crusher_lon
-                    mode: coords
-                  name: Crushers
-                  tooltip: true
-                  type: markers
-              tooltip:
-                mode: details
-              view:
-                allLayers: true
-                id: fit
-                lat: -22.7
-                lon: 117.8
-                noRepeat: false
-                shared: true
-                zoom: 15
-          version: 12.4.0-19628459846
-    panel-4:
-      kind: Panel
-      spec:
-        data:
-          kind: QueryGroup
-          spec:
-            queries:
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    datasource:
-                      name: ${datasource}
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      expr: truck_payload_tonnes{region="$region", truck=~"$truck"}
-                      legendFormat: '{{truck}}'
-                    version: v0
-                  refId: A
-            queryOptions: {}
-            transformations: []
-        description: ''
-        id: 4
-        links: []
-        title: Payload (Tonnes)
-        vizConfig:
-          group: timeseries
-          kind: VizConfig
-          spec:
-            fieldConfig:
-              defaults:
-                color:
-                  mode: palette-classic
-                custom:
-                  axisBorderShow: false
-                  axisCenteredZero: false
-                  axisColorMode: text
-                  axisLabel: ''
-                  axisPlacement: auto
-                  barAlignment: 0
-                  barWidthFactor: 0.6
-                  drawStyle: line
-                  fillOpacity: 10
-                  gradientMode: none
-                  hideFrom:
-                    legend: false
-                    tooltip: false
-                    viz: false
-                  insertNulls: false
-                  lineInterpolation: linear
-                  lineWidth: 1
-                  pointSize: 5
-                  scaleDistribution:
-                    type: linear
-                  showPoints: auto
-                  showValues: false
-                  spanNulls: false
-                  stacking:
-                    group: A
-                    mode: none
-                  thresholdsStyle:
-                    mode: 'off'
-                thresholds:
-                  mode: absolute
-                  steps:
-                    - color: green
-                      value: 0
-                unit: short
-              overrides: []
-            options:
-              legend:
-                calcs: []
-                displayMode: list
-                placement: bottom
-                showLegend: true
-              tooltip:
-                hideZeros: false
-                mode: single
-                sort: none
-          version: 12.4.0-19628459846
-    panel-5:
-      kind: Panel
-      spec:
-        data:
-          kind: QueryGroup
-          spec:
-            queries:
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    datasource:
-                      name: ${datasource}
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      expr: truck_speed_kph{region="$region", truck=~"$truck"}
-                      legendFormat: '{{truck}}'
-                    version: v0
-                  refId: A
-            queryOptions: {}
-            transformations: []
-        description: ''
-        id: 5
-        links: []
-        title: Speed (km/h)
-        vizConfig:
-          group: timeseries
-          kind: VizConfig
-          spec:
-            fieldConfig:
-              defaults:
-                color:
-                  mode: palette-classic
-                custom:
-                  axisBorderShow: false
-                  axisCenteredZero: false
-                  axisColorMode: text
-                  axisLabel: ''
-                  axisPlacement: auto
-                  barAlignment: 0
-                  barWidthFactor: 0.6
-                  drawStyle: line
-                  fillOpacity: 10
-                  gradientMode: none
-                  hideFrom:
-                    legend: false
-                    tooltip: false
-                    viz: false
-                  insertNulls: false
-                  lineInterpolation: linear
-                  lineWidth: 1
-                  pointSize: 5
-                  scaleDistribution:
-                    type: linear
-                  showPoints: auto
-                  showValues: false
-                  spanNulls: false
-                  stacking:
-                    group: A
-                    mode: none
-                  thresholdsStyle:
-                    mode: 'off'
-                thresholds:
-                  mode: absolute
-                  steps:
-                    - color: green
-                      value: 0
-                unit: velocitykmh
-              overrides: []
-            options:
-              legend:
-                calcs: []
-                displayMode: list
-                placement: bottom
-                showLegend: true
-              tooltip:
-                hideZeros: false
-                mode: single
-                sort: none
-          version: 12.4.0-19628459846
-    panel-6:
-      kind: Panel
-      spec:
-        data:
-          kind: QueryGroup
-          spec:
-            queries:
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    datasource:
-                      name: ${datasource}
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      expr: truck_state{region="$region", truck=~"$truck"} == 1
-                      legendFormat: '{{truck}} - {{state}}'
-                    version: v0
-                  refId: A
-            queryOptions: {}
-            transformations: []
-        description: ''
-        id: 6
-        links: []
-        title: Operational State Timeline
-        vizConfig:
-          group: state-timeline
-          kind: VizConfig
-          spec:
-            fieldConfig:
-              defaults:
-                color:
-                  mode: palette-classic
-                custom:
-                  axisPlacement: auto
-                  fillOpacity: 70
-                  hideFrom:
-                    legend: false
-                    tooltip: false
-                    viz: false
-                  insertNulls: false
-                  lineWidth: 0
-                  spanNulls: false
-                thresholds:
-                  mode: absolute
-                  steps:
-                    - color: green
-                      value: 0
-              overrides: []
-            options:
-              alignValue: center
-              legend:
-                calcs: []
-                displayMode: list
-                placement: right
-                showLegend: true
-              mergeValues: true
-              rowHeight: 0.9
-              showValue: never
-              tooltip:
-                hideZeros: false
-                mode: single
-                sort: none
-          version: 12.4.0-19628459846
-    panel-8:
-      kind: Panel
-      spec:
-        data:
-          kind: QueryGroup
-          spec:
-            queries:
-              - kind: PanelQuery
-                spec:
-                  hidden: false
-                  query:
-                    datasource:
-                      name: ${datasource}
-                    group: prometheus
-                    kind: DataQuery
-                    spec:
-                      expr: truck_fuel_percent{region="$region", truck=~"$truck"}
-                      legendFormat: '{{truck}}'
-                    version: v0
-                  refId: A
-            queryOptions: {}
-            transformations: []
-        description: ''
-        id: 8
-        links: []
-        title: Fuel Level
-        vizConfig:
-          group: gauge
-          kind: VizConfig
-          spec:
-            fieldConfig:
-              defaults:
-                color:
-                  mode: thresholds
-                max: 100
-                min: 0
-                thresholds:
-                  mode: absolute
-                  steps:
-                    - color: red
-                      value: 0
-                    - color: orange
-                      value: 15
-                    - color: green
-                      value: 30
-                unit: percent
-              overrides: []
-            options:
-              minVizHeight: 75
-              minVizWidth: 75
-              orientation: auto
-              reduceOptions:
-                calcs:
-                  - lastNotNull
-                fields: ''
-                values: false
-              showThresholdLabels: false
-              showThresholdMarkers: true
-              showthresholdMarkers: true
-              sizing: auto
-          version: 12.4.0-19628459846
-  layout:
-    kind: GridLayout
-    spec:
-      items: []
-  links: []
-  liveNow: false
-  preload: false
-  tags: []
-  timeSettings:
-    autoRefresh: 5s
-    autoRefreshIntervals:
-      - 5s
-      - 10s
-      - 30s
-      - 1m
-      - 5m
-      - 15m
-      - 30m
-      - 1h
-      - 2h
-      - 1d
-    fiscalYearStartMonth: 0
-    from: now-1m
-    hideTimepicker: false
-    timezone: browser
-    to: now
-  title: Mining Fleet Command Center Copy
-  variables:
-    - kind: DatasourceVariable
-      spec:
-        allowCustomValue: true
-        current:
-          text: ''
-          value: ''
-        hide: dontHide
-        includeAll: false
-        label: Datasource
-        multi: false
-        name: datasource
-        options: []
-        pluginId: prometheus
-        refresh: onDashboardLoad
-        regex: ''
-        skipUrlSync: false
-    - kind: QueryVariable
-      spec:
-        allowCustomValue: true
-        current:
-          text: ''
-          value: ''
-        definition: label_values(truck_speed_kph, region)
-        hide: dontHide
-        includeAll: false
-        label: Region
-        multi: false
-        name: region
-        options: []
-        query:
-          datasource:
-            name: ${datasource}
-          group: prometheus
-          kind: DataQuery
-          spec:
-            query: label_values(truck_speed_kph, region)
-            refId: StandardVariableQuery
-          version: v0
-        refresh: onDashboardLoad
-        regex: ''
-        skipUrlSync: false
-        sort: alphabeticalAsc
-    - kind: QueryVariable
-      spec:
-        allowCustomValue: true
-        current:
-          text: ''
-          value: ''
-        definition: label_values(truck_speed_kph{region="$region"}, truck)
-        hide: dontHide
-        includeAll: true
-        label: Truck
-        multi: true
-        name: truck
-        options: []
-        query:
-          datasource:
-            name: ${datasource}
-          group: prometheus
-          kind: DataQuery
-          spec:
-            query: label_values(truck_speed_kph{region="$region"}, truck)
-            refId: StandardVariableQuery
-          version: v0
-        refresh: onDashboardLoad
-        regex: ''
-        skipUrlSync: false
-        sort: alphabeticalAsc
-status: {}
+  json: |
+    {
+      "annotations": {
+        "list": [
+          {
+            "builtIn": 1,
+            "datasource": {
+              "type": "datasource",
+              "uid": "-- Grafana --"
+            },
+            "enable": true,
+            "hide": true,
+            "iconColor": "rgba(0, 211, 255, 1)",
+            "name": "Annotations & Alerts",
+            "type": "dashboard"
+          }
+        ]
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "links": [],
+      "liveNow": false,
+      "panels": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "description": "Real-time location of Trucks, Crushers, and Loaders.",
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "custom": {
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 12,
+            "w": 12,
+            "x": 0,
+            "y": 0
+          },
+          "id": 2,
+          "links": [],
+          "options": {
+            "basemap": {
+              "config": {
+                "server": "streets",
+                "showLabels": true,
+                "theme": "auto"
+              },
+              "layer-tooltip": true,
+              "name": "Layer 1",
+              "noRepeat": false,
+              "opacity": 0.9,
+              "type": "xyz"
+            },
+            "controls": {
+              "mouseWheelZoom": true,
+              "showAttribution": true,
+              "showDebug": false,
+              "showMeasure": false,
+              "showScale": false,
+              "showZoom": true
+            },
+            "layers": [
+              {
+                "config": {
+                  "showLegend": true,
+                  "style": {
+                    "color": {
+                      "field": "Speed",
+                      "fixed": "dark-green"
+                    },
+                    "opacity": 1,
+                    "rotation": {
+                      "fixed": 0,
+                      "max": 360,
+                      "min": -360,
+                      "mode": "mod"
+                    },
+                    "size": {
+                      "fixed": 9,
+                      "max": 15,
+                      "min": 2
+                    },
+                    "symbol": {
+                      "fixed": "img/icons/unicons/truck.svg",
+                      "mode": "fixed"
+                    },
+                    "symbolAlign": {
+                      "horizontal": "center",
+                      "vertical": "center"
+                    },
+                    "text": {
+                      "field": "Payload",
+                      "fixed": "",
+                      "mode": "fixed"
+                    },
+                    "textConfig": {
+                      "fontSize": 7,
+                      "offsetX": 0,
+                      "offsetY": 0,
+                      "textAlign": "center",
+                      "textBaseline": "middle"
+                    }
+                  },
+                  "tooltip": true
+                },
+                "layer-tooltip": true,
+                "location": {
+                  "latitude": "lat",
+                  "longitude": "lon",
+                  "mode": "coords"
+                },
+                "name": "Trucks",
+                "opacity": 1,
+                "type": "markers"
+              },
+              {
+                "config": {
+                  "showLocation": true,
+                  "size": {
+                    "fixed": 8
+                  },
+                  "style": {
+                    "color": {
+                      "fixed": "blue"
+                    },
+                    "opacity": 1,
+                    "rotation": {
+                      "fixed": 0
+                    },
+                    "size": {
+                      "fixed": 5,
+                      "max": 15,
+                      "min": 2
+                    },
+                    "symbol": {
+                      "fixed": "https://png.pngtree.com/png-clipart/20241113/original/pngtree-yellow-front-wheel-loader-isolated-on-white-background-png-image_16986356.png",
+                      "mode": "fixed"
+                    },
+                    "text": {
+                      "field": "loader_id",
+                      "fixed": "",
+                      "mode": "field"
+                    },
+                    "textConfig": {
+                      "fontSize": 12,
+                      "offsetX": 0,
+                      "offsetY": 0,
+                      "textAlign": "center",
+                      "textBaseline": "middle"
+                    }
+                  },
+                  "tooltip": true
+                },
+                "layer-tooltip": true,
+                "location": {
+                  "latitude": "Value #E",
+                  "longitude": "Value #F",
+                  "mode": "coords"
+                },
+                "name": "Loaders",
+                "opacity": 1,
+                "type": "markers"
+              },
+              {
+                "config": {
+                  "showLegend": true,
+                  "style": {
+                    "color": {
+                      "fixed": "red"
+                    },
+                    "opacity": 1,
+                    "rotation": {
+                      "fixed": 0,
+                      "max": 360,
+                      "min": -360,
+                      "mode": "mod"
+                    },
+                    "size": {
+                      "fixed": 5,
+                      "max": 15,
+                      "min": 2
+                    },
+                    "symbol": {
+                      "fixed": "img/icons/marker/circle.svg",
+                      "mode": "fixed"
+                    },
+                    "symbolAlign": {
+                      "horizontal": "center",
+                      "vertical": "center"
+                    },
+                    "textConfig": {
+                      "fontSize": 12,
+                      "offsetX": 0,
+                      "offsetY": 0,
+                      "textAlign": "center",
+                      "textBaseline": "middle"
+                    }
+                  },
+                  "tooltip": true
+                },
+                "layer-tooltip": true,
+                "location": {
+                  "latitude": "crusher_lat",
+                  "longitude": "crusher_lon",
+                  "mode": "coords"
+                },
+                "name": "Crushers",
+                "opacity": 1,
+                "type": "markers"
+              }
+            ],
+            "tooltip": {
+              "mode": "details"
+            },
+            "view": {
+              "allLayers": true,
+              "id": "fit",
+              "lat": -22.7,
+              "lon": 117.8,
+              "noRepeat": false,
+              "shared": true,
+              "zoom": 15
+            }
+          },
+          "targets": [
+            {
+              "expr": "truck_latitude{region=\"$region\", truck=~\"$truck\"} ",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "truck_latitude",
+              "refId": "A"
+            },
+            {
+              "expr": "truck_longitude{region=\"$region\", truck=~\"$truck\"}",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "truck_longitude",
+              "refId": "B"
+            },
+            {
+              "expr": "truck_payload_tonnes{region=\"$region\", truck=~\"$truck\"}",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "truck_payload_tonnes",
+              "refId": "C"
+            },
+            {
+              "expr": "truck_speed_kph{region=\"$region\", truck=~\"$truck\"}",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "truck_speed_kph",
+              "refId": "D"
+            },
+            {
+              "expr": "loader_latitude{region=\"$region\"}",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "loader_latitude",
+              "refId": "E"
+            },
+            {
+              "expr": "loader_longitude{region=\"$region\"}",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "loader_longitude",
+              "refId": "F"
+            },
+            {
+              "expr": "crusher_latitude{region=\"$region\"}",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "crusher_latitude",
+              "refId": "G"
+            },
+            {
+              "expr": "crusher_longitude{region=\"$region\"}",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "crusher_longitude",
+              "refId": "H"
+            },
+            {
+              "expr": "truck_state{region=\"$region\", truck=~\"$truck\"} == 1",
+              "format": "table",
+              "instant": true,
+              "legendFormat": "State",
+              "refId": "I"
+            }
+          ],
+          "title": "Site Map (Trucks, Loaders, Crushers)",
+          "transformations": [
+            {
+              "id": "concatenate",
+              "options": {
+                "frameNameLabel": "truckdata",
+                "frameNameMode": "label"
+              }
+            },
+            {
+              "id": "concatenate",
+              "options": {
+                "filter": {
+                  "id": "byRefId",
+                  "options": "/^(?:E|F)$/"
+                },
+                "frameNameLabel": "loader",
+                "frameNameMode": "label"
+              }
+            },
+            {
+              "id": "concatenate",
+              "options": {
+                "filter": {
+                  "id": "byRefId",
+                  "options": "/^(?:G|H)$/"
+                },
+                "frameNameLabel": "crusher",
+                "frameNameMode": "label"
+              }
+            },
+            {
+              "id": "joinByField",
+              "options": {
+                "byField": "truck 1",
+                "mode": "inner"
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": {
+                  "Time": true,
+                  "Time 1": false,
+                  "Time 2": true,
+                  "Time 3": true,
+                  "Time 4": true,
+                  "Time 5": true,
+                  "Value #I": true,
+                  "__name__": true,
+                  "__name__ 1": true,
+                  "__name__ 2": true,
+                  "__name__ 3": true,
+                  "__name__ 4": true,
+                  "__name__ 5": true,
+                  "__name__ 6": true,
+                  "__name__ 7": true,
+                  "__name__ 8": true,
+                  "__name__ 9": true,
+                  "container": true,
+                  "container 1": true,
+                  "container 2": true,
+                  "container 3": true,
+                  "container 4": true,
+                  "container 5": true,
+                  "container 6": true,
+                  "container 7": true,
+                  "container 8": true,
+                  "container 9": true,
+                  "crusher_id 2": true,
+                  "endpoint": true,
+                  "endpoint 1": true,
+                  "endpoint 2": true,
+                  "endpoint 3": true,
+                  "endpoint 4": true,
+                  "endpoint 5": true,
+                  "endpoint 6": true,
+                  "endpoint 7": true,
+                  "endpoint 8": true,
+                  "endpoint 9": true,
+                  "instance": true,
+                  "instance 1": true,
+                  "instance 2": true,
+                  "instance 3": true,
+                  "instance 4": true,
+                  "instance 5": true,
+                  "instance 6": true,
+                  "instance 7": true,
+                  "instance 8": true,
+                  "instance 9": true,
+                  "job": true,
+                  "job 1": true,
+                  "job 2": true,
+                  "job 3": true,
+                  "job 4": true,
+                  "job 5": true,
+                  "job 6": true,
+                  "job 7": true,
+                  "job 8": true,
+                  "job 9": true,
+                  "loader_id 2": true,
+                  "namespace": true,
+                  "namespace 1": true,
+                  "namespace 2": true,
+                  "namespace 3": true,
+                  "namespace 4": true,
+                  "namespace 5": true,
+                  "namespace 6": true,
+                  "namespace 7": true,
+                  "namespace 8": true,
+                  "namespace 9": true,
+                  "pod": true,
+                  "pod 1": true,
+                  "pod 2": true,
+                  "pod 3": true,
+                  "pod 4": true,
+                  "pod 5": true,
+                  "pod 6": true,
+                  "pod 7": true,
+                  "pod 8": true,
+                  "pod 9": true,
+                  "prometheus": true,
+                  "prometheus 1": true,
+                  "prometheus 2": true,
+                  "prometheus 3": true,
+                  "prometheus 4": true,
+                  "prometheus 5": true,
+                  "prometheus 6": true,
+                  "prometheus 7": true,
+                  "prometheus 8": true,
+                  "prometheus 9": true,
+                  "region": true,
+                  "region 1": true,
+                  "region 2": true,
+                  "region 3": true,
+                  "region 4": true,
+                  "region 5": true,
+                  "region 6": true,
+                  "region 7": true,
+                  "region 8": true,
+                  "region 9": true,
+                  "service": true,
+                  "service 1": true,
+                  "service 2": true,
+                  "service 3": true,
+                  "service 4": true,
+                  "service 5": true,
+                  "service 6": true,
+                  "service 7": true,
+                  "service 8": true,
+                  "service 9": true,
+                  "truck 2": true,
+                  "truck 3": true,
+                  "truck 4": true,
+                  "truck 5": true
+                },
+                "indexByName": {
+                  "Time 1": 2,
+                  "Time 2": 14,
+                  "Time 3": 26,
+                  "Time 4": 38,
+                  "Value #A": 13,
+                  "Value #B": 25,
+                  "Value #C": 37,
+                  "Value #D": 1,
+                  "__name__ 1": 3,
+                  "__name__ 2": 15,
+                  "__name__ 3": 27,
+                  "__name__ 4": 39,
+                  "container 1": 4,
+                  "container 2": 16,
+                  "container 3": 28,
+                  "container 4": 40,
+                  "endpoint 1": 5,
+                  "endpoint 2": 17,
+                  "endpoint 3": 29,
+                  "endpoint 4": 41,
+                  "instance 1": 6,
+                  "instance 2": 18,
+                  "instance 3": 30,
+                  "instance 4": 42,
+                  "job 1": 7,
+                  "job 2": 19,
+                  "job 3": 31,
+                  "job 4": 43,
+                  "namespace 1": 8,
+                  "namespace 2": 20,
+                  "namespace 3": 32,
+                  "namespace 4": 44,
+                  "pod 1": 9,
+                  "pod 2": 21,
+                  "pod 3": 33,
+                  "pod 4": 45,
+                  "prometheus 1": 10,
+                  "prometheus 2": 22,
+                  "prometheus 3": 34,
+                  "prometheus 4": 46,
+                  "region 1": 11,
+                  "region 2": 23,
+                  "region 3": 35,
+                  "region 4": 47,
+                  "service 1": 12,
+                  "service 2": 24,
+                  "service 3": 36,
+                  "service 4": 48,
+                  "truck": 0
+                },
+                "orderByMode": "manual",
+                "renameByName": {
+                  "Value #A": "lat",
+                  "Value #B": "lon",
+                  "Value #C": "Payload",
+                  "Value #D": "Speed",
+                  "Value #E": "loader_lat",
+                  "Value #F": "loader_lon",
+                  "Value #G": "crusher_lat",
+                  "Value #H": "crusher_lon",
+                  "Value #I": "Crusher/Loader #ID",
+                  "loader_id 2": ""
+                }
+              }
+            }
+          ],
+          "type": "geomap"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 12,
+            "y": 0
+          },
+          "id": 4,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "truck_payload_tonnes{region=\"$region\", truck=~\"$truck\"}",
+              "legendFormat": "{{truck}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Payload (Tonnes)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "velocitykmh"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 6,
+            "x": 18,
+            "y": 0
+          },
+          "id": 5,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "truck_speed_kph{region=\"$region\", truck=~\"$truck\"}",
+              "legendFormat": "{{truck}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Speed (km/h)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisPlacement": "auto",
+                "fillOpacity": 70,
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineWidth": 0,
+                "spanNulls": false
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 12,
+            "x": 12,
+            "y": 6
+          },
+          "id": 6,
+          "links": [],
+          "options": {
+            "alignValue": "center",
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "right",
+              "showLegend": true
+            },
+            "mergeValues": true,
+            "rowHeight": 0.9,
+            "showValue": "never",
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "truck_state{region=\"$region\", truck=~\"$truck\"} == 1",
+              "legendFormat": "{{truck}} - {{state}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Operational State Timeline",
+          "type": "state-timeline"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "max": 100,
+              "min": 0,
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "red",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 15
+                  },
+                  {
+                    "color": "green",
+                    "value": 30
+                  }
+                ]
+              },
+              "unit": "percent"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 0,
+            "y": 12
+          },
+          "id": 8,
+          "links": [],
+          "options": {
+            "minVizHeight": 75,
+            "minVizWidth": 75,
+            "orientation": "auto",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showThresholdLabels": false,
+            "showThresholdMarkers": true,
+            "sizing": "auto"
+          },
+          "targets": [
+            {
+              "expr": "truck_fuel_percent{region=\"$region\", truck=~\"$truck\"}",
+              "legendFormat": "{{truck}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Fuel Level",
+          "type": "gauge"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "celsius"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 4,
+            "y": 12
+          },
+          "id": 10,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "truck_engine_temp_celsius{region=\"$region\", truck=~\"$truck\"}",
+              "legendFormat": "{{truck}} Engine",
+              "refId": "A"
+            }
+          ],
+          "title": "Engine Temperature",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "rpm"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 8,
+            "y": 12
+          },
+          "id": 11,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "truck_engine_rpm{region=\"$region\", truck=~\"$truck\"}",
+              "legendFormat": "{{truck}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Engine RPM",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "dBm"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 12,
+            "y": 12
+          },
+          "id": 12,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "truck_sys_signal_dbm{region=\"$region\", truck=~\"$truck\"}",
+              "legendFormat": "{{truck}} Signal",
+              "refId": "A"
+            }
+          ],
+          "title": "Signal Strength (dBm)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "s"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 16,
+            "y": 12
+          },
+          "id": 13,
+          "links": [],
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(telemetry_delivery_latency_seconds_bucket{region=\"$region\"}[5m])) by (le, truck))",
+              "legendFormat": "{{truck}} P95",
+              "refId": "A"
+            }
+          ],
+          "title": "End-to-End Latency (P95)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "thresholds"
+              },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  },
+                  {
+                    "color": "orange",
+                    "value": 1
+                  },
+                  {
+                    "color": "red",
+                    "value": 5
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 6,
+            "w": 4,
+            "x": 20,
+            "y": 12
+          },
+          "id": 14,
+          "links": [],
+          "options": {
+            "colorMode": "background",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "sum"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "targets": [
+            {
+              "expr": "increase(kafka_backpressure_events_total{region=\"$region\"}[1h])",
+              "legendFormat": "{{truck}}",
+              "refId": "A",
+              "range": true
+            }
+          ],
+          "title": "Backpressure Events (1h)",
+          "type": "stat"
+        }
+      ],
+      "refresh": "5s",
+      "schemaVersion": 38,
+      "style": "dark",
+      "tags": [],
+      "templating": {
+        "list": [
+          {
+            "allValue": null,
+            "current": {
+              "selected": true,
+              "text": "Prometheus",
+              "value": "Prometheus"
+            },
+            "datasource": {
+              "type": "datasource",
+              "uid": "gdev-prometheus"
+            },
+            "description": null,
+            "hide": 0,
+            "label": "Datasource",
+            "multi": false,
+            "name": "datasource",
+            "options": [],
+            "query": "prometheus",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "type": "datasource"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "selected": true,
+              "text": "default",
+              "value": "default"
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "definition": "label_values(truck_speed_kph, region)",
+            "description": null,
+            "hide": 0,
+            "label": "Region",
+            "multi": false,
+            "name": "region",
+            "options": [],
+            "query": "label_values(truck_speed_kph, region)",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          },
+          {
+            "allValue": null,
+            "current": {
+              "selected": true,
+              "text": "All",
+              "value": [
+                "$__all"
+              ]
+            },
+            "datasource": {
+              "type": "prometheus",
+              "uid": "${datasource}"
+            },
+            "definition": "label_values(truck_speed_kph{region=\"$region\"}, truck)",
+            "description": null,
+            "hide": 0,
+            "includeAll": true,
+            "label": "Truck",
+            "multi": true,
+            "name": "truck",
+            "options": [],
+            "query": "label_values(truck_speed_kph{region=\"$region\"}, truck)",
+            "refresh": 1,
+            "regex": "",
+            "skipUrlSync": false,
+            "sort": 1,
+            "type": "query"
+          }
+        ]
+      },
+      "time": {
+        "from": "now-1h",
+        "to": "now"
+      },
+      "timepicker": {
+        "refresh_intervals": [
+          "5s",
+          "10s",
+          "30s",
+          "1m",
+          "5m",
+          "15m",
+          "30m",
+          "1h",
+          "2h",
+          "1d"
+        ],
+        "time_options": []
+      },
+      "timezone": "browser",
+      "title": "Mining Fleet Command Center Copy",
+      "uid": "generated_uid_here",
+      "version": 1
+    }
