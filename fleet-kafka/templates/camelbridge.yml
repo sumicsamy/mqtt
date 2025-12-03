@@ -104,6 +104,7 @@ spec:
             defaultMode: 384
             optional: false
             secretName: {{ $.Values.bridge.mqtt.clientId }}-tls
+---            
 {{- end }}            
 ---
 apiVersion: monitoring.coreos.com/v1
