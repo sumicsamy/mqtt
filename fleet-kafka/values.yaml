@@ -55,7 +55,8 @@ bridge:
   # ============================================================        
   camel:
     image: "quay.io/suchugh/mqtt-kafka-camel:1.0.4"
-    replicas: 3
+    replicas: 2
+    brokerUrl: "ssl://fleet-manager-broker-mqtts-<BROKER>-svc.mqtt-broker.svc.cluster.local:8883"
     resources:
       requests:
         cpu: "500m"

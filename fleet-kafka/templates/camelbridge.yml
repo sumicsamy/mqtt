@@ -26,6 +26,7 @@ spec:
     app.kubernetes.io/part-of: fleet-telemetry
   type: ClusterIP
 ---
+{{ range $index, $_ := until (.Values.bridge.camel.replicas | int)}}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -40,10 +41,10 @@ metadata:
     app.openshift.io/runtime: quarkus
     app.kubernetes.io/part-of: fleet-telemetry
     app.kubernetes.io/name: mqtt-kafka-camel
-  name: mqtt-kafka-camel
-  namespace: {{ .Values.namespace }}
+  name: mqtt-kafka-camel-{{ $index }}
+  namespace: {{ $.Values.namespace }}
 spec:
-  replicas: {{ .Values.bridge.camel.replicas }}
+  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/part-of: fleet-telemetry
@@ -68,7 +69,7 @@ spec:
             - name: MQTT_TLS_CRT
               value: /certs/tls.crt
             - name: MQTT_BROKER_URL
-              value: {{ $.Values.bridge.mqtt.brokers }}
+              value: {{ replace "<BROKER>"  ($index|toString) $.Values.bridge.camel.brokerUrl }}
             - name: MQTT_TLS_KEY
               value: /certs/tls.key
             - name: MQTT_TOPIC
@@ -102,6 +103,7 @@ spec:
             defaultMode: 384
             optional: false
             secretName: {{ $.Values.bridge.mqtt.clientId }}-tls
+{{- end }}            
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
