@@ -48,6 +48,8 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: mqtt-kafka-camel-{{ $index }}
+      app.openshift.io/runtime: quarkus
+      app.kubernetes.io/part-of: fleet-telemetry
   template:
     metadata:
       annotations:
