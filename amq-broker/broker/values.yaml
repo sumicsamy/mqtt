@@ -1,12 +1,12 @@
 sites:
-  - id: pilbara
-    namespace: site-pilbara
+  - id: A
+    namespace: site-A
     truckCount: 100
-  - id: tomprice
-    namespace: site-tomprice
+  - id: B
+    namespace: site-B
     truckCount: 100
-  - id: paraburdoo
-    namespace: site-paraburdoo
+  - id: C
+    namespace: site-C
     truckCount: 100
 brokerNamespace: mqtt-broker    
 

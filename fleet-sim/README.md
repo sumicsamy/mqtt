@@ -4,14 +4,14 @@ The repo deploys the fleet simulators.
 
 ``` 
 sites:
-  - id: pilbara
-    namespace: site-pilbara
+  - id: A
+    namespace: site-A
     truckCount: 1
-  - id: tomprice
-    namespace: site-tomprice
+  - id: B
+    namespace: site-B
     truckCount: 1
-  - id: paraburdoo
-    namespace: site-paraburdoo
+  - id: C
+    namespace: site-C
     truckCount: 1
 
 

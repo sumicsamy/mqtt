@@ -1,4 +1,4 @@
-apiVersion: dashboard.grafana.app/v2beta1
+apiVersion: grafana.integreatly.org/v1beta1
 kind: Dashboard
 metadata:
   name: truck-sim-dashboard
@@ -555,7 +555,7 @@ spec:
           kind: DataQuery
           spec:
             qryType: 1
-            query: label_values({namespace=~"site-paraburdoo|site-pilbara|site-tomprice"},namespace)
+            query: label_values({namespace=~"site-A|site-B|site-C"},namespace)
             refId: PrometheusVariableQueryEditor-VariableQuery
           version: v0
         refresh: onDashboardLoad
