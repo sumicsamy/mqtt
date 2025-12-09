@@ -1,7 +1,7 @@
 resources:
   - clusterissuer.yaml
   - amq-broker.yaml
-  - rolebinding.yaml
-  - trust-manager.yaml
+  # - rolebinding.yaml
+  # - trust-manager.yaml
   - ns.yaml
   # - sub-us.yaml
