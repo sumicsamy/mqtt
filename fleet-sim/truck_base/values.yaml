@@ -1,5 +1,5 @@
 truckId: "001"
 siteId: "pilbara"
-namespace: site-A
+namespace: site-a
 brokerHost: mqtt-broker-hdls.mqtt-broker.svc
 brokerPort: 8883

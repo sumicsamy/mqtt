@@ -1,12 +1,12 @@
 sites:
-  - id: A
-    namespace: site-A
+  - id: a
+    namespace: site-a
     truckCount: 20
-  - id: B
-    namespace: site-B
+  - id: b
+    namespace: site-b
     truckCount: 20
-  - id: C
-    namespace: site-C
+  - id: c
+    namespace: site-c
     truckCount: 20
 
 

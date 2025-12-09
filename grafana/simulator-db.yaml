@@ -555,7 +555,7 @@ spec:
           kind: DataQuery
           spec:
             qryType: 1
-            query: label_values({namespace=~"site-A|site-B|site-C"},namespace)
+            query: label_values({namespace=~"site-a|site-b|site-c"},namespace)
             refId: PrometheusVariableQueryEditor-VariableQuery
           version: v0
         refresh: onDashboardLoad
