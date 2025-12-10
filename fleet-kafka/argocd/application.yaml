@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: fleet-kafka-stack
+  namespace: openshift-gitops
+spec:
+  project: mqtt
+  source:
+    repoURL: https://github.com/sumicsamy/mqtt.git
+    path: fleet-kafka
+    targetRevision: main
+    helm:
+      releaseName: fleet-kafka
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: fleet-kafka
+  syncPolicy:
+    automated:
+      selfHeal: true
+      prune: true
+    syncOptions:
+      - CreateNamespace=true
