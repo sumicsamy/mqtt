@@ -1,5 +1,5 @@
 apiVersion: grafana.integreatly.org/v1beta1
-kind: Dashboard
+kind: GrafanaDashboard
 metadata:
   name: mining-cmd-center
 spec:
