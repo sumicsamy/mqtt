@@ -5,5 +5,5 @@ resources:
   - rbac.yaml
   - bridge-camel-db.yaml
   - mining-cmd-center.yaml
-  - simulator-db.yaml
+  # - simulator-db.yaml
   # - fleet-metrics-db.yaml
