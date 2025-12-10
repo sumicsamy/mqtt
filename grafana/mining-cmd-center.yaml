@@ -27,9 +27,17 @@ spec:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 1,
+      "id": 0,
       "links": [],
-      "liveNow": false,
       "panels": [
+        {
+          "title": "🗺️ Geospatial Overview",
+          "type": "text",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 },
+          "options": {
+            "content": "### Real-Time Location and Status"
+          }
+        },
         {
           "datasource": {
             "type": "prometheus",
@@ -48,6 +56,7 @@ spec:
                   "viz": false
                 }
               },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -61,13 +70,12 @@ spec:
             "overrides": []
           },
           "gridPos": {
-            "h": 12,
-            "w": 12,
+            "h": 14,
+            "w": 18,
             "x": 0,
-            "y": 0
+            "y": 1
           },
           "id": 2,
-          "links": [],
           "options": {
             "basemap": {
               "config": {
@@ -252,6 +260,7 @@ spec:
               "zoom": 15
             }
           },
+          "pluginVersion": "12.4.0-19628459846",
           "targets": [
             {
               "expr": "truck_latitude{region=\"$region\", truck=~\"$truck\"} ",
@@ -553,182 +562,6 @@ spec:
                 "mode": "palette-classic"
               },
               "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "showValues": false,
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "short"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 6,
-            "x": 12,
-            "y": 0
-          },
-          "id": 4,
-          "links": [],
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "expr": "truck_payload_tonnes{region=\"$region\", truck=~\"$truck\"}",
-              "legendFormat": "{{truck}}",
-              "refId": "A"
-            }
-          ],
-          "title": "Payload (Tonnes)",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 10,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "showValues": false,
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": 0
-                  }
-                ]
-              },
-              "unit": "velocitykmh"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 6,
-            "w": 6,
-            "x": 18,
-            "y": 0
-          },
-          "id": 5,
-          "links": [],
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "targets": [
-            {
-              "expr": "truck_speed_kph{region=\"$region\", truck=~\"$truck\"}",
-              "legendFormat": "{{truck}}",
-              "refId": "A"
-            }
-          ],
-          "title": "Speed (km/h)",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "${datasource}"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
                 "axisPlacement": "auto",
                 "fillOpacity": 70,
                 "hideFrom": {
@@ -740,6 +573,7 @@ spec:
                 "lineWidth": 0,
                 "spanNulls": false
               },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -753,13 +587,12 @@ spec:
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 12,
-            "x": 12,
-            "y": 6
+            "h": 7,
+            "w": 6,
+            "x": 18,
+            "y": 1
           },
           "id": 6,
-          "links": [],
           "options": {
             "alignValue": "center",
             "legend": {
@@ -777,6 +610,7 @@ spec:
               "sort": "none"
             }
           },
+          "pluginVersion": "12.4.0-19628459846",
           "targets": [
             {
               "expr": "truck_state{region=\"$region\", truck=~\"$truck\"} == 1",
@@ -797,6 +631,7 @@ spec:
               "color": {
                 "mode": "thresholds"
               },
+              "mappings": [],
               "max": 100,
               "min": 0,
               "thresholds": {
@@ -821,13 +656,12 @@ spec:
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 0,
-            "y": 12
+            "h": 7,
+            "w": 6,
+            "x": 18,
+            "y": 8
           },
           "id": 8,
-          "links": [],
           "options": {
             "minVizHeight": 75,
             "minVizWidth": 75,
@@ -843,6 +677,7 @@ spec:
             "showThresholdMarkers": true,
             "sizing": "auto"
           },
+          "pluginVersion": "12.4.0-19628459846",
           "targets": [
             {
               "expr": "truck_fuel_percent{region=\"$region\", truck=~\"$truck\"}",
@@ -850,8 +685,16 @@ spec:
               "refId": "A"
             }
           ],
-          "title": "Fuel Level",
+          "title": "Fuel Level (%)",
           "type": "gauge"
+        },
+        {
+          "title": "⚙️ Vehicle Performance Metrics",
+          "type": "text",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 15 },
+          "options": {
+            "content": "### Key Operational Telemetry"
+          }
         },
         {
           "datasource": {
@@ -897,6 +740,7 @@ spec:
                   "mode": "off"
                 }
               },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -906,18 +750,17 @@ spec:
                   }
                 ]
               },
-              "unit": "celsius"
+              "unit": "velocitykmh"
             },
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 4,
-            "y": 12
+            "h": 7,
+            "w": 8,
+            "x": 0,
+            "y": 16
           },
-          "id": 10,
-          "links": [],
+          "id": 5,
           "options": {
             "legend": {
               "calcs": [],
@@ -931,14 +774,15 @@ spec:
               "sort": "none"
             }
           },
+          "pluginVersion": "12.4.0-19628459846",
           "targets": [
             {
-              "expr": "truck_engine_temp_celsius{region=\"$region\", truck=~\"$truck\"}",
-              "legendFormat": "{{truck}} Engine",
+              "expr": "truck_speed_kph{region=\"$region\", truck=~\"$truck\"}",
+              "legendFormat": "{{truck}}",
               "refId": "A"
             }
           ],
-          "title": "Engine Temperature",
+          "title": "Speed (km/h)",
           "type": "timeseries"
         },
         {
@@ -985,6 +829,7 @@ spec:
                   "mode": "off"
                 }
               },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -999,13 +844,12 @@ spec:
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 4,
+            "h": 7,
+            "w": 8,
             "x": 8,
-            "y": 12
+            "y": 16
           },
           "id": 11,
-          "links": [],
           "options": {
             "legend": {
               "calcs": [],
@@ -1019,6 +863,7 @@ spec:
               "sort": "none"
             }
           },
+          "pluginVersion": "12.4.0-19628459846",
           "targets": [
             {
               "expr": "truck_engine_rpm{region=\"$region\", truck=~\"$truck\"}",
@@ -1073,6 +918,193 @@ spec:
                   "mode": "off"
                 }
               },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "celsius"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 16,
+            "y": 16
+          },
+          "id": 10,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.4.0-19628459846",
+          "targets": [
+            {
+              "expr": "truck_engine_temp_celsius{region=\"$region\", truck=~\"$truck\"}",
+              "legendFormat": "{{truck}} Engine",
+              "refId": "A"
+            }
+          ],
+          "title": "Engine Temperature (°C)",
+          "type": "timeseries"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green",
+                    "value": 0
+                  }
+                ]
+              },
+              "unit": "short"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 7,
+            "w": 8,
+            "x": 0,
+            "y": 23
+          },
+          "id": 4,
+          "options": {
+            "legend": {
+              "calcs": [],
+              "displayMode": "list",
+              "placement": "bottom",
+              "showLegend": true
+            },
+            "tooltip": {
+              "hideZeros": false,
+              "mode": "single",
+              "sort": "none"
+            }
+          },
+          "pluginVersion": "12.4.0-19628459846",
+          "targets": [
+            {
+              "expr": "truck_payload_tonnes{region=\"$region\", truck=~\"$truck\"}",
+              "legendFormat": "{{truck}}",
+              "refId": "A"
+            }
+          ],
+          "title": "Payload (Tonnes)",
+          "type": "timeseries"
+        },
+        {
+          "title": "📡 Data & Connectivity Health",
+          "type": "text",
+          "gridPos": { "h": 1, "w": 24, "x": 0, "y": 30 },
+          "options": {
+            "content": "### Telemetry System Monitoring"
+          }
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${datasource}"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
+                "mode": "palette-classic"
+              },
+              "custom": {
+                "axisBorderShow": false,
+                "axisCenteredZero": false,
+                "axisColorMode": "text",
+                "axisLabel": "",
+                "axisPlacement": "auto",
+                "barAlignment": 0,
+                "barWidthFactor": 0.6,
+                "drawStyle": "line",
+                "fillOpacity": 10,
+                "gradientMode": "none",
+                "hideFrom": {
+                  "legend": false,
+                  "tooltip": false,
+                  "viz": false
+                },
+                "insertNulls": false,
+                "lineInterpolation": "linear",
+                "lineWidth": 1,
+                "pointSize": 5,
+                "scaleDistribution": {
+                  "type": "linear"
+                },
+                "showPoints": "auto",
+                "showValues": false,
+                "spanNulls": false,
+                "stacking": {
+                  "group": "A",
+                  "mode": "none"
+                },
+                "thresholdsStyle": {
+                  "mode": "off"
+                }
+              },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -1087,13 +1119,12 @@ spec:
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 12,
-            "y": 12
+            "h": 7,
+            "w": 8,
+            "x": 0,
+            "y": 31
           },
           "id": 12,
-          "links": [],
           "options": {
             "legend": {
               "calcs": [],
@@ -1107,6 +1138,7 @@ spec:
               "sort": "none"
             }
           },
+          "pluginVersion": "12.4.0-19628459846",
           "targets": [
             {
               "expr": "truck_sys_signal_dbm{region=\"$region\", truck=~\"$truck\"}",
@@ -1161,6 +1193,7 @@ spec:
                   "mode": "off"
                 }
               },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -1175,13 +1208,12 @@ spec:
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 16,
-            "y": 12
+            "h": 7,
+            "w": 8,
+            "x": 8,
+            "y": 31
           },
           "id": 13,
-          "links": [],
           "options": {
             "legend": {
               "calcs": [],
@@ -1195,6 +1227,7 @@ spec:
               "sort": "none"
             }
           },
+          "pluginVersion": "12.4.0-19628459846",
           "targets": [
             {
               "expr": "histogram_quantile(0.95, sum(rate(telemetry_delivery_latency_seconds_bucket{region=\"$region\"}[5m])) by (le, truck))",
@@ -1215,6 +1248,7 @@ spec:
               "color": {
                 "mode": "thresholds"
               },
+              "mappings": [],
               "thresholds": {
                 "mode": "absolute",
                 "steps": [
@@ -1237,13 +1271,12 @@ spec:
             "overrides": []
           },
           "gridPos": {
-            "h": 6,
-            "w": 4,
-            "x": 20,
-            "y": 12
+            "h": 7,
+            "w": 8,
+            "x": 16,
+            "y": 31
           },
           "id": 14,
-          "links": [],
           "options": {
             "colorMode": "background",
             "graphMode": "none",
@@ -1261,76 +1294,59 @@ spec:
             "textMode": "auto",
             "wideLayout": true
           },
+          "pluginVersion": "12.4.0-19628459846",
           "targets": [
             {
               "expr": "increase(kafka_backpressure_events_total{region=\"$region\"}[1h])",
               "legendFormat": "{{truck}}",
-              "refId": "A",
-              "range": true
+              "range": true,
+              "refId": "A"
             }
           ],
           "title": "Backpressure Events (1h)",
           "type": "stat"
         }
       ],
+      "preload": false,
       "refresh": "5s",
-      "schemaVersion": 38,
-      "style": "dark",
+      "schemaVersion": 42,
       "tags": [],
       "templating": {
         "list": [
           {
-            "allValue": null,
             "current": {
-              "selected": true,
-              "text": "Prometheus",
-              "value": "Prometheus"
+              "text": "prometheus",
+              "value": "4aee656c-db8a-4ef3-a491-6620c75963f1"
             },
-            "datasource": {
-              "type": "datasource",
-              "uid": "gdev-prometheus"
-            },
-            "description": null,
-            "hide": 0,
             "label": "Datasource",
-            "multi": false,
             "name": "datasource",
             "options": [],
             "query": "prometheus",
             "refresh": 1,
             "regex": "",
-            "skipUrlSync": false,
             "type": "datasource"
           },
           {
-            "allValue": null,
             "current": {
-              "selected": true,
-              "text": "default",
-              "value": "default"
+              "text": "alpha",
+              "value": "alpha"
             },
             "datasource": {
               "type": "prometheus",
-              "uid": "${datasource}"
+              "uid": "4aee656c-db8a-4ef3-a491-6620c75963f1"
             },
             "definition": "label_values(truck_speed_kph, region)",
-            "description": null,
-            "hide": 0,
             "label": "Region",
-            "multi": false,
             "name": "region",
             "options": [],
             "query": "label_values(truck_speed_kph, region)",
             "refresh": 2,
             "regex": "",
-            "skipUrlSync": false,
             "sort": 1,
             "type": "query"
           },
           {
-            "allValue": null,
             "current": {
-              "selected": true,
               "text": "All",
               "value": [
                 "$__all"
@@ -1338,11 +1354,9 @@ spec:
             },
             "datasource": {
               "type": "prometheus",
-              "uid": "${datasource}"
+              "uid": "4aee656c-db8a-4ef3-a491-6620c75963f1"
             },
             "definition": "label_values(truck_speed_kph{region=\"$region\"}, truck)",
-            "description": null,
-            "hide": 0,
             "includeAll": true,
             "label": "Truck",
             "multi": true,
@@ -1351,33 +1365,18 @@ spec:
             "query": "label_values(truck_speed_kph{region=\"$region\"}, truck)",
             "refresh": 2,
             "regex": "",
-            "skipUrlSync": false,
             "sort": 1,
             "type": "query"
           }
         ]
       },
       "time": {
-        "from": "now-1h",
+        "from": "now-5m",
         "to": "now"
       },
-      "timepicker": {
-        "refresh_intervals": [
-          "5s",
-          "10s",
-          "30s",
-          "1m",
-          "5m",
-          "15m",
-          "30m",
-          "1h",
-          "2h",
-          "1d"
-        ],
-        "time_options": []
-      },
+      "timepicker": {},
       "timezone": "browser",
       "title": "Mining Fleet Command Center",
       "uid": "generated_uid_here",
-      "version": 1
+      "version": 4
     }
