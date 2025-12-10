@@ -6,6 +6,9 @@ metadata:
     folders: fleet-metrics
   name: fleet-monitoring
   namespace: grafana
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
 spec:
   version: docker.io/grafana/grafana@sha256:e0b95a0e84e14c3d1ba32c658c4756fcf9b83a43013c8de9eacc05d40af19a5c
   config:
