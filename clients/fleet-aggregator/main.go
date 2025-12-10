@@ -243,7 +243,7 @@ func pushStaticSiteLocations() {
 		loaders  []struct{ Lat, Lon float64 }
 		crushers []struct{ Lat, Lon float64 }
 	}{
-		"pilbara": {
+		"alpha": {
 			loaders: []struct{ Lat, Lon float64 }{
 				{-22.29500, 117.76500},
 				{-22.29620, 117.77050},
@@ -254,7 +254,7 @@ func pushStaticSiteLocations() {
 				{-22.29200, 117.79000},
 			},
 		},
-		"tomprice": {
+		"beta": {
 			loaders: []struct{ Lat, Lon float64 }{
 				{-22.69150, 117.80000},
 				{-22.68880, 117.80850},
@@ -265,7 +265,7 @@ func pushStaticSiteLocations() {
 				{-22.68500, 117.78500},
 			},
 		},
-		"paraburdoo": {
+		"gamma": {
 			loaders: []struct{ Lat, Lon float64 }{
 				{-23.20520, 117.66500},
 				{-23.20780, 117.67000},

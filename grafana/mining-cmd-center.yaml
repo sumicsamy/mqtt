@@ -3,6 +3,9 @@ kind: Dashboard
 metadata:
   name: mining-cmd-center
 spec:
+  instanceSelector:
+    matchLabels:
+      dashboards: fleet-metrics
   json: |
     {
       "annotations": {
