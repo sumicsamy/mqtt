@@ -1321,7 +1321,7 @@ spec:
             "name": "region",
             "options": [],
             "query": "label_values(truck_speed_kph, region)",
-            "refresh": 1,
+            "refresh": 2,
             "regex": "",
             "skipUrlSync": false,
             "sort": 1,
@@ -1349,7 +1349,7 @@ spec:
             "name": "truck",
             "options": [],
             "query": "label_values(truck_speed_kph{region=\"$region\"}, truck)",
-            "refresh": 1,
+            "refresh": 2,
             "regex": "",
             "skipUrlSync": false,
             "sort": 1,
@@ -1377,7 +1377,7 @@ spec:
         "time_options": []
       },
       "timezone": "browser",
-      "title": "Mining Fleet Command Center Copy",
+      "title": "Mining Fleet Command Center",
       "uid": "generated_uid_here",
       "version": 1
     }
