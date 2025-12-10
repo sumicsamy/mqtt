@@ -44,7 +44,7 @@ metadata:
   name: mqtt-kafka-camel-{{ $index }}
   namespace: {{ $.Values.namespace }}
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app.kubernetes.io/name: mqtt-kafka-camel-{{ $index }}
@@ -76,7 +76,9 @@ spec:
             - name: MQTT_TOPIC
               value: {{ $.Values.bridge.mqtt.topic }}
             - name: BRIDGE_ID
-              value: {{ $.Values.bridge.mqtt.clientId }}
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: KAFKA_TOPIC
               value: {{ $.Values.telemetryTopic.name }}
             - name: KAFKA_BROKERS
