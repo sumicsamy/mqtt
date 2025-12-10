@@ -1,12 +1,12 @@
 sites:
-  - id: A
-    namespace: site-emqx-A
+  - id: alpha
+    namespace: site-emqx-alpha
     truckCount: 20
-  - id: B
-    namespace: site-emqx-B
+  - id: beta
+    namespace: site-emqx-beta
     truckCount: 20
-  - id: C
-    namespace: site-emqx-C
+  - id: gamma
+    namespace: site-emqx-gamma
     truckCount: 20
 
 

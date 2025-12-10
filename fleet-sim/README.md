@@ -4,10 +4,10 @@ The repo deploys the fleet simulators.
 
 ``` 
 sites:
-  - id: a
+  - id: alpha
     namespace: site-alpha
     truckCount: 1
-  - id: b
+  - id: beta
     namespace: site-beta
     truckCount: 1
 
