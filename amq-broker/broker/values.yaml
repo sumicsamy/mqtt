@@ -1,12 +1,9 @@
 sites:
   - id: a
-    namespace: site-a
+    namespace: site-alpha
     truckCount: 100
   - id: b
-    namespace: site-b
-    truckCount: 100
-  - id: c
-    namespace: site-c
+    namespace: site-beta
     truckCount: 100
 brokerNamespace: mqtt-broker    
 
